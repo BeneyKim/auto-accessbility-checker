@@ -69,6 +69,36 @@ describe("ThinQ DOM helpers", () => {
     expect(controls?.settingsButton.className).toBe("gear");
   });
 
+  it("detects product tabs from the ThinQ footer while settings stays in the product body", () => {
+    document.body.innerHTML = `
+      <div id="root_container">
+        <div id="body_container" data-width="900" data-height="700">
+          <div data-name="prodAppBar">
+            <button tabindex="0" role="button" aria-label="설정" data-top="170" data-left="840" data-width="48" data-height="48"></button>
+          </div>
+          <h2 aria-label="공기청정기">공기청정기</h2>
+        </div>
+        <div id="$$root_footer">
+          <div id="bottom_navigator_bar">
+            <div data-name="prodMainTabbar">
+              <ul role="tablist">
+                <li role="tab" tabindex="0" aria-selected="true"><span>제품</span></li>
+                <li role="tab" tabindex="0" aria-selected="false"><span>유용한 기능</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const controls = findRequiredControls();
+
+    expect(controls).toBeDefined();
+    expect(controls?.productTab.getAttribute("role")).toBe("tab");
+    expect(controls?.usefulFeaturesTab.getAttribute("role")).toBe("tab");
+    expect(controls?.settingsButton.getAttribute("aria-label")).toBe("설정");
+  });
+
   it("skips ThinQ PLAY, close, branch tabs, and switch-like controls", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

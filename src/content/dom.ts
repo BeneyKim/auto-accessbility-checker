@@ -29,6 +29,8 @@ export interface RequiredControlsDiagnostic {
   settingsButtonFound: boolean;
   shellTagName: string;
   shellRole: string;
+  tabbarFound: boolean;
+  tabbarTextSample: string;
   shellTextSample: string;
 }
 
@@ -39,9 +41,10 @@ export interface ClickCandidate {
 
 export function findRequiredControls(root: ParentNode = document): RequiredControls | undefined {
   const shell = findProductShell(root);
-  const productTab = findByName(shell, /^제품$/);
-  const usefulFeaturesTab = findByName(shell, /^유용한\s*기능$/);
-  const settingsButton = findSettingsButton(shell);
+  const tabbar = findProductTabbar(root);
+  const productTab = findByName(tabbar ?? root, /^제품$/) ?? findByName(shell, /^제품$/);
+  const usefulFeaturesTab = findByName(tabbar ?? root, /^유용한\s*기능$/) ?? findByName(shell, /^유용한\s*기능$/);
+  const settingsButton = findSettingsButton(shell) ?? findSettingsButton(root);
 
   if (!productTab || !usefulFeaturesTab || !settingsButton) {
     return undefined;
@@ -52,12 +55,15 @@ export function findRequiredControls(root: ParentNode = document): RequiredContr
 
 export function diagnoseRequiredControls(root: ParentNode = document): RequiredControlsDiagnostic {
   const shell = findProductShell(root);
+  const tabbar = findProductTabbar(root);
   return {
-    productTabFound: Boolean(findByName(shell, /^제품$/)),
-    usefulFeaturesTabFound: Boolean(findByName(shell, /^유용한\s*기능$/)),
-    settingsButtonFound: Boolean(findSettingsButton(shell)),
+    productTabFound: Boolean(findByName(tabbar ?? root, /^제품$/) ?? findByName(shell, /^제품$/)),
+    usefulFeaturesTabFound: Boolean(findByName(tabbar ?? root, /^유용한\s*기능$/) ?? findByName(shell, /^유용한\s*기능$/)),
+    settingsButtonFound: Boolean(findSettingsButton(shell) ?? findSettingsButton(root)),
     shellTagName: shell.tagName.toLowerCase(),
     shellRole: shell.getAttribute("role") ?? "",
+    tabbarFound: Boolean(tabbar),
+    tabbarTextSample: normalizeText(tabbar?.innerText ?? "").slice(0, 300),
     shellTextSample: normalizeText(shell.innerText).slice(0, 500)
   };
 }
@@ -78,6 +84,29 @@ export function findProductShell(root: ParentNode = document): HTMLElement {
     .sort((a, b) => area(b) - area(a));
 
   return fixedPanels[0] ?? document.body;
+}
+
+function findProductTabbar(root: ParentNode): HTMLElement | undefined {
+  const explicit = Array.from(
+    root.querySelectorAll<HTMLElement>('[data-name="prodMainTabbar"], [id*="bottom_navigator"], [id*="tabbar"], [role="tablist"]')
+  )
+    .filter(isVisible)
+    .find((element) => {
+      const text = normalizeText(element.innerText);
+      return /제품/.test(text) && /유용한\s*기능/.test(text);
+    });
+  if (explicit) {
+    return explicit;
+  }
+
+  return Array.from(root.querySelectorAll<HTMLElement>("ul,nav,div"))
+    .filter(isVisible)
+    .filter((element) => {
+      const text = normalizeText(element.innerText);
+      const rect = element.getBoundingClientRect();
+      return /제품/.test(text) && /유용한\s*기능/.test(text) && rect.height <= 140;
+    })
+    .sort((a, b) => area(a) - area(b))[0];
 }
 
 export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {

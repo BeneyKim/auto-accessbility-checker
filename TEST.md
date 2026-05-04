@@ -12,6 +12,7 @@ Current automated coverage:
 
 - Required ThinQ controls detection
 - Custom div-based bottom tabs and unnamed top-right settings icon detection
+- ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
 - IBM summary extraction
