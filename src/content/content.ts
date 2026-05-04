@@ -179,9 +179,10 @@ async function scanDepth(context: ScanContext): Promise<void> {
   }
 
   const candidates = collectClickCandidates(shell);
-  context.log("debug", "Click candidates collected.", {
+  context.log(candidates.length === 0 ? "warn" : "info", "Click candidates collected.", {
     count: candidates.length,
-    candidates: candidates.map((candidate) => candidate.snapshot)
+    candidates: candidates.map((candidate) => candidate.snapshot),
+    shellTextSample: candidates.length === 0 ? shell.innerText?.replace(/\s+/g, " ").trim().slice(0, 500) : undefined
   });
 
   for (const candidate of candidates) {

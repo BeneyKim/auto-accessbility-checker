@@ -16,6 +16,22 @@ const BACK_TEXT_PATTERNS = [/^뒤로$/, /^이전$/, /^back$/i];
 
 const NAVIGABLE_ROLES = new Set(["button", "link", "menuitem", "option", "tab"]);
 
+const INTERACTIVE_SELECTORS = [
+  "button",
+  "a[href]",
+  "[role='button']",
+  "[role='link']",
+  "[role='menuitem']",
+  "[role='option']",
+  "[role='tab']",
+  "[tabindex]:not([tabindex='-1'])",
+  "[data-nscreenfocusable]",
+  "[data-tux-id]",
+  "summary",
+  "select",
+  "[class*='rippleEffect']"
+];
+
 export interface RequiredControls {
   shell: HTMLElement;
   productTab: HTMLElement;
@@ -110,22 +126,15 @@ function findProductTabbar(root: ParentNode): HTMLElement | undefined {
 }
 
 export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
-  const selectors = [
-    "button",
-    "a[href]",
-    "[role='button']",
-    "[role='link']",
-    "[role='menuitem']",
-    "[role='option']",
-    "[role='tab']",
-    "summary",
-    "select"
-  ];
   const seen = new Set<HTMLElement>();
   const candidates: ClickCandidate[] = [];
 
-  for (const element of shell.querySelectorAll<HTMLElement>(selectors.join(","))) {
-    if (seen.has(element) || !isVisible(element) || isDisabled(element)) {
+  for (const rawElement of shell.querySelectorAll<HTMLElement>(INTERACTIVE_SELECTORS.join(","))) {
+    if (!isVisible(rawElement)) {
+      continue;
+    }
+    const element = findActionableCandidate(rawElement, shell);
+    if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
       continue;
     }
     seen.add(element);
@@ -146,8 +155,17 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
 }
 
 export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[] {
-  return Array.from(shell.querySelectorAll<HTMLElement>("button,a[href],[role],summary,select"))
-    .filter((element) => isVisible(element) && !isDisabled(element))
+  const seen = new Set<HTMLElement>();
+  return Array.from(shell.querySelectorAll<HTMLElement>(INTERACTIVE_SELECTORS.join(",")))
+    .filter((element) => isVisible(element))
+    .map((element) => findActionableCandidate(element, shell))
+    .filter((element) => {
+      if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
+        return false;
+      }
+      seen.add(element);
+      return true;
+    })
     .map((element) => {
       const snapshot = toCandidateSnapshot(element);
       snapshot.reason = getSkipReason(element, snapshot.name);
@@ -316,7 +334,12 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
     return "blocked-navigation";
   }
-  if (!NAVIGABLE_ROLES.has(role) && element.tagName.toLowerCase() !== "summary" && element.tagName.toLowerCase() !== "select") {
+  if (
+    !NAVIGABLE_ROLES.has(role) &&
+    element.tagName.toLowerCase() !== "summary" &&
+    element.tagName.toLowerCase() !== "select" &&
+    !hasThinQInteractionHint(element)
+  ) {
     return "not-navigable-role";
   }
   return undefined;
@@ -352,6 +375,33 @@ function findClickableAncestor(element: HTMLElement, boundary: ParentNode): HTML
   return element;
 }
 
+function findActionableCandidate(element: HTMLElement, boundary: HTMLElement): HTMLElement {
+  if (isClickableLike(element) && hasUsefulCandidateSignal(element)) {
+    return element;
+  }
+
+  let current: HTMLElement | null = element.parentElement;
+  while (current && current !== boundary) {
+    if (isClickableLike(current) && hasUsefulCandidateSignal(current)) {
+      return current;
+    }
+    if (hasThinQInteractionHint(current) && hasUsefulCandidateSignal(current)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  current = element.parentElement;
+  while (current && current !== boundary) {
+    if (hasMeaningfulText(current) && !isOversizedContainer(current, boundary)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return element;
+}
+
 function isClickableLike(element: HTMLElement): boolean {
   const tagName = element.tagName.toLowerCase();
   const role = getRole(element);
@@ -362,8 +412,38 @@ function isClickableLike(element: HTMLElement): boolean {
     NAVIGABLE_ROLES.has(role) ||
     element.hasAttribute("tabindex") ||
     element.hasAttribute("onclick") ||
+    hasThinQInteractionHint(element) ||
     style.cursor === "pointer"
   );
+}
+
+function hasThinQInteractionHint(element: HTMLElement): boolean {
+  const className = String(element.className ?? "");
+  return (
+    element.hasAttribute("data-nscreenfocusable") ||
+    element.hasAttribute("data-tux-id") ||
+    /rippleEffect/i.test(className)
+  );
+}
+
+function hasUsefulCandidateSignal(element: HTMLElement): boolean {
+  return hasMeaningfulText(element) || Boolean(getAccessibleName(element)) || hasIconOnlyNavigationSignal(element);
+}
+
+function hasMeaningfulText(element: HTMLElement): boolean {
+  return normalizeText(element.innerText || element.textContent || "").length > 0;
+}
+
+function hasIconOnlyNavigationSignal(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  const className = String(element.className ?? "");
+  return rect.width <= 120 && rect.height <= 120 && /arrow|next|more|chevron/i.test(className);
+}
+
+function isOversizedContainer(element: HTMLElement, shell: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  const shellRect = shell.getBoundingClientRect();
+  return rect.width > shellRect.width * 0.92 && rect.height > shellRect.height * 0.35;
 }
 
 function getDirectElementText(element: HTMLElement): string {
