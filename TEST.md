@@ -32,6 +32,7 @@ Current automated coverage:
 - JSON, Markdown, and HTML reports download successfully.
 - IBM reports that contain DOM node references are sanitized before crossing `postMessage`.
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
+- IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 
 ## Real Product Test Matrix
 

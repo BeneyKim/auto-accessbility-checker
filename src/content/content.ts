@@ -153,7 +153,7 @@ async function scanDepth(context: ScanContext): Promise<void> {
 
   const skipped = collectSkippedCandidates(shell);
   const title = extractScreenTitle(shell, context.menuPath.at(-1) ?? branchLabel(context.branch));
-  const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, context.log);
+  const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, shell, context.log);
   const screenshot = await requestScreenshot(context.log);
 
   context.results.push({
@@ -251,11 +251,17 @@ async function ensureIbmRunner(log: (level: LogEntry["level"], message: string, 
   });
 }
 
-async function runIbmCheck(policy: string, ruleSet: string): Promise<unknown> {
+async function runIbmCheck(policy: string, ruleSet: string, target: HTMLElement): Promise<unknown> {
   const requestId = crypto.randomUUID();
+  const targetId = `thinq-a11y-target-${requestId}`;
+  target.setAttribute("data-thinq-a11y-target", targetId);
   return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      target.removeAttribute("data-thinq-a11y-target");
+    };
     const timeout = window.setTimeout(() => {
       window.removeEventListener("message", onMessage);
+      cleanup();
       reject(new Error("IBM accessibility check timed out."));
     }, 60000);
 
@@ -265,6 +271,7 @@ async function runIbmCheck(policy: string, ruleSet: string): Promise<unknown> {
       }
       window.clearTimeout(timeout);
       window.removeEventListener("message", onMessage);
+      cleanup();
       if (event.data.ok) {
         resolve(event.data.report);
       } else {
@@ -279,7 +286,8 @@ async function runIbmCheck(policy: string, ruleSet: string): Promise<unknown> {
         type: IBM_CHECK_REQUEST,
         requestId,
         policy,
-        ruleSet
+        ruleSet,
+        targetSelector: `[data-thinq-a11y-target="${targetId}"]`
       },
       "*"
     );
@@ -289,10 +297,11 @@ async function runIbmCheck(policy: string, ruleSet: string): Promise<unknown> {
 async function runIbmCheckSafely(
   policy: string,
   ruleSet: string,
+  target: HTMLElement,
   log: (level: LogEntry["level"], message: string, data?: unknown) => void
 ): Promise<unknown> {
   try {
-    return await runIbmCheck(policy, ruleSet);
+    return await runIbmCheck(policy, ruleSet, target);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log("error", "IBM accessibility check failed for this screen.", { message });

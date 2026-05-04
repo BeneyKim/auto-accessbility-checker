@@ -63,6 +63,7 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
 
   const requestId = String(event.data.requestId ?? "");
   const policy = String(event.data.policy ?? "IBM_Accessibility");
+  const targetSelector = typeof event.data.targetSelector === "string" ? event.data.targetSelector : "";
 
   try {
     if (!window.ace?.Checker) {
@@ -73,8 +74,18 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
       throw new Error("IBM Equal Access checker is unavailable.");
     }
     const checker = new ace.Checker();
-    const report = await checker.check(document, [policy]);
-    window.postMessage({ type: IBM_CHECK_RESPONSE, requestId, ok: true, report: toCloneSafeJson(report) }, "*");
+    const target = targetSelector ? document.querySelector(targetSelector) : document;
+    if (!target) {
+      throw new Error(`IBM check target not found: ${targetSelector}`);
+    }
+    const ruleExceptions: string[] = [];
+    const report = await withRuleExceptionCapture(ruleExceptions, () => checker.check(target, [policy]));
+    window.postMessage({
+      type: IBM_CHECK_RESPONSE,
+      requestId,
+      ok: true,
+      report: addThinQMetadata(toCloneSafeJson(report), { targetSelector, ruleExceptions })
+    }, "*");
   } catch (error) {
     window.postMessage(
       {
@@ -86,6 +97,44 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
       "*"
     );
   }
+}
+
+async function withRuleExceptionCapture<T>(ruleExceptions: string[], action: () => Promise<T>): Promise<T> {
+  const originalError = console.error;
+  const originalWarn = console.warn;
+  const capture = (level: "error" | "warn", args: unknown[]): boolean => {
+    const message = args.map(String).join(" ");
+    if (message.includes("RULE EXCEPTION:")) {
+      ruleExceptions.push(message.slice(0, 2000));
+      return true;
+    }
+    return false;
+  };
+
+  console.error = (...args: unknown[]) => {
+    if (!capture("error", args)) {
+      originalError.apply(console, args);
+    }
+  };
+  console.warn = (...args: unknown[]) => {
+    if (!capture("warn", args)) {
+      originalWarn.apply(console, args);
+    }
+  };
+
+  try {
+    return await action();
+  } finally {
+    console.error = originalError;
+    console.warn = originalWarn;
+  }
+}
+
+function addThinQMetadata(report: unknown, metadata: Record<string, unknown>): unknown {
+  if (report && typeof report === "object" && !Array.isArray(report)) {
+    return { ...(report as Record<string, unknown>), _thinqA11y: metadata };
+  }
+  return { report, _thinqA11y: metadata };
 }
 
 function toCloneSafeJson(value: unknown): unknown {
