@@ -30,6 +30,7 @@ PowerShell 실행 정책 때문에 `npm`이 막히는 환경에서는 `npm.cmd`�
 4. Load unpacked를 선택하고 `dist` 폴더를 지정합니다.
 5. `https://my.lgthinq.com/`에 접속해 로그인하고 제품 상세 화면으로 진입합니다.
 6. 확장앱 popup에서 설정을 확인한 뒤 Start를 누릅니다.
+7. ThinQ 화면 전환으로 콘솔 로그가 사라지면 popup의 Download debug log 버튼으로 실행 로그 JSON을 다운로드합니다.
 
 ## Reports
 
@@ -38,6 +39,7 @@ PowerShell 실행 정책 때문에 `npm`이 막히는 환경에서는 `npm.cmd`�
 - `{title}-{yyyyMMdd-HHmmss}.json`
 - `{title}-{yyyyMMdd-HHmmss}.md`
 - `{title}-{yyyyMMdd-HHmmss}.html`
+- `{title}-debug-log-{yyyyMMdd-HHmmss}.json`
 
 ## Notes
 

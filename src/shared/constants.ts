@@ -22,5 +22,6 @@ export const IBM_CHECK_RESPONSE = "THINQ_A11Y_CHECK_RESPONSE";
 export const STORAGE_KEYS = {
   settings: "settings",
   status: "status",
-  result: "result"
+  result: "result",
+  debugLog: "debugLog"
 } as const;

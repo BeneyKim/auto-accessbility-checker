@@ -91,6 +91,10 @@ export interface DownloadReportMessage {
   type: "DOWNLOAD_REPORT";
 }
 
+export interface DownloadDebugLogMessage {
+  type: "DOWNLOAD_DEBUG_LOG";
+}
+
 export interface CaptureScreenshotMessage {
   type: "CAPTURE_SCREENSHOT";
 }
@@ -115,6 +119,7 @@ export type RuntimeMessage =
   | StopRunMessage
   | GetStatusMessage
   | DownloadReportMessage
+  | DownloadDebugLogMessage
   | CaptureScreenshotMessage
   | RunLogMessage
   | RunCompleteMessage

@@ -9,6 +9,7 @@ let state: RunState = {
 };
 
 let lastResult: RunResult | undefined;
+let debugLog: LogEntry[] = [];
 
 chrome.runtime.onInstalled.addListener(async () => {
   const stored = await chrome.storage.local.get(STORAGE_KEYS.settings);
@@ -38,6 +39,8 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       return stopRun();
     case "DOWNLOAD_REPORT":
       return downloadReport();
+    case "DOWNLOAD_DEBUG_LOG":
+      return downloadDebugLog();
     case "CAPTURE_SCREENSHOT":
       return captureScreenshot(sender.tab?.windowId);
     case "RUN_LOG":
@@ -77,8 +80,9 @@ async function startRun(settings: CheckerSettings): Promise<unknown> {
   }
 
   lastResult = undefined;
+  debugLog = [];
   state = { status: "running", logs: [], screenCount: 0 };
-  await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings, [STORAGE_KEYS.status]: state });
+  await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings, [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
   appendLog("info", "Run started.", { maxDepth: settings.maxDepth });
 
   await chrome.tabs.sendMessage(tab.id, { type: "START_RUN", settings } satisfies RuntimeMessage);
@@ -137,16 +141,43 @@ async function downloadReport(): Promise<unknown> {
   return { ok: true };
 }
 
+async function downloadDebugLog(): Promise<unknown> {
+  if (debugLog.length === 0) {
+    const stored = await chrome.storage.local.get(STORAGE_KEYS.debugLog);
+    debugLog = (stored[STORAGE_KEYS.debugLog] as LogEntry[] | undefined) ?? [];
+  }
+
+  const storedSettings = await chrome.storage.local.get(STORAGE_KEYS.settings);
+  const settings = { ...DEFAULT_SETTINGS, ...(storedSettings[STORAGE_KEYS.settings] as Partial<CheckerSettings> | undefined) };
+  const base = makeFileBase(`${settings.title || "ThinQ Web"}-debug-log`);
+  await chrome.downloads.download({
+    url: toDataUrl(JSON.stringify({ exportedAt: new Date().toISOString(), logs: debugLog }, null, 2), "application/json"),
+    filename: `${base}.json`,
+    saveAs: false
+  });
+  appendLog("info", "Debug log download started.", { count: debugLog.length });
+  return { ok: true };
+}
+
 function appendLog(level: LogEntry["level"], message: string, data?: unknown, timestamp = new Date().toISOString()): void {
-  const entry: LogEntry = { timestamp, level, message, data };
+  const entry: LogEntry = { timestamp, level, message, data: makeCloneSafe(data) };
+  debugLog = [...debugLog, entry].slice(-2000);
   state = {
     ...state,
     logs: [...state.logs, entry].slice(-200)
   };
-  void chrome.storage.local.set({ [STORAGE_KEYS.status]: state });
+  void chrome.storage.local.set({ [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
 }
 
 function toDataUrl(content: string, mime: string): string {
   const encoded = btoa(unescape(encodeURIComponent(content)));
   return `data:${mime};charset=utf-8;base64,${encoded}`;
+}
+
+function makeCloneSafe(value: unknown): unknown {
+  try {
+    return JSON.parse(JSON.stringify(value));
+  } catch {
+    return String(value);
+  }
 }

@@ -35,6 +35,7 @@ Current automated coverage:
 - Traversal does not repeatedly scan the same screen.
 - Completion returns to the product tab.
 - JSON, Markdown, and HTML reports download successfully.
+- Debug log JSON downloads from the popup even when page console logs are lost during ThinQ refresh/navigation.
 - IBM reports that contain DOM node references are sanitized before crossing `postMessage`.
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.

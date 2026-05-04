@@ -10,6 +10,7 @@ const depthSelect = document.querySelector<HTMLSelectElement>("#maxDepth");
 const startButton = document.querySelector<HTMLButtonElement>("#start");
 const stopButton = document.querySelector<HTMLButtonElement>("#stop");
 const downloadButton = document.querySelector<HTMLButtonElement>("#download");
+const downloadLogButton = document.querySelector<HTMLButtonElement>("#downloadLog");
 const statusText = document.querySelector<HTMLElement>("#status");
 const screenCountText = document.querySelector<HTMLElement>("#screenCount");
 const logsList = document.querySelector<HTMLOListElement>("#logs");
@@ -31,6 +32,7 @@ async function initialize(): Promise<void> {
   startButton?.addEventListener("click", () => void startRun());
   stopButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "STOP_RUN" }));
   downloadButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_REPORT" }));
+  downloadLogButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_DEBUG_LOG" }));
 
   setInterval(() => void refreshStatus(), 1000);
 }
