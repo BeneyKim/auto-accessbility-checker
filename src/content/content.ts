@@ -72,26 +72,23 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
 
     log("info", "Required ThinQ product controls detected.");
     const visited = new Set<string>();
-    const branches: Array<{ branch: Branch; entry: HTMLElement }> = [
-      { branch: "product", entry: controls.productTab },
-      { branch: "usefulFeatures", entry: controls.usefulFeaturesTab },
-      { branch: "settings", entry: controls.settingsButton }
-    ];
+    const branches: Branch[] = ["product", "usefulFeatures", "settings"];
 
-    for (const item of branches) {
+    for (const branch of branches) {
       if (stopRequested) {
         break;
       }
-      log("info", `Entering branch: ${branchLabel(item.branch)}`);
-      await clickAndWait(item.entry);
-      await waitForIdle();
-      const refreshed = findRequiredControls();
-      const shell = refreshed?.shell ?? controls.shell;
+      log("info", `Entering branch: ${branchLabel(branch)}`);
+      const entered = await enterBranch(branch, log);
+      if (!entered.ok) {
+        log("error", "Branch entry failed; skipping branch scan.", { branch, reason: entered.reason });
+        continue;
+      }
       await scanDepth({
         settings,
-        shell,
-        branch: item.branch,
-        menuPath: [branchLabel(item.branch)],
+        shell: entered.shell,
+        branch,
+        menuPath: [branchLabel(branch)],
         depth: 0,
         visited,
         results,
@@ -124,6 +121,68 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
     log("error", message);
     await chrome.runtime.sendMessage({ type: "RUN_FAILED", error: message } satisfies RuntimeMessage);
   }
+}
+
+interface BranchEntryResult {
+  ok: boolean;
+  shell: HTMLElement;
+  reason?: string;
+}
+
+async function enterBranch(branch: Branch, log: (level: LogEntry["level"], message: string, data?: unknown) => void): Promise<BranchEntryResult> {
+  const beforeShell = resolveCurrentShell(document.body);
+  const beforeMeta = getScreenMeta(beforeShell);
+  const controls = findRequiredControls();
+  if (!controls) {
+    return { ok: false, shell: beforeShell, reason: "required-controls-missing" };
+  }
+
+  const target = branch === "product" ? controls.productTab : branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
+  const targetName = target.innerText || target.getAttribute("aria-label") || branchLabel(branch);
+  log("info", "Clicking branch entry.", { branch, targetName });
+  await clickAndWait(target);
+
+  const transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
+  log(transition.ok ? "info" : "warn", "Branch entry result.", { branch, ok: transition.ok, reason: transition.reason, shell: describeShell(transition.shell) });
+  return transition;
+}
+
+async function waitForBranchTransition(branch: Branch, before: ScreenMeta, fallbackShell: HTMLElement, timeoutMs = 2500): Promise<BranchEntryResult> {
+  const started = performance.now();
+  let latestShell = resolveCurrentShell(fallbackShell);
+  let latestMeta = getScreenMeta(latestShell);
+
+  while (performance.now() - started < timeoutMs) {
+    await wait(150);
+    latestShell = resolveCurrentShell(fallbackShell);
+    latestMeta = getScreenMeta(latestShell);
+
+    const controls = findRequiredControls();
+    const expectedSelected = getExpectedBranchSelected(branch, controls);
+    const candidatesChanged = latestMeta.candidateNames.join("|") !== before.candidateNames.join("|");
+    const titleChanged = latestMeta.title !== before.title;
+
+    if (branch === "product" && controls) {
+      return { ok: true, shell: latestShell, reason: "product-branch" };
+    }
+    if (expectedSelected || candidatesChanged || titleChanged) {
+      return {
+        ok: true,
+        shell: latestShell,
+        reason: expectedSelected ? "selected-branch" : candidatesChanged ? "candidates-changed" : "title-changed"
+      };
+    }
+  }
+
+  return { ok: false, shell: latestShell, reason: "branch-did-not-change-screen" };
+}
+
+function getExpectedBranchSelected(branch: Branch, controls?: ReturnType<typeof findRequiredControls>): boolean {
+  if (!controls) {
+    return false;
+  }
+  const element = branch === "product" ? controls.productTab : branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
+  return element.getAttribute("aria-selected") === "true" || element.getAttribute("aria-current") === "page";
 }
 
 interface ScanContext {
