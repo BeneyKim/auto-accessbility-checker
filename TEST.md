@@ -15,6 +15,7 @@ Current automated coverage:
 - ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
 - ThinQ `body_container` is used as the product shell when app body and footer are siblings
 - Branch entry uses freshly resolved controls and skips scanning a branch when clicking the tab/settings control does not change the active screen.
+- Branch controls are activated with focus, pointer, mouse, click, keyboard retry, and fresh-target retry so ThinQ tab/settings controls are actually pressed.
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
 - Fan-speed value controls are candidates again; carousel previous/next controls are skipped as state-only controls.
 - Parent rows that contain switch-like controls, such as sleep reservation rows, are candidates when the row itself is actionable.

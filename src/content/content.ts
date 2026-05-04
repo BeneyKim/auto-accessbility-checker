@@ -139,10 +139,30 @@ async function enterBranch(branch: Branch, log: (level: LogEntry["level"], messa
 
   const target = branch === "product" ? controls.productTab : branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
   const targetName = target.innerText || target.getAttribute("aria-label") || branchLabel(branch);
-  log("info", "Clicking branch entry.", { branch, targetName });
+  log("info", "Clicking branch entry.", { branch, targetName, target: describeElement(target) });
   await clickAndWait(target);
 
-  const transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
+  let transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
+  if (!transition.ok) {
+    log("warn", "Branch click did not transition; retrying with keyboard activation.", { branch, reason: transition.reason });
+    await activateWithKeyboard(target);
+    transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
+  }
+  if (!transition.ok) {
+    const retryControls = findRequiredControls();
+    const retryTarget = retryControls
+      ? branch === "product"
+        ? retryControls.productTab
+        : branch === "usefulFeatures"
+          ? retryControls.usefulFeaturesTab
+          : retryControls.settingsButton
+      : undefined;
+    if (retryTarget && retryTarget !== target) {
+      log("warn", "Branch keyboard activation did not transition; retrying with fresh target.", { branch, target: describeElement(retryTarget) });
+      await clickAndWait(retryTarget);
+      transition = await waitForBranchTransition(branch, beforeMeta, retryControls!.shell);
+    }
+  }
   log(transition.ok ? "info" : "warn", "Branch entry result.", { branch, ok: transition.ok, reason: transition.reason, shell: describeShell(transition.shell) });
   return transition;
 }
@@ -291,6 +311,23 @@ function describeShell(shell: HTMLElement): Record<string, unknown> {
     role: shell.getAttribute("role") || undefined,
     dataName: shell.getAttribute("data-name") || undefined,
     className: String(shell.className || "").slice(0, 160),
+    width: Math.round(rect.width),
+    height: Math.round(rect.height),
+    top: Math.round(rect.top),
+    left: Math.round(rect.left)
+  };
+}
+
+function describeElement(element: HTMLElement): Record<string, unknown> {
+  const rect = element.getBoundingClientRect();
+  return {
+    tagName: element.tagName.toLowerCase(),
+    id: element.id || undefined,
+    role: element.getAttribute("role") || undefined,
+    ariaLabel: element.getAttribute("aria-label") || undefined,
+    ariaSelected: element.getAttribute("aria-selected") || undefined,
+    dataName: element.getAttribute("data-name") || undefined,
+    text: element.innerText?.replace(/\s+/g, " ").trim().slice(0, 120),
     width: Math.round(rect.width),
     height: Math.round(rect.height),
     top: Math.round(rect.top),
@@ -492,8 +529,58 @@ async function requestScreenshot(log: (level: LogEntry["level"], message: string
 async function clickAndWait(element: HTMLElement): Promise<void> {
   element.scrollIntoView({ block: "center", inline: "center" });
   await wait(120);
-  element.click();
+  dispatchActivationSequence(element);
   await waitForIdle();
+}
+
+async function activateWithKeyboard(element: HTMLElement): Promise<void> {
+  element.focus({ preventScroll: false });
+  await wait(80);
+  element.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true, cancelable: true }));
+  element.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter", code: "Enter", bubbles: true, cancelable: true }));
+  await waitForIdle();
+  element.dispatchEvent(new KeyboardEvent("keydown", { key: " ", code: "Space", bubbles: true, cancelable: true }));
+  element.dispatchEvent(new KeyboardEvent("keyup", { key: " ", code: "Space", bubbles: true, cancelable: true }));
+  await waitForIdle();
+}
+
+function dispatchActivationSequence(element: HTMLElement): void {
+  const rect = element.getBoundingClientRect();
+  const clientX = rect.left + rect.width / 2;
+  const clientY = rect.top + rect.height / 2;
+  element.focus({ preventScroll: true });
+  const pointerOptions: PointerEventInit = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    isPrimary: true,
+    button: 0,
+    buttons: 1,
+    clientX,
+    clientY
+  };
+  const mouseOptions: MouseEventInit = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    button: 0,
+    buttons: 1,
+    clientX,
+    clientY
+  };
+
+  element.dispatchEvent(new PointerEvent("pointerover", pointerOptions));
+  element.dispatchEvent(new PointerEvent("pointerenter", pointerOptions));
+  element.dispatchEvent(new MouseEvent("mouseover", mouseOptions));
+  element.dispatchEvent(new MouseEvent("mouseenter", mouseOptions));
+  element.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
+  element.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
+  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
+  element.click();
 }
 
 async function restorePreviousScreen(previousSignature: string, shell: HTMLElement, log: ScanContext["log"]): Promise<boolean> {
