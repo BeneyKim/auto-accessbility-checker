@@ -15,6 +15,8 @@ Current automated coverage:
 - ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
 - ThinQ `body_container` is used as the product shell when app body and footer are siblings
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
+- Fan-speed/state-changing controls are skipped and do not create artificial depth.
+- Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens.
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
 - IBM summary extraction
@@ -36,6 +38,7 @@ Current automated coverage:
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
+- Screenshots are captured as compressed JPEG to reduce report payload size.
 
 ## Real Product Test Matrix
 

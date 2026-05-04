@@ -173,6 +173,24 @@ describe("ThinQ DOM helpers", () => {
     expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
   });
 
+  it("skips state-changing fan speed controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button>청정 세기 약</button>
+        <button>청정 세기, 이전</button>
+        <button>청정 세기, 다음</button>
+        <button>예약</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
+    expect(skipped.map((candidate) => candidate.reason)).toContain("state-control");
+  });
+
   it("changes screen signature when visible content changes", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

@@ -99,8 +99,8 @@ async function captureScreenshot(windowId?: number): Promise<unknown> {
   try {
     const screenshot =
       typeof windowId === "number"
-        ? await chrome.tabs.captureVisibleTab(windowId, { format: "png" })
-        : await chrome.tabs.captureVisibleTab({ format: "png" });
+        ? await chrome.tabs.captureVisibleTab(windowId, { format: "jpeg", quality: 45 })
+        : await chrome.tabs.captureVisibleTab({ format: "jpeg", quality: 45 });
     appendLog("debug", "Screenshot captured.");
     return { ok: true, screenshot };
   } catch (error) {

@@ -18,6 +18,13 @@ const BACK_TEXT_PATTERNS = [/^뒤로$/, /^이전$/, /^back$/i];
 
 const NAVIGABLE_ROLES = new Set(["button", "link", "menuitem", "option", "tab"]);
 
+const STATE_CONTROL_PATTERNS = [
+  /^청정\s*세기/,
+  /,\s*(이전|다음)$/,
+  /\b(이전|다음)\b.*(세기|모드|단계|레벨)/,
+  /(세기|모드|단계|레벨).*\b(이전|다음)\b/
+];
+
 const INTERACTIVE_SELECTORS = [
   "button",
   "a[href]",
@@ -231,7 +238,6 @@ export function toCandidateSnapshot(element: HTMLElement): CandidateSnapshot {
 }
 
 export function screenSignature(shell: HTMLElement): string {
-  const visibleText = normalizeText(shell.innerText).slice(0, 1200);
   const selectedTab = Array.from(shell.querySelectorAll<HTMLElement>('[aria-selected="true"], [aria-current="page"]'))
     .map(getAccessibleName)
     .filter(Boolean)
@@ -242,8 +248,21 @@ export function screenSignature(shell: HTMLElement): string {
     .filter(Boolean)
     .slice(0, 5)
     .join("|");
-  const modalCount = document.querySelectorAll('[role="dialog"], [aria-modal="true"]').length;
-  return hash(`${location.href}\n${selectedTab}\n${headings}\n${modalCount}\n${visibleText}`);
+  const overlays = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
+    )
+  )
+    .filter(isVisible)
+    .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${getAccessibleName(element).slice(0, 80)}:${Math.round(area(element))}`)
+    .slice(0, 10)
+    .join("|");
+  const landmarkShape = Array.from(shell.querySelectorAll<HTMLElement>('[role], [data-name], [aria-modal], [aria-expanded="true"]'))
+    .filter(isVisible)
+    .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${element.getAttribute("data-name") ?? ""}:${element.getAttribute("aria-expanded") ?? ""}`)
+    .slice(0, 80)
+    .join("|");
+  return hash(`${location.href}\n${selectedTab}\n${headings}\n${overlays}\n${landmarkShape}`);
 }
 
 export function extractScreenTitle(shell: HTMLElement, fallback: string): string {
@@ -375,6 +394,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   }
   if (BACK_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
     return "blocked-back-navigation";
+  }
+  if (STATE_CONTROL_PATTERNS.some((pattern) => pattern.test(name))) {
+    return "state-control";
   }
   const role = getRole(element);
   if (role === "tab") {
