@@ -173,7 +173,7 @@ describe("ThinQ DOM helpers", () => {
     expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
   });
 
-  it("skips parent rows that contain switch-like controls", () => {
+  it("keeps parent rows that contain switch-like controls when the row itself is actionable", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">
         <div data-nscreenfocusable="nscreenFocusable" tabindex="0" data-width="600" data-height="90">
@@ -190,11 +190,11 @@ describe("ThinQ DOM helpers", () => {
     const candidates = collectClickCandidates(shell);
     const skipped = collectSkippedCandidates(shell);
 
-    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
-    expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["취침 예약", "예약"]);
+    expect(skipped.map((candidate) => candidate.reason)).not.toContain("switch-toggle");
   });
 
-  it("skips state-changing fan speed controls", () => {
+  it("keeps fan speed controls but skips carousel previous and next controls", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">
         <button>청정 세기 약</button>
@@ -208,7 +208,7 @@ describe("ThinQ DOM helpers", () => {
     const candidates = collectClickCandidates(shell);
     const skipped = collectSkippedCandidates(shell);
 
-    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["청정 세기 약", "예약"]);
     expect(skipped.map((candidate) => candidate.reason)).toContain("state-control");
   });
 

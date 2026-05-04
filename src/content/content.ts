@@ -386,9 +386,9 @@ async function restorePreviousScreen(previousSignature: string, shell: HTMLEleme
       return true;
     }
 
-    const backButton = findBackButton(currentShell);
+    const backButton = findBackButton(currentShell) ?? findBackButton(document.body);
     if (backButton) {
-      log("debug", "Restoring with back button.");
+      log("info", "Restoring with back button.", { name: backButton.innerText || backButton.getAttribute("aria-label") });
       await clickAndWait(backButton);
     } else {
       log("debug", "Restoring with Escape key.");
@@ -398,9 +398,16 @@ async function restorePreviousScreen(previousSignature: string, shell: HTMLEleme
     }
   }
 
+  if (history.length > 1 && location.hostname === THINQ_HOST) {
+    log("warn", "Restoring with guarded history back.");
+    history.back();
+    await waitForIdle();
+    await wait(700);
+  }
+
   const controls = findRequiredControls();
   const currentShell = controls?.shell ?? shell;
-  return screenSignature(currentShell) === previousSignature;
+  return Boolean(controls) && screenSignature(currentShell) === previousSignature;
 }
 
 async function reenterBranch(branch: Branch): Promise<void> {

@@ -15,8 +15,8 @@ Current automated coverage:
 - ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
 - ThinQ `body_container` is used as the product shell when app body and footer are siblings
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
-- Fan-speed/state-changing controls are skipped and do not create artificial depth.
-- Parent rows that contain switch-like controls, such as sleep reservation toggles, are skipped.
+- Fan-speed value controls are candidates again; carousel previous/next controls are skipped as state-only controls.
+- Parent rows that contain switch-like controls, such as sleep reservation rows, are candidates when the row itself is actionable.
 - The traversal skips candidates already present in the current menu path to avoid repeated self-entry.
 - Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens.
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
@@ -39,6 +39,7 @@ Current automated coverage:
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
+- Restore attempts use the current shell, whole document back controls, Escape, then guarded history back.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
 - Screenshots are captured as compressed JPEG to reduce report payload size.
 
