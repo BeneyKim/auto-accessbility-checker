@@ -74,7 +74,7 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
     }
     const checker = new ace.Checker();
     const report = await checker.check(document, [policy]);
-    window.postMessage({ type: IBM_CHECK_RESPONSE, requestId, ok: true, report }, "*");
+    window.postMessage({ type: IBM_CHECK_RESPONSE, requestId, ok: true, report: toCloneSafeJson(report) }, "*");
   } catch (error) {
     window.postMessage(
       {
@@ -86,4 +86,49 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
       "*"
     );
   }
+}
+
+function toCloneSafeJson(value: unknown): unknown {
+  const seen = new WeakSet<object>();
+  return JSON.parse(
+    JSON.stringify(value, (_key, nestedValue: unknown) => {
+      if (nestedValue instanceof Node) {
+        return describeNode(nestedValue);
+      }
+      if (typeof nestedValue === "function" || typeof nestedValue === "symbol" || typeof nestedValue === "undefined") {
+        return undefined;
+      }
+      if (nestedValue && typeof nestedValue === "object") {
+        if (seen.has(nestedValue)) {
+          return "[Circular]";
+        }
+        seen.add(nestedValue);
+      }
+      return nestedValue;
+    })
+  );
+}
+
+function describeNode(node: Node): Record<string, unknown> {
+  if (node instanceof Element) {
+    return {
+      nodeType: node.nodeType,
+      nodeName: node.nodeName,
+      id: node.id || undefined,
+      className: typeof node.className === "string" ? node.className || undefined : undefined,
+      role: node.getAttribute("role") || undefined,
+      ariaLabel: node.getAttribute("aria-label") || undefined,
+      text: normalizeNodeText(node.textContent)
+    };
+  }
+  return {
+    nodeType: node.nodeType,
+    nodeName: node.nodeName,
+    text: normalizeNodeText(node.textContent)
+  };
+}
+
+function normalizeNodeText(value: string | null): string | undefined {
+  const text = value?.replace(/\s+/g, " ").trim().slice(0, 160);
+  return text || undefined;
 }

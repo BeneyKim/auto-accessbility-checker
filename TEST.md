@@ -29,6 +29,8 @@ Current automated coverage:
 - Traversal does not repeatedly scan the same screen.
 - Completion returns to the product tab.
 - JSON, Markdown, and HTML reports download successfully.
+- IBM reports that contain DOM node references are sanitized before crossing `postMessage`.
+- If IBM check fails on one screen, the run records an error report for that screen and continues.
 
 ## Real Product Test Matrix
 

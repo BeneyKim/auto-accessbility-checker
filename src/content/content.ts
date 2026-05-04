@@ -153,7 +153,7 @@ async function scanDepth(context: ScanContext): Promise<void> {
 
   const skipped = collectSkippedCandidates(shell);
   const title = extractScreenTitle(shell, context.menuPath.at(-1) ?? branchLabel(context.branch));
-  const ibmReport = await runIbmCheck(context.settings.accessibilityStandard, context.settings.ruleSet);
+  const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, context.log);
   const screenshot = await requestScreenshot(context.log);
 
   context.results.push({
@@ -283,6 +283,40 @@ async function runIbmCheck(policy: string, ruleSet: string): Promise<unknown> {
       "*"
     );
   });
+}
+
+async function runIbmCheckSafely(
+  policy: string,
+  ruleSet: string,
+  log: (level: LogEntry["level"], message: string, data?: unknown) => void
+): Promise<unknown> {
+  try {
+    return await runIbmCheck(policy, ruleSet);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log("error", "IBM accessibility check failed for this screen.", { message });
+    return {
+      report: {
+        summary: {
+          counts: {
+            violation: 0,
+            potentialviolation: 0,
+            recommendation: 0,
+            potentialrecommendation: 0,
+            manual: 0,
+            pass: 0,
+            ignored: 0
+          }
+        },
+        results: [],
+        error: {
+          message,
+          policy,
+          ruleSet
+        }
+      }
+    };
+  }
 }
 
 async function requestScreenshot(log: (level: LogEntry["level"], message: string, data?: unknown) => void): Promise<string | undefined> {
