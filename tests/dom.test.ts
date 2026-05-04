@@ -131,6 +131,7 @@ describe("ThinQ DOM helpers", () => {
   it("skips ThinQ PLAY, close, branch tabs, and switch-like controls", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">
+        <button>뒤로</button>
         <button role="tab">제품</button>
         <button role="tab">유용한 기능</button>
         <button>ThinQ PLAY</button>
@@ -146,6 +147,7 @@ describe("ThinQ DOM helpers", () => {
 
     expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
     expect(skipped.map((candidate) => candidate.reason)).toContain("blocked-navigation");
+    expect(skipped.map((candidate) => candidate.reason)).toContain("blocked-back-navigation");
     expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
     expect(skipped.map((candidate) => candidate.reason)).toContain("root-branch-tab");
   });

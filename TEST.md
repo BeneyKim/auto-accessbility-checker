@@ -34,6 +34,8 @@ Current automated coverage:
 - IBM reports that contain DOM node references are sanitized before crossing `postMessage`.
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
+- Back/home navigation controls are blocked from normal traversal candidates.
+- If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
 
 ## Real Product Test Matrix
 

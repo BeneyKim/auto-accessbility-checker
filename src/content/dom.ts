@@ -373,6 +373,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (isSwitchLike(element)) {
     return "switch-toggle";
   }
+  if (BACK_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
+    return "blocked-back-navigation";
+  }
   const role = getRole(element);
   if (role === "tab") {
     return "root-branch-tab";

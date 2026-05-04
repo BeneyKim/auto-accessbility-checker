@@ -75,16 +75,14 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
     }
     const checker = new ace.Checker();
     const target = targetSelector ? document.querySelector(targetSelector) : document;
-    if (!target) {
-      throw new Error(`IBM check target not found: ${targetSelector}`);
-    }
     const ruleExceptions: string[] = [];
-    const report = await withRuleExceptionCapture(ruleExceptions, () => checker.check(target, [policy]));
+    const effectiveTarget = target ?? document;
+    const report = await withRuleExceptionCapture(ruleExceptions, () => checker.check(effectiveTarget, [policy]));
     window.postMessage({
       type: IBM_CHECK_RESPONSE,
       requestId,
       ok: true,
-      report: addThinQMetadata(toCloneSafeJson(report), { targetSelector, ruleExceptions })
+      report: addThinQMetadata(toCloneSafeJson(report), { targetSelector, targetFound: Boolean(target), ruleExceptions })
     }, "*");
   } catch (error) {
     window.postMessage(
