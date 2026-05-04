@@ -13,6 +13,7 @@ Current automated coverage:
 - Required ThinQ controls detection
 - Custom div-based bottom tabs and unnamed top-right settings icon detection
 - ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
+- ThinQ `body_container` is used as the product shell when app body and footer are siblings
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection

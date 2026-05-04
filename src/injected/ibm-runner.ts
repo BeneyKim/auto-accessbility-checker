@@ -102,6 +102,7 @@ async function handleCheckRequest(event: MessageEvent): Promise<void> {
 async function withRuleExceptionCapture<T>(ruleExceptions: string[], action: () => Promise<T>): Promise<T> {
   const originalError = console.error;
   const originalWarn = console.warn;
+  const originalLog = console.log;
   const capture = (level: "error" | "warn", args: unknown[]): boolean => {
     const message = args.map(String).join(" ");
     if (message.includes("RULE EXCEPTION:")) {
@@ -121,12 +122,18 @@ async function withRuleExceptionCapture<T>(ruleExceptions: string[], action: () 
       originalWarn.apply(console, args);
     }
   };
+  console.log = (...args: unknown[]) => {
+    if (!capture("warn", args)) {
+      originalLog.apply(console, args);
+    }
+  };
 
   try {
     return await action();
   } finally {
     console.error = originalError;
     console.warn = originalWarn;
+    console.log = originalLog;
   }
 }
 

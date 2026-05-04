@@ -152,7 +152,15 @@ async function scanDepth(context: ScanContext): Promise<void> {
   context.visited.add(visitKey);
 
   const skipped = collectSkippedCandidates(shell);
+  const candidates = collectClickCandidates(shell);
   const title = extractScreenTitle(shell, context.menuPath.at(-1) ?? branchLabel(context.branch));
+  context.log(candidates.length === 0 ? "warn" : "info", "Click candidates collected before IBM check.", {
+    count: candidates.length,
+    candidates: candidates.map((candidate) => candidate.snapshot),
+    shell: describeShell(shell),
+    shellTextSample: candidates.length === 0 ? shell.innerText?.replace(/\s+/g, " ").trim().slice(0, 700) : undefined
+  });
+
   const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, shell, context.log);
   const screenshot = await requestScreenshot(context.log);
 
@@ -177,13 +185,6 @@ async function scanDepth(context: ScanContext): Promise<void> {
     context.log("debug", "Depth limit reached.", { depth: context.depth });
     return;
   }
-
-  const candidates = collectClickCandidates(shell);
-  context.log(candidates.length === 0 ? "warn" : "info", "Click candidates collected.", {
-    count: candidates.length,
-    candidates: candidates.map((candidate) => candidate.snapshot),
-    shellTextSample: candidates.length === 0 ? shell.innerText?.replace(/\s+/g, " ").trim().slice(0, 500) : undefined
-  });
 
   for (const candidate of candidates) {
     if (stopRequested) {
@@ -217,6 +218,21 @@ async function scanDepth(context: ScanContext): Promise<void> {
       await reenterBranch(context.branch);
     }
   }
+}
+
+function describeShell(shell: HTMLElement): Record<string, unknown> {
+  const rect = shell.getBoundingClientRect();
+  return {
+    tagName: shell.tagName.toLowerCase(),
+    id: shell.id || undefined,
+    role: shell.getAttribute("role") || undefined,
+    dataName: shell.getAttribute("data-name") || undefined,
+    className: String(shell.className || "").slice(0, 160),
+    width: Math.round(rect.width),
+    height: Math.round(rect.height),
+    top: Math.round(rect.top),
+    left: Math.round(rect.left)
+  };
 }
 
 function validateLocation(): void {

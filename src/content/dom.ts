@@ -8,6 +8,8 @@ const BLOCKED_TEXT_PATTERNS = [
   /^닫기$/,
   /^홈$/,
   /^home$/i,
+  /^설정$/,
+  /^settings$/i,
   /^제품$/,
   /^유용한\s*기능$/
 ];
@@ -85,6 +87,11 @@ export function diagnoseRequiredControls(root: ParentNode = document): RequiredC
 }
 
 export function findProductShell(root: ParentNode = document): HTMLElement {
+  const thinqBodyShell = findThinQBodyShell(root);
+  if (thinqBodyShell) {
+    return thinqBodyShell;
+  }
+
   const dialog = Array.from(root.querySelectorAll<HTMLElement>('[role="dialog"], [aria-modal="true"]'))
     .filter(isVisible)
     .sort((a, b) => area(b) - area(a))[0];
@@ -100,6 +107,45 @@ export function findProductShell(root: ParentNode = document): HTMLElement {
     .sort((a, b) => area(b) - area(a));
 
   return fixedPanels[0] ?? document.body;
+}
+
+function findThinQBodyShell(root: ParentNode): HTMLElement | undefined {
+  const bodyContainer = Array.from(root.querySelectorAll<HTMLElement>("#body_container, [id='body_container']"))
+    .filter(isVisible)
+    .find((element) => Boolean(element.querySelector('[data-name="prodAppBar"], [class*="TABPANEL_CONTAINER"]')));
+  if (bodyContainer) {
+    return bodyContainer;
+  }
+
+  const appBar = Array.from(root.querySelectorAll<HTMLElement>('[data-name="prodAppBar"]')).filter(isVisible)[0];
+  const appBody = appBar ? nearestUsefulAncestor(appBar) : undefined;
+  if (appBody) {
+    return appBody;
+  }
+
+  const tabPanel = Array.from(root.querySelectorAll<HTMLElement>('[class*="TABPANEL_CONTAINER"], [role="tabpanel"]'))
+    .filter(isVisible)
+    .sort((a, b) => area(b) - area(a))[0];
+  return tabPanel ? nearestUsefulAncestor(tabPanel) : undefined;
+}
+
+function nearestUsefulAncestor(element: HTMLElement): HTMLElement {
+  let current: HTMLElement = element;
+  while (current.parentElement && current.parentElement !== document.body) {
+    const parent = current.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+    const currentRect = current.getBoundingClientRect();
+    const hasFooter = Boolean(parent.querySelector('[data-name="prodMainTabbar"], [id*="bottom_navigator"]'));
+    if (hasFooter) {
+      return current;
+    }
+    if (parentRect.width >= currentRect.width && parentRect.height >= currentRect.height && area(parent) < area(document.body) * 0.9) {
+      current = parent;
+      continue;
+    }
+    break;
+  }
+  return current;
 }
 
 function findProductTabbar(root: ParentNode): HTMLElement | undefined {

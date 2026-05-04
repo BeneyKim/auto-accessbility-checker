@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { collectClickCandidates, collectSkippedCandidates, findRequiredControls, screenSignature } from "../src/content/dom";
+import { collectClickCandidates, collectSkippedCandidates, findProductShell, findRequiredControls, screenSignature } from "../src/content/dom";
 
 beforeEach(() => {
   document.body.innerHTML = "";
@@ -97,6 +97,35 @@ describe("ThinQ DOM helpers", () => {
     expect(controls?.productTab.getAttribute("role")).toBe("tab");
     expect(controls?.usefulFeaturesTab.getAttribute("role")).toBe("tab");
     expect(controls?.settingsButton.getAttribute("aria-label")).toBe("설정");
+  });
+
+  it("uses body_container as the ThinQ product shell when footer tabbar is outside it", () => {
+    document.body.innerHTML = `
+      <div id="body_container" data-width="900" data-height="700">
+        <div data-name="prodAppBar">
+          <button tabindex="0" role="button" aria-label="설정" data-top="170" data-left="840" data-width="48" data-height="48"></button>
+        </div>
+        <div data-nscreenfocusable="nscreenFocusable" tabindex="0" data-width="600" data-height="90">
+          <span>예약</span>
+        </div>
+      </div>
+      <div id="$$root_footer">
+        <div data-name="prodMainTabbar">
+          <ul role="tablist">
+            <li role="tab" tabindex="0" aria-selected="true"><span>제품</span></li>
+            <li role="tab" tabindex="0" aria-selected="false"><span>유용한 기능</span></li>
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const shell = findProductShell();
+    const controls = findRequiredControls();
+    const candidates = collectClickCandidates(shell);
+
+    expect(shell.id).toBe("body_container");
+    expect(controls).toBeDefined();
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
   });
 
   it("skips ThinQ PLAY, close, branch tabs, and switch-like controls", () => {
