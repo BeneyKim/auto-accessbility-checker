@@ -193,6 +193,10 @@ async function scanDepth(context: ScanContext): Promise<void> {
 
     const beforeSignature = screenSignature(shell);
     const triggerName = candidate.snapshot.name || candidate.snapshot.role;
+    if (context.menuPath.includes(triggerName)) {
+      context.log("debug", "Skipping candidate already present in menu path.", { triggerName, menuPath: context.menuPath });
+      continue;
+    }
     context.log("info", "Trying candidate.", { triggerName, depth: context.depth });
 
     await clickAndWait(candidate.element);

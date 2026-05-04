@@ -20,6 +20,7 @@ const NAVIGABLE_ROLES = new Set(["button", "link", "menuitem", "option", "tab"])
 
 const STATE_CONTROL_PATTERNS = [
   /^청정\s*세기/,
+  /^취침\s*예약$/,
   /,\s*(이전|다음)$/,
   /\b(이전|다음)\b.*(세기|모드|단계|레벨)/,
   /(세기|모드|단계|레벨).*\b(이전|다음)\b/
@@ -389,7 +390,7 @@ function findSettingsButton(root: ParentNode): HTMLElement | undefined {
 }
 
 function getSkipReason(element: HTMLElement, name: string): string | undefined {
-  if (isSwitchLike(element)) {
+  if (isSwitchLike(element) || containsSwitchLikeControl(element)) {
     return "switch-toggle";
   }
   if (BACK_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
@@ -428,6 +429,19 @@ function isSwitchLike(element: HTMLElement): boolean {
     /switch|toggle/i.test(className) ||
     (element.hasAttribute("aria-pressed") && !hasNavigationHint(element))
   );
+}
+
+function containsSwitchLikeControl(element: HTMLElement): boolean {
+  const descendants = Array.from(element.querySelectorAll<HTMLElement>("[role='switch'], [role='checkbox'], input[type='checkbox'], input[type='radio'], [aria-pressed], [class*='switch'], [class*='Switch'], [class*='toggle'], [class*='Toggle']"));
+  if (descendants.length === 0) {
+    return false;
+  }
+  return !hasExplicitDetailNavigation(element);
+}
+
+function hasExplicitDetailNavigation(element: HTMLElement): boolean {
+  const name = getAccessibleName(element);
+  return /상세|보기|관리|설정|이동|next|open|detail|more/i.test(name);
 }
 
 function hasNavigationHint(element: HTMLElement): boolean {

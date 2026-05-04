@@ -173,6 +173,27 @@ describe("ThinQ DOM helpers", () => {
     expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
   });
 
+  it("skips parent rows that contain switch-like controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <div data-nscreenfocusable="nscreenFocusable" tabindex="0" data-width="600" data-height="90">
+          <span>취침 예약</span>
+          <span role="switch" aria-checked="false"></span>
+        </div>
+        <div data-nscreenfocusable="nscreenFocusable" tabindex="0" data-width="600" data-height="90">
+          <span>예약</span>
+        </div>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
+    expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
+  });
+
   it("skips state-changing fan speed controls", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

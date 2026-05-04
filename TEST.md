@@ -16,6 +16,8 @@ Current automated coverage:
 - ThinQ `body_container` is used as the product shell when app body and footer are siblings
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
 - Fan-speed/state-changing controls are skipped and do not create artificial depth.
+- Parent rows that contain switch-like controls, such as sleep reservation toggles, are skipped.
+- The traversal skips candidates already present in the current menu path to avoid repeated self-entry.
 - Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens.
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
