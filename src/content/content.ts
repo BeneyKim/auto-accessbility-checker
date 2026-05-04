@@ -10,6 +10,7 @@ import {
   branchLabel,
   collectClickCandidates,
   collectSkippedCandidates,
+  diagnoseRequiredControls,
   extractScreenTitle,
   findBackButton,
   findRequiredControls,
@@ -60,6 +61,8 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
 
     const controls = findRequiredControls();
     if (!controls) {
+      const diagnostic = diagnoseRequiredControls();
+      log("error", "Required ThinQ product controls were not detected.", diagnostic);
       const message = "제품 탭, 유용한 기능 탭, 설정 아이콘을 모두 찾을 수 없어 탐색을 시작하지 않습니다.";
       alert(message);
       throw new Error(message);

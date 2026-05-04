@@ -45,6 +45,30 @@ describe("ThinQ DOM helpers", () => {
     expect(controls?.usefulFeaturesTab.textContent).toBe("유용한 기능");
   });
 
+  it("detects custom div tabs and an unnamed top-right settings icon", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700" data-top="90" data-left="20">
+        <header>
+          <button aria-label="뒤로" data-top="110" data-left="40"></button>
+          <div class="gear" tabindex="0" data-top="170" data-left="840" data-width="48" data-height="48">
+            <svg aria-hidden="true"></svg>
+          </div>
+        </header>
+        <nav class="bottom-tabs" data-top="780" data-left="200" data-width="500" data-height="60">
+          <div class="tab" style="cursor: pointer"><span>제품</span></div>
+          <div class="tab" style="cursor: pointer"><span>유용한 기능</span></div>
+        </nav>
+      </section>
+    `;
+
+    const controls = findRequiredControls();
+
+    expect(controls).toBeDefined();
+    expect(controls?.productTab.className).toBe("tab");
+    expect(controls?.usefulFeaturesTab.className).toBe("tab");
+    expect(controls?.settingsButton.className).toBe("gear");
+  });
+
   it("skips ThinQ PLAY, close, branch tabs, and switch-like controls", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

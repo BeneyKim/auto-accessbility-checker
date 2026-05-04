@@ -23,6 +23,15 @@ export interface RequiredControls {
   settingsButton: HTMLElement;
 }
 
+export interface RequiredControlsDiagnostic {
+  productTabFound: boolean;
+  usefulFeaturesTabFound: boolean;
+  settingsButtonFound: boolean;
+  shellTagName: string;
+  shellRole: string;
+  shellTextSample: string;
+}
+
 export interface ClickCandidate {
   element: HTMLElement;
   snapshot: CandidateSnapshot;
@@ -39,6 +48,18 @@ export function findRequiredControls(root: ParentNode = document): RequiredContr
   }
 
   return { shell, productTab, usefulFeaturesTab, settingsButton };
+}
+
+export function diagnoseRequiredControls(root: ParentNode = document): RequiredControlsDiagnostic {
+  const shell = findProductShell(root);
+  return {
+    productTabFound: Boolean(findByName(shell, /^제품$/)),
+    usefulFeaturesTabFound: Boolean(findByName(shell, /^유용한\s*기능$/)),
+    settingsButtonFound: Boolean(findSettingsButton(shell)),
+    shellTagName: shell.tagName.toLowerCase(),
+    shellRole: shell.getAttribute("role") ?? "",
+    shellTextSample: normalizeText(shell.innerText).slice(0, 500)
+  };
 }
 
 export function findProductShell(root: ParentNode = document): HTMLElement {
@@ -212,28 +233,47 @@ export function normalizeText(value: string): string {
 }
 
 function findByName(root: ParentNode, pattern: RegExp): HTMLElement | undefined {
-  return Array.from(root.querySelectorAll<HTMLElement>("button,[role='tab'],[role='button'],a[href]"))
+  const semanticTarget = Array.from(root.querySelectorAll<HTMLElement>("button,[role='tab'],[role='button'],a[href],[tabindex]"))
     .filter(isVisible)
     .find((element) => pattern.test(getAccessibleName(element)));
+  if (semanticTarget) {
+    return semanticTarget;
+  }
+
+  const textTarget = Array.from(root.querySelectorAll<HTMLElement>("*"))
+    .filter((element) => isVisible(element) && pattern.test(getDirectElementText(element)))
+    .sort((a, b) => area(a) - area(b))[0];
+
+  return textTarget ? findClickableAncestor(textTarget, root) : undefined;
 }
 
 function findSettingsButton(root: ParentNode): HTMLElement | undefined {
-  const named = Array.from(root.querySelectorAll<HTMLElement>("button,[role='button'],a[href]"))
+  const named = Array.from(root.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex],*"))
     .filter(isVisible)
     .find((element) => /설정|settings/i.test(getAccessibleName(element)));
   if (named) {
-    return named;
+    return findClickableAncestor(named, root);
   }
 
   const shell = root instanceof HTMLElement ? root : document.body;
   const shellRect = shell.getBoundingClientRect();
-  return Array.from(shell.querySelectorAll<HTMLElement>("button,[role='button']"))
+  const rightTopCandidates = Array.from(shell.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex],svg,img,*"))
     .filter((element) => isVisible(element) && !isDisabled(element))
-    .find((element) => {
+    .filter((element) => {
       const rect = element.getBoundingClientRect();
       const name = getAccessibleName(element);
-      return rect.top < shellRect.top + 120 && rect.right > shellRect.right - 120 && !/play|닫기|close|x/i.test(name);
+      const isRightTop = rect.top > shellRect.top + 45 && rect.top < shellRect.top + 180 && rect.right > shellRect.right - 120;
+      const isSmallControl = rect.width <= 96 && rect.height <= 96;
+      return isRightTop && isSmallControl && !/play|닫기|close|x/i.test(name);
+    })
+    .sort((a, b) => {
+      const aRect = a.getBoundingClientRect();
+      const bRect = b.getBoundingClientRect();
+      return bRect.right - aRect.right || aRect.top - bRect.top || area(a) - area(b);
     });
+
+  const candidate = rightTopCandidates[0];
+  return candidate ? findClickableAncestor(candidate, root) : undefined;
 }
 
 function getSkipReason(element: HTMLElement, name: string): string | undefined {
@@ -270,6 +310,38 @@ function isSwitchLike(element: HTMLElement): boolean {
 function hasNavigationHint(element: HTMLElement): boolean {
   const name = getAccessibleName(element);
   return /상세|보기|예약|설정|관리|이동|next|open|detail|more/i.test(name);
+}
+
+function findClickableAncestor(element: HTMLElement, boundary: ParentNode): HTMLElement {
+  let current: HTMLElement | null = element;
+  while (current && current !== boundary) {
+    if (isClickableLike(current)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return element;
+}
+
+function isClickableLike(element: HTMLElement): boolean {
+  const tagName = element.tagName.toLowerCase();
+  const role = getRole(element);
+  const style = getComputedStyle(element);
+  return (
+    tagName === "button" ||
+    tagName === "a" ||
+    NAVIGABLE_ROLES.has(role) ||
+    element.hasAttribute("tabindex") ||
+    element.hasAttribute("onclick") ||
+    style.cursor === "pointer"
+  );
+}
+
+function getDirectElementText(element: HTMLElement): string {
+  const childText = Array.from(element.children)
+    .map((child) => child.textContent ?? "")
+    .join(" ");
+  return normalizeText((element.textContent ?? "").replace(childText, ""));
 }
 
 function isDisabled(element: HTMLElement): boolean {

@@ -11,6 +11,7 @@ npm.cmd run verify
 Current automated coverage:
 
 - Required ThinQ controls detection
+- Custom div-based bottom tabs and unnamed top-right settings icon detection
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
 - IBM summary extraction
