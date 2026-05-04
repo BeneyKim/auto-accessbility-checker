@@ -13,7 +13,9 @@ import {
   diagnoseRequiredControls,
   extractScreenTitle,
   findBackButton,
+  findProductShell,
   findRequiredControls,
+  isVisible,
   screenSignature
 } from "./dom";
 
@@ -141,8 +143,7 @@ async function scanDepth(context: ScanContext): Promise<void> {
     return;
   }
 
-  const controls = findRequiredControls();
-  const shell = controls?.shell ?? context.shell;
+  const shell = resolveCurrentShell(context.shell);
   const signature = screenSignature(shell);
   const visitKey = `${context.branch}:${context.menuPath.join(">")}:${signature}`;
   if (context.visited.has(visitKey)) {
@@ -154,6 +155,7 @@ async function scanDepth(context: ScanContext): Promise<void> {
   const skipped = collectSkippedCandidates(shell);
   const candidates = collectClickCandidates(shell);
   const title = extractScreenTitle(shell, context.menuPath.at(-1) ?? branchLabel(context.branch));
+  const beforeMeta = getScreenMeta(shell, title, candidates);
   context.log(candidates.length === 0 ? "warn" : "info", "Click candidates collected before IBM check.", {
     count: candidates.length,
     candidates: candidates.map((candidate) => candidate.snapshot),
@@ -191,7 +193,6 @@ async function scanDepth(context: ScanContext): Promise<void> {
       return;
     }
 
-    const beforeSignature = screenSignature(shell);
     const triggerName = candidate.snapshot.name || candidate.snapshot.role;
     if (context.menuPath.includes(triggerName)) {
       context.log("debug", "Skipping candidate already present in menu path.", { triggerName, menuPath: context.menuPath });
@@ -200,14 +201,13 @@ async function scanDepth(context: ScanContext): Promise<void> {
     context.log("info", "Trying candidate.", { triggerName, depth: context.depth });
 
     await clickAndWait(candidate.element);
-    const changed = await waitForSignatureChange(beforeSignature);
-    if (!changed) {
-      context.log("debug", "Candidate did not change screen.", { triggerName });
+    const transition = await waitForNavigableTransition(beforeMeta, context.shell, triggerName);
+    if (!transition.changed) {
+      context.log("debug", "Candidate did not open a navigable screen.", { triggerName, reason: transition.reason });
       continue;
     }
 
-    const nextControls = findRequiredControls();
-    const nextShell = nextControls?.shell ?? shell;
+    const nextShell = transition.shell;
     const nextPath = [...context.menuPath, triggerName];
     await scanDepth({
       ...context,
@@ -216,7 +216,7 @@ async function scanDepth(context: ScanContext): Promise<void> {
       depth: context.depth + 1
     });
 
-    const restored = await restorePreviousScreen(beforeSignature, nextShell, context.log);
+    const restored = await restorePreviousScreen(beforeMeta.signature, nextShell, context.log);
     if (!restored) {
       context.log("warn", "Could not restore previous screen. Re-entering branch.", { triggerName });
       await reenterBranch(context.branch);
@@ -237,6 +237,78 @@ function describeShell(shell: HTMLElement): Record<string, unknown> {
     top: Math.round(rect.top),
     left: Math.round(rect.left)
   };
+}
+
+interface ScreenMeta {
+  signature: string;
+  title: string;
+  candidateNames: string[];
+}
+
+interface TransitionResult {
+  changed: boolean;
+  shell: HTMLElement;
+  reason: string;
+}
+
+function getScreenMeta(shell: HTMLElement, title = extractScreenTitle(shell, "unknown"), candidates = collectClickCandidates(shell)): ScreenMeta {
+  return {
+    signature: screenSignature(shell),
+    title,
+    candidateNames: candidates.map((candidate) => candidate.snapshot.name || candidate.snapshot.role).sort()
+  };
+}
+
+async function waitForNavigableTransition(before: ScreenMeta, fallbackShell: HTMLElement, triggerName: string, timeoutMs = 3500): Promise<TransitionResult> {
+  const started = performance.now();
+  let latestShell = resolveCurrentShell(fallbackShell);
+  let latestMeta = getScreenMeta(latestShell);
+
+  while (performance.now() - started < timeoutMs) {
+    await wait(150);
+    latestShell = resolveCurrentShell(fallbackShell);
+    latestMeta = getScreenMeta(latestShell);
+
+    if (latestShell === document.body && !findRequiredControls()) {
+      return { changed: false, shell: fallbackShell, reason: "product-shell-not-visible" };
+    }
+
+    const signatureChanged = latestMeta.signature !== before.signature;
+    if (!signatureChanged) {
+      continue;
+    }
+
+    const titleChanged = latestMeta.title !== before.title && latestMeta.title !== triggerName;
+    const candidatesChanged = latestMeta.candidateNames.join("|") !== before.candidateNames.join("|");
+    const shellChanged = describeShell(latestShell).id !== describeShell(fallbackShell).id || !isVisible(fallbackShell);
+
+    if (titleChanged || candidatesChanged || shellChanged) {
+      return {
+        changed: true,
+        shell: latestShell,
+        reason: titleChanged ? "title-changed" : candidatesChanged ? "candidates-changed" : "shell-changed"
+      };
+    }
+
+    return {
+      changed: false,
+      shell: latestShell,
+      reason: "signature-only-change"
+    };
+  }
+
+  return { changed: false, shell: latestShell, reason: "timeout" };
+}
+
+function resolveCurrentShell(fallbackShell: HTMLElement): HTMLElement {
+  const freshShell = findProductShell();
+  if (isVisible(freshShell)) {
+    return freshShell;
+  }
+  if (isVisible(fallbackShell)) {
+    return fallbackShell;
+  }
+  return document.body;
 }
 
 function validateLocation(): void {
@@ -363,19 +435,6 @@ async function clickAndWait(element: HTMLElement): Promise<void> {
   await wait(120);
   element.click();
   await waitForIdle();
-}
-
-async function waitForSignatureChange(previous: string, timeoutMs = 3500): Promise<boolean> {
-  const started = performance.now();
-  while (performance.now() - started < timeoutMs) {
-    await wait(150);
-    const controls = findRequiredControls();
-    const shell = controls?.shell ?? document.body;
-    if (screenSignature(shell) !== previous) {
-      return true;
-    }
-  }
-  return false;
 }
 
 async function restorePreviousScreen(previousSignature: string, shell: HTMLElement, log: ScanContext["log"]): Promise<boolean> {

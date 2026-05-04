@@ -19,6 +19,8 @@ Current automated coverage:
 - Parent rows that contain switch-like controls, such as sleep reservation rows, are candidates when the row itself is actionable.
 - The traversal skips candidates already present in the current menu path to avoid repeated self-entry.
 - Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens.
+- Navigable transitions require structural evidence such as title, candidate-set, or shell changes instead of signature-only changes.
+- The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation.
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
 - IBM summary extraction
