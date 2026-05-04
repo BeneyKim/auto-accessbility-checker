@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ThinQ A11y Checker</title>
+  </head>
+  <body>
+    <main id="app" class="popup-shell">
+      <header>
+        <h1>ThinQ A11y</h1>
+        <p>IBM Equal Access scan</p>
+      </header>
+
+      <form id="settings-form" class="settings-form">
+        <label>
+          <span>Title</span>
+          <input id="title" name="title" type="text" placeholder="ThinQ Web" />
+        </label>
+
+        <label>
+          <span>Accessibility standard</span>
+          <select id="accessibilityStandard" name="accessibilityStandard">
+            <option value="IBM_Accessibility">IBM Accessibility</option>
+            <option value="WCAG_2_2">WCAG 2.2</option>
+            <option value="WCAG_2_1">WCAG 2.1</option>
+            <option value="WCAG_2_0">WCAG 2.0</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Rule set</span>
+          <select id="ruleSet" name="ruleSet">
+            <option value="latest">latest</option>
+            <option value="versioned">versioned</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Depth</span>
+          <select id="maxDepth" name="maxDepth">
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+          </select>
+        </label>
+      </form>
+
+      <section class="controls" aria-label="Run controls">
+        <button id="start" type="button">Start</button>
+        <button id="stop" type="button">Stop</button>
+        <button id="download" type="button" disabled>Download report</button>
+      </section>
+
+      <section class="status-panel" aria-live="polite">
+        <div class="status-line">
+          <span>Status</span>
+          <strong id="status">Idle</strong>
+        </div>
+        <div class="status-line">
+          <span>Screens</span>
+          <strong id="screenCount">0</strong>
+        </div>
+      </section>
+
+      <ol id="logs" class="logs" aria-label="Execution log"></ol>
+    </main>
+    <script type="module" src="/src/popup/popup.ts"></script>
+  </body>
+</html>
