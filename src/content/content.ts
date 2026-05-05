@@ -4,8 +4,9 @@ const IBM_RUNNER_READY = "THINQ_A11Y_IBM_RUNNER_READY";
 const LOG_PREFIX = "[ThinQ-A11y]";
 const MESSAGE_SOURCE = "THINQ_A11Y_EXTENSION";
 const THINQ_HOST = "my.lgthinq.com";
-const TRANSITION_TIMEOUT_MS = 15000;
+const TRANSITION_TIMEOUT_MS = 6000;
 const TRANSITION_STABLE_MS = 700;
+const UNSAFE_TRANSITION_STABLE_MS = 1200;
 const TRANSITION_POLL_MS = 150;
 
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
@@ -19,6 +20,7 @@ import {
   getAccessibleName,
   getBranchControls,
   getProductBoundary,
+  findProductShell,
   findRequiredControls,
   isVisible,
   screenSignature
@@ -400,12 +402,10 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   }
 
   if (transition.classification === "home-navigation" || transition.classification === "out-of-scope" || transition.classification === "unknown") {
-    context.log("error", "Unsafe transition detected; attempting recovery and aborting run.", {
+    context.log("error", "Unsafe transition detected; aborting without auto-recovery click.", {
       triggerName,
       classification: transition.classification
     });
-    const restored = await restoreToFrame(context, frame);
-    context.log(restored.restored ? "warn" : "error", "Unsafe transition recovery result.", restored);
     context.aborted = true;
     context.state = "ABORTED";
     await recordFailureResult(context, frame.branch, [...frame.menuPath, triggerName], transition.after, transition.classification);
@@ -495,15 +495,18 @@ async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: Candid
       stableSince = performance.now();
     }
 
+    const stableFor = performance.now() - stableSince;
     if (latestClassification.classification === "out-of-scope" || latestClassification.classification === "unknown" || latestClassification.classification === "home-navigation") {
       lastUnsafeTransition = latestClassification;
+      if (stableFor >= UNSAFE_TRANSITION_STABLE_MS) {
+        return latestClassification;
+      }
       continue;
     }
     if (latestClassification.classification !== "no-change") {
       lastSafeTransition = latestClassification;
     }
     if (latestClassification.classification !== "no-change") {
-      const stableFor = performance.now() - stableSince;
       if (stableFor >= TRANSITION_STABLE_MS) {
         return latestClassification;
       }
@@ -566,8 +569,9 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
   }
 
   const current = getCurrentScreenSnapshot();
-  const backButton = current.shell ? findBackButton(current.shell) ?? findBackButton(document.body) : findBackButton(document.body);
+  const backButton = current.shell ? findBackButton(current.shell) : undefined;
   if (backButton) {
+    context.log("info", "Restoring with in-shell back button.", { name: getAccessibleName(backButton), frame });
     await clickAndWait(backButton);
     await wait(250);
     const snapshot = getCurrentScreenSnapshot();
@@ -673,21 +677,22 @@ async function recordFailureResult(
 function getCurrentScreenSnapshot(): ScreenSnapshot {
   const controls = getBranchControls();
   const boundary = getProductBoundary();
+  const routeShell = boundary ? undefined : findInternalRouteShell();
   const overlay = findTopOverlay(boundary);
-  const shell = overlay ?? boundary;
+  const shell = overlay ?? boundary ?? routeShell;
   const title = shell ? extractScreenTitle(shell, branchLabel(getSelectedBranch(controls) ?? "product")) : document.title || "unknown";
   const overlayDescriptors = getOverlayDescriptors(boundary);
   const candidateNames = shell ? collectClickCandidates(shell).map((candidate) => candidate.snapshot.name || candidate.snapshot.role).sort() : [];
   const signature = shell ? screenSignature(shell) : makeDocumentSignature(title, overlayDescriptors, candidateNames);
   const isHomeLike = looksLikeThinQHome();
-  const isOutOfScopeLike = !boundary && looksLikeOutOfScope();
+  const isOutOfScopeLike = !boundary && !routeShell && looksLikeOutOfScope();
 
   return {
     url: location.href,
     title,
     selectedBranch: getSelectedBranch(controls),
     hasRequiredControls: Boolean(controls),
-    boundaryPresent: Boolean(boundary),
+    boundaryPresent: Boolean(boundary ?? routeShell),
     isHomeLike,
     isOutOfScopeLike,
     overlayDescriptors,
@@ -709,6 +714,35 @@ function getSelectedBranch(controls?: ReturnType<typeof getBranchControls>): Bra
     return "usefulFeatures";
   }
   return undefined;
+}
+
+function findInternalRouteShell(): HTMLElement | undefined {
+  if (!isInternalThinQProductRoute()) {
+    return undefined;
+  }
+
+  const productShell = findProductShell();
+  if (productShell !== document.body && isVisible(productShell) && areaOf(productShell) > 20000) {
+    return productShell;
+  }
+
+  return Array.from(document.querySelectorAll<HTMLElement>("#root_container, #body_container, [id*='container'], [role='main'], main, body > div"))
+    .filter((element) => element !== document.body && isVisible(element) && areaOf(element) > 20000)
+    .filter((element) => {
+      const descriptor = `${element.id} ${String(element.className ?? "")} ${element.getAttribute("data-name") ?? ""}`;
+      const textLength = (element.innerText || element.textContent || "").replace(/\s+/g, "").length;
+      return !/background|bg|image/i.test(descriptor) || textLength > 20;
+    })
+    .sort((a, b) => areaOf(b) - areaOf(a))[0];
+}
+
+function isInternalThinQProductRoute(): boolean {
+  try {
+    const url = new URL(location.href);
+    return url.hostname === THINQ_HOST && /\/GPM-20\//.test(url.pathname) && !looksLikeThinQHome();
+  } catch {
+    return false;
+  }
 }
 
 function findTopOverlay(boundary?: HTMLElement): HTMLElement | undefined {

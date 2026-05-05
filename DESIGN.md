@@ -19,13 +19,15 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Depth is tracked by a `navigationStack`; a screen is considered visited by `branch + menuPath + screenSignature`.
 - Screen signature includes URL, selected tab, headings, modal count, and normalized visible text.
 - A click is classified as `no-change`, `state-change`, `overlay-opened`, `in-product-child`, `branch-changed`, `out-of-scope`, `home-navigation`, or `unknown`.
-- Transition classification waits up to 15 seconds and returns only after a non-`no-change` safe state is stable for 700 ms; transient loading states apply to every candidate, not one feature.
+- Transition classification waits up to 6 seconds and returns only after a non-`no-change` safe state is stable for 700 ms; unsafe states return after 1.2 seconds of stability to avoid long waits on broken navigation.
+- ThinQ internal `GPM-20` route screens can be treated as product child screens with a route shell fallback, while generic `document.body` is still not used as a normal product boundary.
 - Candidate activation targets the element under the click center and dispatches touch, pointer, mouse, native click, and keyboard fallback when the primary click produces no change.
 - Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
 - `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel button or the first visible overlay button.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
-- Restore order is overlay close, in-shell back, Escape, then branch root re-entry.
+- Restore order is overlay close, in-shell back, Escape, then branch root re-entry. Back controls are searched only inside the current safe shell.
+- If a transition is classified as `home-navigation`, `out-of-scope`, or `unknown`, the run aborts without an automatic recovery click to avoid moving several browser/app history entries away from ThinQ Web.
 - If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.
 - Browser history is not used for restoration because it can return to Home on ThinQ Web.
 

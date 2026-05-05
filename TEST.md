@@ -28,7 +28,9 @@ Current automated coverage:
 - The traversal skips candidates already present in the current menu path to avoid repeated self-entry
 - Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens
 - Candidate transitions are classified as no-change, state-change, overlay, product child, branch change, out-of-scope, home, or unknown
-- Candidate transitions wait up to 15 seconds and require a safe non-no-change state to be stable for 700 ms
+- Candidate transitions wait up to 6 seconds and require a safe non-no-change state to be stable for 700 ms
+- Unsafe transitions return after 1.2 seconds of stability and abort without auto-recovery clicks
+- ThinQ internal `GPM-20` route child screens can use a route shell fallback without using generic `document.body` as the product boundary
 - Candidate activation uses center hit-target touch/pointer/mouse/native click plus keyboard fallback after no-change
 - Bottom sheet and overlay screens are scanned as terminal leaf screens; inner picker/buttons such as fan-speed up/down are not traversed as child candidates
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
@@ -58,6 +60,7 @@ Current automated coverage:
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
 - Restore attempts use overlay close, in-shell back controls, Escape, and branch root re-entry; browser history is not used.
+- Back controls are searched only inside the current safe shell, not across the whole document.
 - Bottom sheets are closed after their IBM check by pressing an explicit close/cancel button, or the first visible overlay button when no close/cancel label exists.
 - If restore cannot return to the previous signature, the run aborts with a failure result instead of clicking stale elements from the wrong screen.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.

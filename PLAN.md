@@ -10,6 +10,7 @@
 - [x] Traversal ignores transient background-only refresh layers
 - [x] Traversal state machine with navigation stack, transition classification, and fail-closed recovery
 - [x] Bottom sheet/overlay screens are treated as terminal leaf screens after IBM check
+- [x] Unsafe transitions abort without auto-recovery clicks; internal ThinQ route screens use a route shell fallback
 - [x] IBM Equal Access page runner injection
 - [x] JSON, Markdown, HTML report generation
 - [x] Unit tests for candidate filtering and report generation
@@ -26,7 +27,7 @@
 ## Implementation TODO
 
 - Verify real ThinQ DOM selectors after login.
-- Continue air purifier validation with debug logs after terminal bottom-sheet handling.
+- Continue air purifier validation with debug logs after terminal bottom-sheet and internal route handling.
 - Tune blocked navigation heuristics if a product page exposes unnamed icon buttons.
 - Add waiver settings UI after baseline MVP validation.
 - Add Polarion REST publisher in a corporate-network Codex session.
