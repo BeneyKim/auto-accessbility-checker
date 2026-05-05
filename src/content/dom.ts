@@ -3,8 +3,16 @@ import type { Branch, CandidateSnapshot } from "../shared/types";
 const BLOCKED_TEXT_PATTERNS = [
   /ThinQ\s*Web/i,
   /ThinQ\s*PLAY/i,
+  /home.*dashboard.*(move|go|open)/i,
+  /dashboard.*(move|go|open)/i,
+  /홈.*대시보드.*이동/,
+  /대시보드.*이동/,
+  /팝업.*닫기/,
+  /창.*닫기/,
+  /닫기/,
+  /새로고침|refresh|reload/i,
   /^X$/,
-  /^Close$/i,
+  /close/i,
   /^닫기$/,
   /^홈$/,
   /^home$/i,
@@ -288,8 +296,13 @@ export function extractScreenTitle(shell: HTMLElement, fallback: string): string
   const heading = Array.from(shell.querySelectorAll<HTMLElement>("h1,h2,h3,[role='heading']"))
     .filter(isVisible)
     .map(getAccessibleName)
+    .filter((name) => !isBlockedNavigationName(name))
     .find(Boolean);
   return heading || fallback;
+}
+
+export function isBlockedNavigationName(name: string): boolean {
+  return BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name));
 }
 
 export function findBackButton(shell: HTMLElement): HTMLElement | undefined {
@@ -308,7 +321,7 @@ export function findBackButton(shell: HTMLElement): HTMLElement | undefined {
     return (
       rect.top < shellRect.top + 120 &&
       rect.left < shellRect.left + 120 &&
-      !BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name)) &&
+      !isBlockedNavigationName(name) &&
       rect.width <= 80 &&
       rect.height <= 80
     );
@@ -421,7 +434,7 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (role === "tab") {
     return "root-branch-tab";
   }
-  if (BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
+  if (isBlockedNavigationName(name)) {
     return "blocked-navigation";
   }
   if (

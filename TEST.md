@@ -10,7 +10,7 @@ npm.cmd run verify
 
 Latest local verification:
 
-- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 15 tests. Build output refreshed in `dist/`.
+- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 17 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
 
@@ -38,6 +38,8 @@ Current automated coverage:
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens
 - Depth transitions are logged as `depth pushed` and `depth popped`, and restore runs in a `finally` block after child scanning
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
+- Candidate filtering for ThinQ Home dashboard navigation, popup/window close, and refresh/reload controls
+- Screen title extraction ignores blocked global navigation headings
 - Screen signature change detection
 - IBM summary extraction
 - JSON, Markdown, HTML report generation

@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { collectClickCandidates, collectSkippedCandidates, findProductShell, findRequiredControls, getProductBoundary, screenSignature } from "../src/content/dom";
+import {
+  collectClickCandidates,
+  collectSkippedCandidates,
+  extractScreenTitle,
+  findProductShell,
+  findRequiredControls,
+  getProductBoundary,
+  isBlockedNavigationName,
+  screenSignature
+} from "../src/content/dom";
 
 beforeEach(() => {
   document.body.innerHTML = "";
@@ -173,6 +182,38 @@ describe("ThinQ DOM helpers", () => {
     expect(skipped.map((candidate) => candidate.reason)).toContain("blocked-back-navigation");
     expect(skipped.map((candidate) => candidate.reason)).toContain("switch-toggle");
     expect(skipped.map((candidate) => candidate.reason)).toContain("root-branch-tab");
+  });
+
+  it("blocks home dashboard, popup close, and refresh navigation controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button>ThinQ Web 홈 대시보드로 이동</button>
+        <button>팝업 창 닫기</button>
+        <button>새로고침</button>
+        <button>실내 초미세먼지(PM2.5) 이력</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["실내 초미세먼지(PM2.5) 이력"]);
+    expect(skipped.map((candidate) => candidate.reason)).toEqual(["blocked-navigation", "blocked-navigation", "blocked-navigation"]);
+    expect(isBlockedNavigationName("ThinQ Web 홈 대시보드로 이동")).toBe(true);
+  });
+
+  it("does not use blocked navigation headings as screen titles", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <div role="heading" aria-level="1" aria-label="ThinQ Web 홈 대시보드로 이동"></div>
+        <div role="heading" aria-level="1">실내 공기질</div>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+
+    expect(extractScreenTitle(shell, "제품")).toBe("실내 공기질");
   });
 
   it("collects ThinQ custom focusable rows as navigation candidates", () => {

@@ -26,6 +26,7 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
 - `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel button or the first visible overlay button.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
+- Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
 - Restore order is overlay close, in-shell back, Escape, then branch root re-entry. Back controls are searched only inside the current safe shell.
 - If a transition is classified as `home-navigation`, `out-of-scope`, or `unknown`, the run aborts without an automatic recovery click to avoid moving several browser/app history entries away from ThinQ Web.
 - If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.

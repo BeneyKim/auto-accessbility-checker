@@ -11,6 +11,7 @@
 - [x] Traversal state machine with navigation stack, transition classification, and fail-closed recovery
 - [x] Bottom sheet/overlay screens are treated as terminal leaf screens after IBM check
 - [x] Unsafe transitions abort without auto-recovery clicks; internal ThinQ route screens use a route shell fallback
+- [x] Home dashboard, popup close, and refresh controls are blocked from route child candidates
 - [x] IBM Equal Access page runner injection
 - [x] JSON, Markdown, HTML report generation
 - [x] Unit tests for candidate filtering and report generation
