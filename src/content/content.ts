@@ -4,6 +4,9 @@ const IBM_RUNNER_READY = "THINQ_A11Y_IBM_RUNNER_READY";
 const LOG_PREFIX = "[ThinQ-A11y]";
 const MESSAGE_SOURCE = "THINQ_A11Y_EXTENSION";
 const THINQ_HOST = "my.lgthinq.com";
+const TRANSITION_TIMEOUT_MS = 15000;
+const TRANSITION_STABLE_MS = 700;
+const TRANSITION_POLL_MS = 150;
 
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
@@ -460,29 +463,45 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   }
 }
 
-async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = 8000): Promise<ClassifiedTransition> {
+async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = TRANSITION_TIMEOUT_MS): Promise<ClassifiedTransition> {
   const started = performance.now();
   let latest = getCurrentScreenSnapshot();
   let latestClassification = classifyTransition(before, latest, trigger);
   let lastUnsafeTransition: ClassifiedTransition | undefined;
+  let lastSafeTransition: ClassifiedTransition | undefined;
+  let stableKey = transitionStableKey(latestClassification);
+  let stableSince = performance.now();
 
   while (performance.now() - started < timeoutMs) {
-    await wait(150);
+    await wait(TRANSITION_POLL_MS);
     latest = getCurrentScreenSnapshot();
     latestClassification = classifyTransition(before, latest, trigger);
-    if (latestClassification.classification === "home-navigation") {
-      return latestClassification;
+    const nextStableKey = transitionStableKey(latestClassification);
+    if (nextStableKey !== stableKey) {
+      stableKey = nextStableKey;
+      stableSince = performance.now();
     }
-    if (latestClassification.classification === "out-of-scope" || latestClassification.classification === "unknown") {
+
+    if (latestClassification.classification === "out-of-scope" || latestClassification.classification === "unknown" || latestClassification.classification === "home-navigation") {
       lastUnsafeTransition = latestClassification;
       continue;
     }
     if (latestClassification.classification !== "no-change") {
-      return latestClassification;
+      lastSafeTransition = latestClassification;
+    }
+    if (latestClassification.classification !== "no-change") {
+      const stableFor = performance.now() - stableSince;
+      if (stableFor >= TRANSITION_STABLE_MS) {
+        return latestClassification;
+      }
     }
   }
 
-  return lastUnsafeTransition ?? latestClassification;
+  return lastSafeTransition ?? lastUnsafeTransition ?? latestClassification;
+}
+
+function transitionStableKey(transition: ClassifiedTransition): string {
+  return `${transition.classification}:${transition.after.url}:${transition.after.signature}:${transition.after.boundaryPresent}:${transition.after.overlayDescriptors.join("|")}`;
 }
 
 function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigger: CandidateSnapshot): ClassifiedTransition {
@@ -931,7 +950,9 @@ function dispatchActivationSequence(element: HTMLElement): void {
   const rect = element.getBoundingClientRect();
   const clientX = rect.left + rect.width / 2;
   const clientY = rect.top + rect.height / 2;
-  element.focus({ preventScroll: true });
+  const hitTarget = document.elementFromPoint(clientX, clientY);
+  const target = hitTarget instanceof HTMLElement && element.contains(hitTarget) ? hitTarget : element;
+  target.focus({ preventScroll: true });
   const pointerOptions: PointerEventInit = {
     bubbles: true,
     cancelable: true,
@@ -954,16 +975,47 @@ function dispatchActivationSequence(element: HTMLElement): void {
     clientY
   };
 
-  element.dispatchEvent(new PointerEvent("pointerover", pointerOptions));
-  element.dispatchEvent(new PointerEvent("pointerenter", pointerOptions));
-  element.dispatchEvent(new MouseEvent("mouseover", mouseOptions));
-  element.dispatchEvent(new MouseEvent("mouseenter", mouseOptions));
-  element.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
-  element.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
-  element.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
-  element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
-  element.click();
+  dispatchTouchSequence(target, clientX, clientY);
+  target.dispatchEvent(new PointerEvent("pointerover", pointerOptions));
+  target.dispatchEvent(new PointerEvent("pointerenter", pointerOptions));
+  target.dispatchEvent(new MouseEvent("mouseover", mouseOptions));
+  target.dispatchEvent(new MouseEvent("mouseenter", mouseOptions));
+  target.dispatchEvent(new PointerEvent("pointerdown", pointerOptions));
+  target.dispatchEvent(new MouseEvent("mousedown", mouseOptions));
+  target.dispatchEvent(new PointerEvent("pointerup", { ...pointerOptions, buttons: 0 }));
+  target.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
+  target.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
+  target.click();
+  if (target !== element) {
+    element.click();
+  }
+}
+
+function dispatchTouchSequence(target: HTMLElement, clientX: number, clientY: number): void {
+  try {
+    const touch = new Touch({
+      identifier: Date.now(),
+      target,
+      clientX,
+      clientY,
+      screenX: clientX,
+      screenY: clientY,
+      pageX: clientX + window.scrollX,
+      pageY: clientY + window.scrollY
+    });
+    const eventInit: TouchEventInit = {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      touches: [touch],
+      targetTouches: [touch],
+      changedTouches: [touch]
+    };
+    target.dispatchEvent(new TouchEvent("touchstart", eventInit));
+    target.dispatchEvent(new TouchEvent("touchend", { ...eventInit, touches: [], targetTouches: [] }));
+  } catch {
+    // Some browsers restrict synthetic Touch construction; pointer/mouse activation still runs.
+  }
 }
 
 async function waitForIdle(): Promise<void> {

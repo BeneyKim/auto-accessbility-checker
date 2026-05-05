@@ -24,6 +24,8 @@ Current automated coverage:
 - The traversal skips candidates already present in the current menu path to avoid repeated self-entry
 - Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens
 - Candidate transitions are classified as no-change, state-change, overlay, product child, branch change, out-of-scope, home, or unknown
+- Candidate transitions wait up to 15 seconds and require a safe non-no-change state to be stable for 700 ms
+- Candidate activation uses center hit-target touch/pointer/mouse/native click plus keyboard fallback after no-change
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens

@@ -19,6 +19,8 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Depth is tracked by a `navigationStack`; a screen is considered visited by `branch + menuPath + screenSignature`.
 - Screen signature includes URL, selected tab, headings, modal count, and normalized visible text.
 - A click is classified as `no-change`, `state-change`, `overlay-opened`, `in-product-child`, `branch-changed`, `out-of-scope`, `home-navigation`, or `unknown`.
+- Transition classification waits up to 15 seconds and returns only after a non-`no-change` safe state is stable for 700 ms; transient loading states apply to every candidate, not one feature.
+- Candidate activation targets the element under the click center and dispatches touch, pointer, mouse, native click, and keyboard fallback when the primary click produces no change.
 - Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
