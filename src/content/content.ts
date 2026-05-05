@@ -363,7 +363,15 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   context.log("info", "candidate click started.", { frame, candidate: candidate.snapshot, snapshot: summarizeSnapshot(before) });
   await clickAndWait(candidate.element);
 
-  const transition = await waitAndClassifyTransition(before, candidate.snapshot);
+  let transition = await waitAndClassifyTransition(before, candidate.snapshot);
+  if (transition.classification === "no-change") {
+    context.log("warn", "candidate primary click produced no change; retrying keyboard activation.", {
+      triggerName,
+      candidate: candidate.snapshot
+    });
+    await activateWithKeyboard(candidate.element);
+    transition = await waitAndClassifyTransition(before, candidate.snapshot);
+  }
   context.log("info", "transition classified.", {
     triggerName,
     classification: transition.classification,
@@ -452,21 +460,29 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   }
 }
 
-async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = 4500): Promise<ClassifiedTransition> {
+async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = 8000): Promise<ClassifiedTransition> {
   const started = performance.now();
   let latest = getCurrentScreenSnapshot();
   let latestClassification = classifyTransition(before, latest, trigger);
+  let lastUnsafeTransition: ClassifiedTransition | undefined;
 
   while (performance.now() - started < timeoutMs) {
     await wait(150);
     latest = getCurrentScreenSnapshot();
     latestClassification = classifyTransition(before, latest, trigger);
+    if (latestClassification.classification === "home-navigation") {
+      return latestClassification;
+    }
+    if (latestClassification.classification === "out-of-scope" || latestClassification.classification === "unknown") {
+      lastUnsafeTransition = latestClassification;
+      continue;
+    }
     if (latestClassification.classification !== "no-change") {
       return latestClassification;
     }
   }
 
-  return latestClassification;
+  return lastUnsafeTransition ?? latestClassification;
 }
 
 function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigger: CandidateSnapshot): ClassifiedTransition {
