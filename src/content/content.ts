@@ -23,6 +23,7 @@ import {
   isVisible,
   screenSignature
 } from "./dom";
+import { shouldTraverseFrameCandidates } from "./traversal";
 
 let stopRequested = false;
 let activeRun: Promise<void> | undefined;
@@ -153,6 +154,8 @@ interface NavigationFrame {
   rootSignature: string;
   shellSelector: string;
   candidateSnapshot?: CandidateSnapshot;
+  transitionClassification?: TransitionClassification;
+  terminalOverlay?: boolean;
 }
 
 interface ScreenSnapshot {
@@ -309,6 +312,14 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   context.visited.add(visitKey);
 
   await recordScreenResult(context, frame, snapshot);
+  if (!shouldTraverseFrameCandidates(frame)) {
+    context.log("info", "overlay frame scanned; skipping inner candidate traversal.", {
+      frame,
+      snapshot: summarizeSnapshot(snapshot)
+    });
+    return;
+  }
+
   if (frame.depth >= context.settings.maxDepth) {
     context.log("debug", "Depth limit reached.", { depth: frame.depth, menuPath: frame.menuPath });
     return;
@@ -425,7 +436,9 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     menuPath: [...frame.menuPath, triggerName],
     rootSignature: childSnapshot.signature,
     shellSelector: describeStableShell(childSnapshot.shell),
-    candidateSnapshot: candidate.snapshot
+    candidateSnapshot: candidate.snapshot,
+    transitionClassification: transition.classification,
+    terminalOverlay: transition.classification === "overlay-opened"
   };
 
   context.navigationStack.push(childFrame);
@@ -721,10 +734,13 @@ function getOverlayDescriptors(boundary?: HTMLElement): string[] {
 }
 
 function findOverlayCloseButton(): HTMLElement | undefined {
-  const root = findTopOverlay(getProductBoundary()) ?? document.body;
-  return Array.from(root.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex]"))
-    .filter((element) => isVisible(element))
-    .find((element) => /close|cancel|dismiss|x|닫기|취소|팝업/i.test(getAccessibleName(element)));
+  const overlay = findTopOverlay(getProductBoundary());
+  const overlayRoot = overlay ?? document.body;
+  const buttonCandidates = Array.from(overlayRoot.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex]")).filter((element) =>
+    isVisible(element)
+  );
+  const explicitClose = buttonCandidates.find((element) => /close|cancel|dismiss|^x$|닫기|취소|팝업/i.test(getAccessibleName(element).trim()));
+  return explicitClose ?? (overlay ? buttonCandidates[0] : undefined);
 }
 
 function summarizeSnapshot(snapshot: ScreenSnapshot): Record<string, unknown> {

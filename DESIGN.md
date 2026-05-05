@@ -23,6 +23,7 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Candidate activation targets the element under the click center and dispatches touch, pointer, mouse, native click, and keyboard fallback when the primary click produces no change.
 - Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
+- `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel button or the first visible overlay button.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Restore order is overlay close, in-shell back, Escape, then branch root re-entry.
 - If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.

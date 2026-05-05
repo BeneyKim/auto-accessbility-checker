@@ -8,6 +8,10 @@ Run:
 npm.cmd run verify
 ```
 
+Latest local verification:
+
+- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 15 tests. Build output refreshed in `dist/`.
+
 Current automated coverage:
 
 - Required ThinQ controls detection
@@ -26,6 +30,7 @@ Current automated coverage:
 - Candidate transitions are classified as no-change, state-change, overlay, product child, branch change, out-of-scope, home, or unknown
 - Candidate transitions wait up to 15 seconds and require a safe non-no-change state to be stable for 700 ms
 - Candidate activation uses center hit-target touch/pointer/mouse/native click plus keyboard fallback after no-change
+- Bottom sheet and overlay screens are scanned as terminal leaf screens; inner picker/buttons such as fan-speed up/down are not traversed as child candidates
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens
@@ -53,6 +58,7 @@ Current automated coverage:
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
 - Restore attempts use overlay close, in-shell back controls, Escape, and branch root re-entry; browser history is not used.
+- Bottom sheets are closed after their IBM check by pressing an explicit close/cancel button, or the first visible overlay button when no close/cancel label exists.
 - If restore cannot return to the previous signature, the run aborts with a failure result instead of clicking stale elements from the wrong screen.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
 - Screenshots are captured as compressed JPEG to reduce report payload size.
