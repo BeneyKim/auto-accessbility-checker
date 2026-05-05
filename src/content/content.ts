@@ -5,7 +5,7 @@ const LOG_PREFIX = "[ThinQ-A11y]";
 const MESSAGE_SOURCE = "THINQ_A11Y_EXTENSION";
 const THINQ_HOST = "my.lgthinq.com";
 
-import type { Branch, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
+import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
   branchLabel,
   collectClickCandidates,
@@ -13,7 +13,9 @@ import {
   diagnoseRequiredControls,
   extractScreenTitle,
   findBackButton,
-  findProductShell,
+  getAccessibleName,
+  getBranchControls,
+  getProductBoundary,
   findRequiredControls,
   isVisible,
   screenSignature
@@ -71,29 +73,25 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
     }
 
     log("info", "Required ThinQ product controls detected.");
-    const visited = new Set<string>();
+    const traversal: TraversalContext = {
+      settings,
+      visited: new Set<string>(),
+      attemptedCandidates: new Set<string>(),
+      navigationStack: [],
+      results,
+      log,
+      state: "ROOT_BRANCH",
+      aborted: false
+    };
     const branches: Branch[] = ["product", "usefulFeatures", "settings"];
 
     for (const branch of branches) {
-      if (stopRequested) {
+      if (stopRequested || traversal.aborted) {
         break;
       }
       log("info", `Entering branch: ${branchLabel(branch)}`);
-      const entered = await enterBranch(branch, log);
-      if (!entered.ok) {
-        log("error", "Branch entry failed; skipping branch scan.", { branch, reason: entered.reason });
-        continue;
-      }
-      await scanDepth({
-        settings,
-        shell: entered.shell,
-        branch,
-        menuPath: [branchLabel(branch)],
-        depth: 0,
-        visited,
-        results,
-        log
-      });
+      const branchCompleted = await traverseBranch(traversal, branch);
+      log(branchCompleted ? "info" : "error", "Branch traversal finished.", { branch, completed: branchCompleted, aborted: traversal.aborted });
     }
 
     const finalControls = findRequiredControls();
@@ -123,184 +121,614 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
   }
 }
 
-interface BranchEntryResult {
-  ok: boolean;
-  shell: HTMLElement;
+type TraversalState = "ROOT_BRANCH" | "CLICK_PENDING" | "CHILD_OPEN" | "RESTORE_PENDING" | "BRANCH_RECOVERY" | "ABORTED";
+type TransitionClassification =
+  | "no-change"
+  | "state-change"
+  | "overlay-opened"
+  | "in-product-child"
+  | "branch-changed"
+  | "out-of-scope"
+  | "home-navigation"
+  | "unknown";
+
+interface TraversalContext {
+  settings: CheckerSettings;
+  visited: Set<string>;
+  attemptedCandidates: Set<string>;
+  navigationStack: NavigationFrame[];
+  results: ScreenResult[];
+  log: (level: LogEntry["level"], message: string, data?: unknown) => void;
+  state: TraversalState;
+  aborted: boolean;
+}
+
+interface NavigationFrame {
+  branch: Branch;
+  depth: number;
+  menuPath: string[];
+  rootSignature: string;
+  shellSelector: string;
+  candidateSnapshot?: CandidateSnapshot;
+}
+
+interface ScreenSnapshot {
+  url: string;
+  title: string;
+  selectedBranch?: Branch;
+  hasRequiredControls: boolean;
+  boundaryPresent: boolean;
+  isHomeLike: boolean;
+  isOutOfScopeLike: boolean;
+  overlayDescriptors: string[];
+  candidateNames: string[];
+  signature: string;
+  shell?: HTMLElement;
+  boundary?: HTMLElement;
+}
+
+interface ClassifiedTransition {
+  classification: TransitionClassification;
+  reason: string;
+  before: ScreenSnapshot;
+  after: ScreenSnapshot;
+}
+
+interface RestoreResult {
+  restored: boolean;
+  method: "already-restored" | "overlay-close" | "back-button" | "escape" | "branch-entry" | "failed";
   reason?: string;
 }
 
-async function enterBranch(branch: Branch, log: (level: LogEntry["level"], message: string, data?: unknown) => void): Promise<BranchEntryResult> {
-  const beforeShell = resolveCurrentShell(document.body);
-  const beforeMeta = getScreenMeta(beforeShell);
-  const controls = findRequiredControls();
+async function traverseBranch(context: TraversalContext, branch: Branch): Promise<boolean> {
+  if (!(await ensureProductRoot(context, branch))) {
+    return false;
+  }
+
+  const entered = await activateBranch(context, branch);
+  if (!entered) {
+    context.aborted = true;
+    context.state = "ABORTED";
+    return false;
+  }
+
+  const snapshot = getCurrentScreenSnapshot();
+  if (!snapshot.shell || !snapshot.boundaryPresent || snapshot.isHomeLike || snapshot.isOutOfScopeLike) {
+    context.log("error", "Branch root snapshot is not a safe product screen.", summarizeSnapshot(snapshot));
+    context.aborted = true;
+    context.state = "ABORTED";
+    await recordFailureResult(context, branch, [branchLabel(branch)], snapshot, "branch-root-out-of-scope");
+    return false;
+  }
+
+  const frame: NavigationFrame = {
+    branch,
+    depth: 0,
+    menuPath: [branchLabel(branch)],
+    rootSignature: snapshot.signature,
+    shellSelector: describeStableShell(snapshot.shell)
+  };
+
+  context.navigationStack = [frame];
+  await traverseFrame(context, frame);
+  if (context.aborted) {
+    return false;
+  }
+
+  const restored = await ensureProductRoot(context, branch);
+  return restored && !context.aborted;
+}
+
+async function ensureProductRoot(context: TraversalContext, branch: Branch): Promise<boolean> {
+  context.state = "BRANCH_RECOVERY";
+  let snapshot = getCurrentScreenSnapshot();
+  context.log("info", "Ensuring product root before branch.", { branch, snapshot: summarizeSnapshot(snapshot) });
+
+  if (snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike) {
+    return true;
+  }
+
+  const recoveryFrame = context.navigationStack.at(-1);
+  if (recoveryFrame) {
+    const restored = await restoreToFrame(context, recoveryFrame);
+    snapshot = getCurrentScreenSnapshot();
+    context.log(restored.restored ? "info" : "error", "Product root recovery result.", {
+      branch,
+      restore: restored,
+      snapshot: summarizeSnapshot(snapshot)
+    });
+    return restored.restored && snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike;
+  }
+
+  context.log("error", "Product root is not available and no recovery frame exists.", summarizeSnapshot(snapshot));
+  return false;
+}
+
+async function activateBranch(context: TraversalContext, branch: Branch): Promise<boolean> {
+  context.state = "ROOT_BRANCH";
+  const before = getCurrentScreenSnapshot();
+  const controls = getBranchControls();
   if (!controls) {
-    return { ok: false, shell: beforeShell, reason: "required-controls-missing" };
+    context.log("error", "Branch controls missing before branch activation.", { branch, snapshot: summarizeSnapshot(before) });
+    return false;
   }
 
   const target = branch === "product" ? controls.productTab : branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
-  const targetName = target.innerText || target.getAttribute("aria-label") || branchLabel(branch);
-  log("info", "Clicking branch entry.", { branch, targetName, target: describeElement(target) });
+  context.log("info", "Clicking branch entry.", { branch, target: describeElement(target) });
   await clickAndWait(target);
 
-  let transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
-  if (!transition.ok) {
-    log("warn", "Branch click did not transition; retrying with keyboard activation.", { branch, reason: transition.reason });
-    await activateWithKeyboard(target);
-    transition = await waitForBranchTransition(branch, beforeMeta, controls.shell);
-  }
-  if (!transition.ok) {
-    const retryControls = findRequiredControls();
-    const retryTarget = retryControls
-      ? branch === "product"
-        ? retryControls.productTab
-        : branch === "usefulFeatures"
-          ? retryControls.usefulFeaturesTab
-          : retryControls.settingsButton
-      : undefined;
-    if (retryTarget && retryTarget !== target) {
-      log("warn", "Branch keyboard activation did not transition; retrying with fresh target.", { branch, target: describeElement(retryTarget) });
-      await clickAndWait(retryTarget);
-      transition = await waitForBranchTransition(branch, beforeMeta, retryControls!.shell);
-    }
-  }
-  log(transition.ok ? "info" : "warn", "Branch entry result.", { branch, ok: transition.ok, reason: transition.reason, shell: describeShell(transition.shell) });
-  return transition;
+  const accepted = await waitForBranchActivation(branch, before);
+  context.log(accepted ? "info" : "error", "Branch activation result.", { branch, accepted, snapshot: summarizeSnapshot(getCurrentScreenSnapshot()) });
+  return accepted;
 }
 
-async function waitForBranchTransition(branch: Branch, before: ScreenMeta, fallbackShell: HTMLElement, timeoutMs = 2500): Promise<BranchEntryResult> {
+async function waitForBranchActivation(branch: Branch, before: ScreenSnapshot, timeoutMs = 3500): Promise<boolean> {
   const started = performance.now();
-  let latestShell = resolveCurrentShell(fallbackShell);
-  let latestMeta = getScreenMeta(latestShell);
-
   while (performance.now() - started < timeoutMs) {
     await wait(150);
-    latestShell = resolveCurrentShell(fallbackShell);
-    latestMeta = getScreenMeta(latestShell);
-
-    const controls = findRequiredControls();
-    const expectedSelected = getExpectedBranchSelected(branch, controls);
-    const candidatesChanged = latestMeta.candidateNames.join("|") !== before.candidateNames.join("|");
-    const titleChanged = latestMeta.title !== before.title;
-
-    if (branch === "product" && controls) {
-      return { ok: true, shell: latestShell, reason: "product-branch" };
+    const snapshot = getCurrentScreenSnapshot();
+    if (snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+      return false;
     }
-    if (expectedSelected || candidatesChanged || titleChanged) {
-      return {
-        ok: true,
-        shell: latestShell,
-        reason: expectedSelected ? "selected-branch" : candidatesChanged ? "candidates-changed" : "title-changed"
-      };
+    if (branch !== "settings" && snapshot.selectedBranch === branch) {
+      return true;
+    }
+    if (branch === "settings" && snapshot.signature !== before.signature && Boolean(findBackButton(snapshot.shell ?? document.body))) {
+      return true;
+    }
+    if (branch === "settings" && snapshot.title !== before.title && snapshot.candidateNames.length > 0) {
+      return true;
     }
   }
-
-  return { ok: false, shell: latestShell, reason: "branch-did-not-change-screen" };
+  return false;
 }
 
-function getExpectedBranchSelected(branch: Branch, controls?: ReturnType<typeof findRequiredControls>): boolean {
-  if (!controls) {
-    return false;
-  }
-  const element = branch === "product" ? controls.productTab : branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
-  return element.getAttribute("aria-selected") === "true" || element.getAttribute("aria-current") === "page";
-}
-
-interface ScanContext {
-  settings: CheckerSettings;
-  shell: HTMLElement;
-  branch: Branch;
-  menuPath: string[];
-  depth: number;
-  visited: Set<string>;
-  results: ScreenResult[];
-  log: (level: LogEntry["level"], message: string, data?: unknown) => void;
-}
-
-async function scanDepth(context: ScanContext): Promise<void> {
-  if (stopRequested) {
-    context.log("warn", "Traversal stopped by user.");
+async function traverseFrame(context: TraversalContext, frame: NavigationFrame): Promise<void> {
+  if (stopRequested || context.aborted) {
     return;
   }
 
-  const shell = resolveCurrentShell(context.shell);
-  const signature = screenSignature(shell);
-  const visitKey = `${context.branch}:${context.menuPath.join(">")}:${signature}`;
+  context.state = frame.depth === 0 ? "ROOT_BRANCH" : "CHILD_OPEN";
+  let snapshot = getCurrentScreenSnapshot();
+  if (!snapshot.shell || !snapshot.boundaryPresent || snapshot.isHomeLike || snapshot.isOutOfScopeLike) {
+    context.log("error", "Unsafe frame snapshot; aborting traversal.", { frame, snapshot: summarizeSnapshot(snapshot) });
+    context.aborted = true;
+    context.state = "ABORTED";
+    await recordFailureResult(context, frame.branch, frame.menuPath, snapshot, "unsafe-frame-snapshot");
+    return;
+  }
+
+  const visitKey = `${frame.branch}:${frame.menuPath.join(">")}:${snapshot.signature}`;
   if (context.visited.has(visitKey)) {
-    context.log("debug", "Skipping already visited screen.", { visitKey });
+    context.log("debug", "Skipping already visited frame.", { visitKey, frame });
     return;
   }
   context.visited.add(visitKey);
 
-  const skipped = collectSkippedCandidates(shell);
-  const candidates = collectClickCandidates(shell);
-  const title = extractScreenTitle(shell, context.menuPath.at(-1) ?? branchLabel(context.branch));
-  const beforeMeta = getScreenMeta(shell, title, candidates);
-  context.log(candidates.length === 0 ? "warn" : "info", "Click candidates collected before IBM check.", {
-    count: candidates.length,
-    candidates: candidates.map((candidate) => candidate.snapshot),
-    shell: describeShell(shell),
-    shellTextSample: candidates.length === 0 ? shell.innerText?.replace(/\s+/g, " ").trim().slice(0, 700) : undefined
+  await recordScreenResult(context, frame, snapshot);
+  if (frame.depth >= context.settings.maxDepth) {
+    context.log("debug", "Depth limit reached.", { depth: frame.depth, menuPath: frame.menuPath });
+    return;
+  }
+
+  while (!stopRequested && !context.aborted) {
+    snapshot = getCurrentScreenSnapshot();
+    if (!snapshot.shell || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+      context.log("error", "Frame became unsafe before collecting next candidate.", { frame, snapshot: summarizeSnapshot(snapshot) });
+      context.aborted = true;
+      context.state = "ABORTED";
+      await recordFailureResult(context, frame.branch, frame.menuPath, snapshot, "frame-became-unsafe");
+      return;
+    }
+
+    const candidates = collectClickCandidates(snapshot.shell);
+    context.log(candidates.length === 0 ? "warn" : "info", "candidate collected.", {
+      frame,
+      count: candidates.length,
+      candidates: candidates.map((candidate) => candidate.snapshot),
+      snapshot: summarizeSnapshot(snapshot)
+    });
+
+    const candidate = candidates.find((item) => {
+      const key = candidateAttemptKey(frame, item.snapshot);
+      const triggerName = item.snapshot.name || item.snapshot.role;
+      return !context.attemptedCandidates.has(key) && !frame.menuPath.includes(triggerName);
+    });
+
+    if (!candidate) {
+      return;
+    }
+
+    const key = candidateAttemptKey(frame, candidate.snapshot);
+    context.attemptedCandidates.add(key);
+    await clickCandidateAndHandleTransition(context, frame, candidate.snapshot);
+  }
+}
+
+async function clickCandidateAndHandleTransition(context: TraversalContext, frame: NavigationFrame, candidateSnapshot: CandidateSnapshot): Promise<void> {
+  const before = getCurrentScreenSnapshot();
+  if (!before.shell) {
+    context.log("error", "Cannot click candidate without a safe shell.", { frame, candidateSnapshot });
+    return;
+  }
+
+  const candidate = collectClickCandidates(before.shell).find((item) => candidateAttemptKey(frame, item.snapshot) === candidateAttemptKey(frame, candidateSnapshot));
+  if (!candidate) {
+    context.log("warn", "candidate skipped.", { reason: "fresh-candidate-not-found", frame, candidateSnapshot });
+    return;
+  }
+
+  const triggerName = candidate.snapshot.name || candidate.snapshot.role;
+  context.state = "CLICK_PENDING";
+  context.log("info", "candidate click started.", { frame, candidate: candidate.snapshot, snapshot: summarizeSnapshot(before) });
+  await clickAndWait(candidate.element);
+
+  const transition = await waitAndClassifyTransition(before, candidate.snapshot);
+  context.log("info", "transition classified.", {
+    triggerName,
+    classification: transition.classification,
+    reason: transition.reason,
+    before: summarizeSnapshot(transition.before),
+    after: summarizeSnapshot(transition.after)
   });
 
+  if (transition.classification === "no-change" || transition.classification === "state-change") {
+    context.log("debug", "candidate skipped.", { triggerName, classification: transition.classification, reason: transition.reason });
+    return;
+  }
+
+  if (transition.classification === "home-navigation" || transition.classification === "out-of-scope" || transition.classification === "unknown") {
+    context.log("error", "Unsafe transition detected; attempting recovery and aborting run.", {
+      triggerName,
+      classification: transition.classification
+    });
+    const restored = await restoreToFrame(context, frame);
+    context.log(restored.restored ? "warn" : "error", "Unsafe transition recovery result.", restored);
+    context.aborted = true;
+    context.state = "ABORTED";
+    await recordFailureResult(context, frame.branch, [...frame.menuPath, triggerName], transition.after, transition.classification);
+    return;
+  }
+
+  if (transition.classification === "branch-changed") {
+    const restored = await restoreToFrame(context, frame);
+    context.log(restored.restored ? "warn" : "error", "Unexpected branch transition recovery result.", restored);
+    if (!restored.restored) {
+      context.aborted = true;
+      context.state = "ABORTED";
+    }
+    return;
+  }
+
+  const childSnapshot = transition.after;
+  if (!childSnapshot.shell) {
+    context.log("error", "Accepted child transition without a shell; aborting.", { triggerName, transition });
+    context.aborted = true;
+    context.state = "ABORTED";
+    return;
+  }
+
+  const childFrame: NavigationFrame = {
+    branch: frame.branch,
+    depth: frame.depth + 1,
+    menuPath: [...frame.menuPath, triggerName],
+    rootSignature: childSnapshot.signature,
+    shellSelector: describeStableShell(childSnapshot.shell),
+    candidateSnapshot: candidate.snapshot
+  };
+
+  context.navigationStack.push(childFrame);
+  context.state = "CHILD_OPEN";
+  context.log("info", "depth pushed.", {
+    triggerName,
+    fromDepth: frame.depth,
+    toDepth: childFrame.depth,
+    menuPath: childFrame.menuPath,
+    classification: transition.classification
+  });
+
+  let restored: RestoreResult = { restored: false, method: "failed" };
+  try {
+    await traverseFrame(context, childFrame);
+  } finally {
+    context.state = "RESTORE_PENDING";
+    context.log("info", "restore started.", { targetFrame: frame, childFrame });
+    restored = await restoreToFrame(context, frame);
+    context.navigationStack.pop();
+    context.log(restored.restored ? "info" : "error", "depth popped.", {
+      triggerName,
+      fromDepth: childFrame.depth,
+      toDepth: frame.depth,
+      restored: restored.restored,
+      method: restored.method,
+      reason: restored.reason
+    });
+  }
+
+  if (!restored.restored) {
+    context.aborted = true;
+    context.state = "ABORTED";
+    await recordFailureResult(context, frame.branch, childFrame.menuPath, getCurrentScreenSnapshot(), "restore-failed");
+  }
+}
+
+async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = 4500): Promise<ClassifiedTransition> {
+  const started = performance.now();
+  let latest = getCurrentScreenSnapshot();
+  let latestClassification = classifyTransition(before, latest, trigger);
+
+  while (performance.now() - started < timeoutMs) {
+    await wait(150);
+    latest = getCurrentScreenSnapshot();
+    latestClassification = classifyTransition(before, latest, trigger);
+    if (latestClassification.classification !== "no-change") {
+      return latestClassification;
+    }
+  }
+
+  return latestClassification;
+}
+
+function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigger: CandidateSnapshot): ClassifiedTransition {
+  if (after.isHomeLike) {
+    return { classification: "home-navigation", reason: "home-like-screen-detected", before, after };
+  }
+  if (after.isOutOfScopeLike) {
+    return { classification: "out-of-scope", reason: "out-of-scope-screen-detected", before, after };
+  }
+  if (!after.boundaryPresent && after.overlayDescriptors.length === 0) {
+    return { classification: "out-of-scope", reason: "product-boundary-missing", before, after };
+  }
+  if (before.selectedBranch && after.selectedBranch && before.selectedBranch !== after.selectedBranch) {
+    return { classification: "branch-changed", reason: "selected-branch-changed", before, after };
+  }
+  if (after.overlayDescriptors.length > before.overlayDescriptors.length) {
+    return { classification: "overlay-opened", reason: "overlay-count-increased", before, after };
+  }
+  if (after.signature === before.signature) {
+    return { classification: "no-change", reason: "signature-unchanged", before, after };
+  }
+
+  const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");
+  const titleChanged = after.title !== before.title;
+  const triggerName = trigger.name || trigger.role;
+  if (after.boundaryPresent && (candidateSetChanged || titleChanged || after.title === triggerName)) {
+    return { classification: "in-product-child", reason: titleChanged ? "title-changed" : "candidate-set-changed", before, after };
+  }
+  if (after.boundaryPresent) {
+    return { classification: "state-change", reason: "signature-changed-without-child-evidence", before, after };
+  }
+  return { classification: "unknown", reason: "no-transition-rule-matched", before, after };
+}
+
+async function restoreToFrame(context: TraversalContext, frame: NavigationFrame): Promise<RestoreResult> {
+  const already = getCurrentScreenSnapshot();
+  if (isFrameRestored(frame, already)) {
+    return { restored: true, method: "already-restored" };
+  }
+
+  const closeButton = findOverlayCloseButton();
+  if (closeButton) {
+    await clickAndWait(closeButton);
+    await wait(250);
+    const snapshot = getCurrentScreenSnapshot();
+    if (isFrameRestored(frame, snapshot)) {
+      return { restored: true, method: "overlay-close" };
+    }
+  }
+
+  const current = getCurrentScreenSnapshot();
+  const backButton = current.shell ? findBackButton(current.shell) ?? findBackButton(document.body) : findBackButton(document.body);
+  if (backButton) {
+    await clickAndWait(backButton);
+    await wait(250);
+    const snapshot = getCurrentScreenSnapshot();
+    if (isFrameRestored(frame, snapshot)) {
+      return { restored: true, method: "back-button" };
+    }
+  }
+
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
+  await waitForIdle();
+  let snapshot = getCurrentScreenSnapshot();
+  if (isFrameRestored(frame, snapshot)) {
+    return { restored: true, method: "escape" };
+  }
+
+  const controls = getBranchControls();
+  if (controls) {
+    const target = frame.branch === "product" ? controls.productTab : frame.branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
+    await clickAndWait(target);
+    await wait(250);
+    snapshot = getCurrentScreenSnapshot();
+    if (isFrameRestored(frame, snapshot)) {
+      return { restored: true, method: "branch-entry" };
+    }
+  }
+
+  return { restored: false, method: "failed", reason: "frame-signature-or-branch-not-restored" };
+}
+
+function isFrameRestored(frame: NavigationFrame, snapshot: ScreenSnapshot): boolean {
+  return snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.signature === frame.rootSignature;
+}
+
+async function recordScreenResult(context: TraversalContext, frame: NavigationFrame, snapshot: ScreenSnapshot): Promise<void> {
+  const shell = snapshot.shell;
+  if (!shell) {
+    await recordFailureResult(context, frame.branch, frame.menuPath, snapshot, "missing-shell");
+    return;
+  }
+
+  const skipped = collectSkippedCandidates(shell);
   const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, shell, context.log);
   const screenshot = await requestScreenshot(context.log);
 
   context.results.push({
-    depth: context.depth,
-    menuPath: context.menuPath,
-    branch: context.branch,
-    title,
+    depth: frame.depth,
+    menuPath: frame.menuPath,
+    branch: frame.branch,
+    title: snapshot.title,
     url: location.href,
     timestamp: new Date().toISOString(),
     screenshot,
     ibmReport,
     summary: extractSummary(ibmReport),
     navigation: {
-      screenSignature: signature,
+      trigger: frame.candidateSnapshot
+        ? {
+            name: frame.candidateSnapshot.name,
+            role: frame.candidateSnapshot.role,
+            skipReason: frame.candidateSnapshot.reason
+          }
+        : undefined,
+      screenSignature: snapshot.signature,
       skipped
     }
   });
-  context.log("info", "Screen scanned.", { title, depth: context.depth, branch: context.branch });
+  context.log("info", "Screen scanned.", { title: snapshot.title, depth: frame.depth, branch: frame.branch });
+}
 
-  if (context.depth >= context.settings.maxDepth) {
-    context.log("debug", "Depth limit reached.", { depth: context.depth });
-    return;
+async function recordFailureResult(
+  context: TraversalContext,
+  branch: Branch,
+  menuPath: string[],
+  snapshot: ScreenSnapshot,
+  failureType: string
+): Promise<void> {
+  const screenshot = await requestScreenshot(context.log);
+  const ibmReport = {
+    report: {
+      summary: { counts: {} },
+      results: [],
+      error: { message: failureType }
+    }
+  };
+  context.results.push({
+    depth: Math.max(0, menuPath.length - 1),
+    menuPath,
+    branch,
+    title: snapshot.title || failureType,
+    url: location.href,
+    timestamp: new Date().toISOString(),
+    screenshot,
+    ibmReport,
+    summary: extractSummary(ibmReport),
+    navigation: {
+      screenSignature: snapshot.signature,
+      failed: failureType
+    }
+  });
+}
+
+function getCurrentScreenSnapshot(): ScreenSnapshot {
+  const controls = getBranchControls();
+  const boundary = getProductBoundary();
+  const overlay = findTopOverlay(boundary);
+  const shell = overlay ?? boundary;
+  const title = shell ? extractScreenTitle(shell, branchLabel(getSelectedBranch(controls) ?? "product")) : document.title || "unknown";
+  const overlayDescriptors = getOverlayDescriptors(boundary);
+  const candidateNames = shell ? collectClickCandidates(shell).map((candidate) => candidate.snapshot.name || candidate.snapshot.role).sort() : [];
+  const signature = shell ? screenSignature(shell) : makeDocumentSignature(title, overlayDescriptors, candidateNames);
+  const isHomeLike = looksLikeThinQHome();
+  const isOutOfScopeLike = !boundary && looksLikeOutOfScope();
+
+  return {
+    url: location.href,
+    title,
+    selectedBranch: getSelectedBranch(controls),
+    hasRequiredControls: Boolean(controls),
+    boundaryPresent: Boolean(boundary),
+    isHomeLike,
+    isOutOfScopeLike,
+    overlayDescriptors,
+    candidateNames,
+    signature,
+    shell,
+    boundary
+  };
+}
+
+function getSelectedBranch(controls?: ReturnType<typeof getBranchControls>): Branch | undefined {
+  if (!controls) {
+    return undefined;
   }
-
-  for (const candidate of candidates) {
-    if (stopRequested) {
-      return;
-    }
-
-    const triggerName = candidate.snapshot.name || candidate.snapshot.role;
-    if (context.menuPath.includes(triggerName)) {
-      context.log("debug", "Skipping candidate already present in menu path.", { triggerName, menuPath: context.menuPath });
-      continue;
-    }
-    context.log("info", "Trying candidate.", { triggerName, depth: context.depth });
-
-    await clickAndWait(candidate.element);
-    const transition = await waitForNavigableTransition(beforeMeta, context.shell, triggerName);
-    if (!transition.changed) {
-      context.log("debug", "Candidate did not open a navigable screen.", { triggerName, reason: transition.reason });
-      continue;
-    }
-
-    const nextShell = transition.shell;
-    const nextPath = [...context.menuPath, triggerName];
-    await scanDepth({
-      ...context,
-      shell: nextShell,
-      menuPath: nextPath,
-      depth: context.depth + 1
-    });
-
-    const restored = await restorePreviousScreen(beforeMeta.signature, nextShell, context.log);
-    if (!restored) {
-      context.log("warn", "Could not restore previous screen. Re-entering branch.", { triggerName });
-      await reenterBranch(context.branch);
-    }
+  if (controls.productTab.getAttribute("aria-selected") === "true") {
+    return "product";
   }
+  if (controls.usefulFeaturesTab.getAttribute("aria-selected") === "true") {
+    return "usefulFeatures";
+  }
+  return undefined;
+}
+
+function findTopOverlay(boundary?: HTMLElement): HTMLElement | undefined {
+  const overlays = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
+    )
+  )
+    .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
+    .sort((a, b) => areaOf(b) - areaOf(a));
+  return overlays[0];
+}
+
+function getOverlayDescriptors(boundary?: HTMLElement): string[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
+    )
+  )
+    .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
+    .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${getAccessibleName(element).slice(0, 80)}:${Math.round(areaOf(element))}`)
+    .slice(0, 10);
+}
+
+function findOverlayCloseButton(): HTMLElement | undefined {
+  const root = findTopOverlay(getProductBoundary()) ?? document.body;
+  return Array.from(root.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex]"))
+    .filter((element) => isVisible(element))
+    .find((element) => /close|cancel|dismiss|x|닫기|취소|팝업/i.test(getAccessibleName(element)));
+}
+
+function summarizeSnapshot(snapshot: ScreenSnapshot): Record<string, unknown> {
+  return {
+    url: snapshot.url,
+    title: snapshot.title,
+    selectedBranch: snapshot.selectedBranch,
+    hasRequiredControls: snapshot.hasRequiredControls,
+    boundaryPresent: snapshot.boundaryPresent,
+    isHomeLike: snapshot.isHomeLike,
+    isOutOfScopeLike: snapshot.isOutOfScopeLike,
+    overlayCount: snapshot.overlayDescriptors.length,
+    candidateCount: snapshot.candidateNames.length,
+    signature: snapshot.signature,
+    shell: snapshot.shell ? describeShell(snapshot.shell) : undefined
+  };
+}
+
+function describeStableShell(shell: HTMLElement): string {
+  return `${shell.tagName.toLowerCase()}#${shell.id || ""}.${String(shell.className || "").split(/\s+/).slice(0, 3).join(".")}`;
+}
+
+function candidateAttemptKey(frame: NavigationFrame, candidate: CandidateSnapshot): string {
+  const normalizedName = (candidate.name || candidate.role).replace(/\s+/g, " ").trim().toLowerCase();
+  return `${frame.branch}:${frame.depth}:${normalizedName}:${candidate.role}:${candidate.tagName}`;
+}
+
+function makeDocumentSignature(title: string, overlays: string[], candidates: string[]): string {
+  return `document:${location.href}:${title}:${overlays.join("|")}:${candidates.join("|")}`;
+}
+
+function looksLikeOutOfScope(): boolean {
+  const text = document.body.innerText?.replace(/\s+/g, " ").trim() ?? "";
+  return /ThinQ\s*Web|popup|external|browser|새\s*창|팝업|이동/i.test(text);
+}
+
+function areaOf(element: HTMLElement): number {
+  const rect = element.getBoundingClientRect();
+  return rect.width * rect.height;
 }
 
 function describeShell(shell: HTMLElement): Record<string, unknown> {
@@ -335,76 +763,15 @@ function describeElement(element: HTMLElement): Record<string, unknown> {
   };
 }
 
-interface ScreenMeta {
-  signature: string;
-  title: string;
-  candidateNames: string[];
-}
-
-interface TransitionResult {
-  changed: boolean;
-  shell: HTMLElement;
-  reason: string;
-}
-
-function getScreenMeta(shell: HTMLElement, title = extractScreenTitle(shell, "unknown"), candidates = collectClickCandidates(shell)): ScreenMeta {
-  return {
-    signature: screenSignature(shell),
-    title,
-    candidateNames: candidates.map((candidate) => candidate.snapshot.name || candidate.snapshot.role).sort()
-  };
-}
-
-async function waitForNavigableTransition(before: ScreenMeta, fallbackShell: HTMLElement, triggerName: string, timeoutMs = 3500): Promise<TransitionResult> {
-  const started = performance.now();
-  let latestShell = resolveCurrentShell(fallbackShell);
-  let latestMeta = getScreenMeta(latestShell);
-
-  while (performance.now() - started < timeoutMs) {
-    await wait(150);
-    latestShell = resolveCurrentShell(fallbackShell);
-    latestMeta = getScreenMeta(latestShell);
-
-    if (latestShell === document.body && !findRequiredControls()) {
-      return { changed: false, shell: fallbackShell, reason: "product-shell-not-visible" };
-    }
-
-    const signatureChanged = latestMeta.signature !== before.signature;
-    if (!signatureChanged) {
-      continue;
-    }
-
-    const titleChanged = latestMeta.title !== before.title && latestMeta.title !== triggerName;
-    const candidatesChanged = latestMeta.candidateNames.join("|") !== before.candidateNames.join("|");
-    const shellChanged = describeShell(latestShell).id !== describeShell(fallbackShell).id || !isVisible(fallbackShell);
-
-    if (titleChanged || candidatesChanged || shellChanged) {
-      return {
-        changed: true,
-        shell: latestShell,
-        reason: titleChanged ? "title-changed" : candidatesChanged ? "candidates-changed" : "shell-changed"
-      };
-    }
-
-    return {
-      changed: false,
-      shell: latestShell,
-      reason: "signature-only-change"
-    };
-  }
-
-  return { changed: false, shell: latestShell, reason: "timeout" };
-}
-
-function resolveCurrentShell(fallbackShell: HTMLElement): HTMLElement {
-  const freshShell = findProductShell();
-  if (isVisible(freshShell)) {
-    return freshShell;
-  }
-  if (isVisible(fallbackShell)) {
-    return fallbackShell;
-  }
-  return document.body;
+function looksLikeThinQHome(): boolean {
+  const text = document.body.innerText?.replace(/\s+/g, " ").trim() ?? "";
+  return [
+    "3D \uD648",
+    "\uC990\uACA8 \uCC3E\uB294 \uC81C\uD488",
+    "\uC2A4\uB9C8\uD2B8 \uB8E8\uD2F4",
+    "\uC5D0\uB108\uC9C0 \uBAA8\uB2C8\uD130\uB9C1",
+    "ThinQ PLAY"
+  ].some((keyword) => text.includes(keyword));
 }
 
 function validateLocation(): void {
@@ -581,52 +948,6 @@ function dispatchActivationSequence(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent("mouseup", { ...mouseOptions, buttons: 0 }));
   element.dispatchEvent(new MouseEvent("click", { ...mouseOptions, buttons: 0 }));
   element.click();
-}
-
-async function restorePreviousScreen(previousSignature: string, shell: HTMLElement, log: ScanContext["log"]): Promise<boolean> {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const currentControls = findRequiredControls();
-    const currentShell = currentControls?.shell ?? shell;
-    if (screenSignature(currentShell) === previousSignature) {
-      return true;
-    }
-
-    const backButton = findBackButton(currentShell) ?? findBackButton(document.body);
-    if (backButton) {
-      log("info", "Restoring with back button.", { name: backButton.innerText || backButton.getAttribute("aria-label") });
-      await clickAndWait(backButton);
-    } else {
-      log("debug", "Restoring with Escape key.");
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-      document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
-      await waitForIdle();
-    }
-  }
-
-  if (history.length > 1 && location.hostname === THINQ_HOST) {
-    log("warn", "Restoring with guarded history back.");
-    history.back();
-    await waitForIdle();
-    await wait(700);
-  }
-
-  const controls = findRequiredControls();
-  const currentShell = controls?.shell ?? shell;
-  return Boolean(controls) && screenSignature(currentShell) === previousSignature;
-}
-
-async function reenterBranch(branch: Branch): Promise<void> {
-  const controls = findRequiredControls();
-  if (!controls) {
-    return;
-  }
-  if (branch === "product") {
-    await clickAndWait(controls.productTab);
-  } else if (branch === "usefulFeatures") {
-    await clickAndWait(controls.usefulFeaturesTab);
-  } else {
-    await clickAndWait(controls.settingsButton);
-  }
 }
 
 async function waitForIdle(): Promise<void> {

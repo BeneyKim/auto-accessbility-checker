@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { collectClickCandidates, collectSkippedCandidates, findProductShell, findRequiredControls, screenSignature } from "../src/content/dom";
+import { collectClickCandidates, collectSkippedCandidates, findProductShell, findRequiredControls, getProductBoundary, screenSignature } from "../src/content/dom";
 
 beforeEach(() => {
   document.body.innerHTML = "";
@@ -126,6 +126,29 @@ describe("ThinQ DOM helpers", () => {
     expect(shell.id).toBe("body_container");
     expect(controls).toBeDefined();
     expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["예약"]);
+  });
+
+  it("does not select a background-only image container as the product shell", () => {
+    document.body.innerHTML = `
+      <div id="background_img_container" style="position: absolute" data-width="1200" data-height="900"></div>
+      <div id="real_product_panel" style="position: absolute" data-width="900" data-height="700">
+        <button>예약</button>
+      </div>
+    `;
+
+    const shell = findProductShell();
+
+    expect(shell.id).toBe("real_product_panel");
+  });
+
+  it("does not expose document.body as the product boundary", () => {
+    document.body.innerHTML = `
+      <main data-width="900" data-height="700">
+        <button>홈 화면 버튼</button>
+      </main>
+    `;
+
+    expect(getProductBoundary()).toBeUndefined();
   });
 
   it("skips ThinQ PLAY, close, branch tabs, and switch-like controls", () => {

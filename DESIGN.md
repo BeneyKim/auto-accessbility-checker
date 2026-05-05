@@ -13,14 +13,18 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 ## Traversal Decisions
 
 - Traversal starts only when product tab, useful features tab, and settings button are all visible.
-- The product shell is detected from the largest visible dialog/modal-like region, falling back to `document.body`.
-- The traversal root branches are product, useful features, and settings.
-- Each branch uses DFS until the configured max depth.
-- A screen is considered visited by `branch + menuPath + screenSignature`.
+- The product boundary is detected from the ThinQ body/app shell and is never allowed to fall back to `document.body`; background-only image layers are ignored.
+- The traversal root branches are product, useful features, and settings, and each branch starts only after the matching tab/settings control is activated and verified.
+- Traversal is a state machine with `ROOT_BRANCH`, `CLICK_PENDING`, `CHILD_OPEN`, `RESTORE_PENDING`, `BRANCH_RECOVERY`, and `ABORTED` states.
+- Depth is tracked by a `navigationStack`; a screen is considered visited by `branch + menuPath + screenSignature`.
 - Screen signature includes URL, selected tab, headings, modal count, and normalized visible text.
+- A click is classified as `no-change`, `state-change`, `overlay-opened`, `in-product-child`, `branch-changed`, `out-of-scope`, `home-navigation`, or `unknown`.
+- Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
+- `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
-- After each child screen, the extension tries to restore the previous screen by using an in-shell back button or Escape.
-- Browser history is intentionally avoided to reduce the risk of returning to Home.
+- Restore order is overlay close, in-shell back, Escape, then branch root re-entry.
+- If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.
+- Browser history is not used for restoration because it can return to Home on ThinQ Web.
 
 ## Data Model
 

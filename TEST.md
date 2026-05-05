@@ -14,15 +14,20 @@ Current automated coverage:
 - Custom div-based bottom tabs and unnamed top-right settings icon detection
 - ThinQ footer `data-name="prodMainTabbar"` tab detection when the tabbar is outside the product body
 - ThinQ `body_container` is used as the product shell when app body and footer are siblings
-- Branch entry uses freshly resolved controls and skips scanning a branch when clicking the tab/settings control does not change the active screen.
-- Branch controls are activated with focus, pointer, mouse, click, keyboard retry, and fresh-target retry so ThinQ tab/settings controls are actually pressed.
+- Branch entry uses freshly resolved controls and verifies the active branch before scanning
+- Branch controls are activated with focus, pointer, mouse, and click so ThinQ tab/settings controls are actually pressed
+- Background-only layers such as `background_img_container` are not selected as traversal shells
+- `document.body` is not exposed as the product boundary
 - ThinQ custom `data-nscreenfocusable` rows are collected as navigation candidates
-- Fan-speed value controls are candidates again; carousel previous/next controls are skipped as state-only controls.
-- Parent rows that contain switch-like controls, such as sleep reservation rows, are candidates when the row itself is actionable.
-- The traversal skips candidates already present in the current menu path to avoid repeated self-entry.
-- Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens.
-- Navigable transitions require structural evidence such as title, candidate-set, or shell changes instead of signature-only changes.
-- The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation.
+- Fan-speed value controls are candidates again; carousel previous/next controls are skipped as state-only controls
+- Parent rows that contain switch-like controls, such as sleep reservation rows, are candidates when the row itself is actionable
+- The traversal skips candidates already present in the current menu path to avoid repeated self-entry
+- Screen signatures use structural signals instead of full visible text to avoid treating value changes as new screens
+- Candidate transitions are classified as no-change, state-change, overlay, product child, branch change, out-of-scope, home, or unknown
+- Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
+- The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
+- The traversal waits through transient background-only refresh layers and does not count them as navigable child screens
+- Depth transitions are logged as `depth pushed` and `depth popped`, and restore runs in a `finally` block after child scanning
 - Candidate filtering for ThinQ PLAY, close, branch tabs, and switches
 - Screen signature change detection
 - IBM summary extraction
@@ -37,14 +42,16 @@ Current automated coverage:
 - Traversal does not click X or close controls.
 - Traversal does not operate ON/OFF-only switches.
 - Traversal does not repeatedly scan the same screen.
-- Completion returns to the product tab.
+- Completion returns to the product tab when the product root remains available.
 - JSON, Markdown, and HTML reports download successfully.
 - Debug log JSON downloads from the popup even when page console logs are lost during ThinQ refresh/navigation.
+- Candidate transition classifications are logged with snapshot details to diagnose missed bottom sheets or detail pages.
 - IBM reports that contain DOM node references are sanitized before crossing `postMessage`.
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
-- Restore attempts use the current shell, whole document back controls, Escape, then guarded history back.
+- Restore attempts use overlay close, in-shell back controls, Escape, and branch root re-entry; browser history is not used.
+- If restore cannot return to the previous signature, the run aborts with a failure result instead of clicking stale elements from the wrong screen.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
 - Screenshots are captured as compressed JPEG to reduce report payload size.
 

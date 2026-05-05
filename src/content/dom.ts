@@ -63,6 +63,15 @@ export interface ClickCandidate {
   snapshot: CandidateSnapshot;
 }
 
+export function getProductBoundary(root: ParentNode = document): HTMLElement | undefined {
+  const shell = findProductShell(root);
+  return shell === document.body ? undefined : shell;
+}
+
+export function getBranchControls(root: ParentNode = document): RequiredControls | undefined {
+  return findRequiredControls(root);
+}
+
 export function findRequiredControls(root: ParentNode = document): RequiredControls | undefined {
   const shell = findProductShell(root);
   const tabbar = findProductTabbar(root);
@@ -108,11 +117,22 @@ export function findProductShell(root: ParentNode = document): HTMLElement {
   const fixedPanels = Array.from(root.querySelectorAll<HTMLElement>("body *"))
     .filter((element) => {
       const style = getComputedStyle(element);
-      return isVisible(element) && ["fixed", "absolute"].includes(style.position) && area(element) > 200000;
+      return (
+        isVisible(element) &&
+        ["fixed", "absolute"].includes(style.position) &&
+        area(element) > 200000 &&
+        !isBackgroundOnlyContainer(element)
+      );
     })
     .sort((a, b) => area(b) - area(a));
 
   return fixedPanels[0] ?? document.body;
+}
+
+function isBackgroundOnlyContainer(element: HTMLElement): boolean {
+  const descriptor = `${element.id} ${String(element.className ?? "")} ${element.getAttribute("data-name") ?? ""}`;
+  const text = normalizeText(element.innerText || element.textContent || "");
+  return /background|bg|image/i.test(descriptor) && text.length < 20;
 }
 
 function findThinQBodyShell(root: ParentNode): HTMLElement | undefined {
