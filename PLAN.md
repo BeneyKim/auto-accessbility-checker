@@ -19,6 +19,7 @@
 - [x] Graph X-axis/touchframe controls are skipped while keeping the chart in the current-screen accessibility scan
 - [x] Date picker modal overlays are restored with close/Escape and no cascading parent back after abort
 - [x] Generated-class picker modals with cancel/confirm and year/month/day values are detected as terminal overlays
+- [x] Restore back/close controls use a single native click path to avoid repeated app back navigation
 - [x] Large static composite chart/date containers are skipped as candidates
 - [x] Missing content-script receiving end is recovered by script injection and retry
 - [x] IBM Equal Access page runner injection

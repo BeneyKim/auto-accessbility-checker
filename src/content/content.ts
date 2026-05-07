@@ -636,9 +636,8 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
   const hadOverlay = Boolean(findTopOverlay(getProductBoundary()));
   const closeButton = findOverlayCloseButton();
   if (closeButton) {
-    await clickAndWait(closeButton);
-    await wait(250);
-    const snapshot = getCurrentScreenSnapshot();
+    await clickRestoreControlAndWait(closeButton);
+    const snapshot = await waitForFrameRestore(frame, 2500);
     if (isFrameRestored(frame, snapshot)) {
       return { restored: true, method: "overlay-close" };
     }
@@ -662,9 +661,8 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
   const backButton = current.shell ? findBackButton(current.shell) : undefined;
   if (backButton && !hadOverlay) {
     context.log("info", "Restoring with in-shell back button.", { name: getAccessibleName(backButton), frame });
-    await clickAndWait(backButton);
-    await wait(250);
-    const snapshot = getCurrentScreenSnapshot();
+    await clickRestoreControlAndWait(backButton);
+    const snapshot = await waitForFrameRestore(frame, 3500);
     if (isFrameRestored(frame, snapshot)) {
       return { restored: true, method: "back-button" };
     }
@@ -684,9 +682,8 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
   const controls = getBranchControls();
   if (controls) {
     const target = frame.branch === "product" ? controls.productTab : frame.branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
-    await clickAndWait(target);
-    await wait(250);
-    snapshot = getCurrentScreenSnapshot();
+    await clickRestoreControlAndWait(target);
+    snapshot = await waitForFrameRestore(frame, 2500);
     if (isFrameRestored(frame, snapshot)) {
       return { restored: true, method: "branch-entry" };
     }
@@ -697,6 +694,19 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
 
 function isFrameRestored(frame: NavigationFrame, snapshot: ScreenSnapshot): boolean {
   return snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.signature === frame.rootSignature;
+}
+
+async function waitForFrameRestore(frame: NavigationFrame, timeoutMs: number): Promise<ScreenSnapshot> {
+  const started = performance.now();
+  let snapshot = getCurrentScreenSnapshot();
+  while (performance.now() - started < timeoutMs) {
+    if (isFrameRestored(frame, snapshot) || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+      return snapshot;
+    }
+    await wait(150);
+    snapshot = getCurrentScreenSnapshot();
+  }
+  return snapshot;
 }
 
 async function recordScreenResult(context: TraversalContext, frame: NavigationFrame, snapshot: ScreenSnapshot): Promise<void> {
@@ -1101,6 +1111,14 @@ async function clickAndWait(element: HTMLElement): Promise<void> {
   element.scrollIntoView({ block: "center", inline: "center" });
   await wait(120);
   dispatchActivationSequence(element);
+  await waitForIdle();
+}
+
+async function clickRestoreControlAndWait(element: HTMLElement): Promise<void> {
+  element.scrollIntoView({ block: "center", inline: "center" });
+  await wait(120);
+  element.focus({ preventScroll: true });
+  element.click();
   await waitForIdle();
 }
 

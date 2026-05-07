@@ -32,6 +32,7 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
 - Restore order is overlay close, Escape, in-shell back, then branch root re-entry. Back controls are searched only inside the current safe shell and are not used while an overlay is present.
+- Restore controls use a single native click path, not the aggressive touch/pointer/mouse activation sequence used for exploration candidates, to prevent repeated app back navigation.
 - Modal/portal overlays include `[data-modal="true"]`, `[bottomsheet="1"]`, and `#portal_container`, so date picker popups are treated as terminal overlays rather than nested product pages.
 - Picker modals that expose cancel/confirm controls plus year/month/day values are also treated as overlays even when their generated CSS class does not contain modal/sheet keywords.
 - Child restore targets the screen signature captured immediately before the click, not an older frame signature, so same-depth period tab changes do not make later overlay restore fail.
