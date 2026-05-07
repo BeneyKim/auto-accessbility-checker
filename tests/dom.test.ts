@@ -203,6 +203,25 @@ describe("ThinQ DOM helpers", () => {
     expect(isBlockedNavigationName("ThinQ Web 홈 대시보드로 이동")).toBe(true);
   });
 
+  it("skips period paging controls as state controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button>이전 연도</button>
+        <button>다음 연도</button>
+        <button>이전 월</button>
+        <button>다음 주</button>
+        <button>공기질 측정 기준</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["공기질 측정 기준"]);
+    expect(skipped.map((candidate) => candidate.reason)).toEqual(["state-control", "state-control", "state-control", "state-control"]);
+  });
+
   it("does not use blocked navigation headings as screen titles", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

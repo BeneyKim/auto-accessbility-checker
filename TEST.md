@@ -10,7 +10,7 @@ npm.cmd run verify
 
 Latest local verification:
 
-- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 18 tests. Build output refreshed in `dist/`.
+- 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 19 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
 
@@ -34,6 +34,7 @@ Current automated coverage:
 - Candidate activation uses center hit-target touch/pointer/mouse/native click plus keyboard fallback after no-change
 - Bottom sheet and overlay screens are scanned as terminal leaf screens; inner picker/buttons such as fan-speed up/down are not traversed as child candidates
 - Same-screen period tabs such as `1일`, `1주`, `1개월`, and `1년` are scanned at the current depth without pushing a child frame
+- Period paging controls such as `이전 연도`, `다음 연도`, `이전 월`, and `다음 주` are skipped as state controls
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens

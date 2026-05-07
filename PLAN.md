@@ -13,6 +13,7 @@
 - [x] Unsafe transitions abort without auto-recovery clicks; internal ThinQ route screens use a route shell fallback
 - [x] Home dashboard, popup close, and refresh controls are blocked from route child candidates
 - [x] Same-screen period tab variants are scanned without increasing depth
+- [x] Period paging controls are skipped as state controls
 - [x] Missing content-script receiving end is recovered by script injection and retry
 - [x] IBM Equal Access page runner injection
 - [x] JSON, Markdown, HTML report generation

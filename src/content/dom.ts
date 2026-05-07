@@ -27,6 +27,9 @@ const BACK_TEXT_PATTERNS = [/^뒤로$/, /^이전$/, /^back$/i];
 const NAVIGABLE_ROLES = new Set(["button", "link", "menuitem", "option", "tab"]);
 
 const STATE_CONTROL_PATTERNS = [
+  /^(이전|다음)\s*(일|날짜|주|월|개월|연도|년)$/,
+  /(이전|다음)\s*(일|날짜|주|월|개월|연도|년)/,
+  /^(previous|next)\s*(day|date|week|month|year)$/i,
   /,\s*(이전|다음)$/,
   /\b(이전|다음)\b.*(세기|모드|단계|레벨)/,
   /(세기|모드|단계|레벨).*\b(이전|다음)\b/
