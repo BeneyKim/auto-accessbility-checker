@@ -288,6 +288,9 @@ function collectDatePickerDropdownCandidates(shell: HTMLElement, seen: Set<HTMLE
     if (!isVisible(rawElement) || !hasDatePickerDropdownSignal(rawElement)) {
       continue;
     }
+    if (!isDatePickerCandidateSized(rawElement, shell)) {
+      continue;
+    }
     const element = findActionableCandidate(rawElement, shell);
     if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
       continue;
@@ -481,6 +484,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (isChartDataControl(element, name)) {
     return "chart-data-control";
   }
+  if (isStaticCompositeContainer(element, name)) {
+    return "static-composite-container";
+  }
   const role = getRole(element);
   if (role === "tab") {
     return "root-branch-tab";
@@ -489,6 +495,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
     return "blocked-navigation";
   }
   if (hasDatePickerDropdownSignal(element)) {
+    if (isLargeCompositeDatePickerCandidate(element)) {
+      return "static-composite-container";
+    }
     return undefined;
   }
   if (
@@ -542,6 +551,18 @@ function isChartDataControl(element: HTMLElement, name: string): boolean {
   const chartRoot = (closestSvg ?? closestChart)!;
   const chartDescriptor = `${getAccessibleName(chartRoot)} ${chartRoot.getAttribute("aria-label") ?? ""} ${String(chartRoot.className ?? "")}`;
   return CHART_CONTROL_PATTERN.test(chartDescriptor);
+}
+
+function isStaticCompositeContainer(element: HTMLElement, name: string): boolean {
+  const tagName = element.tagName.toLowerCase();
+  if (tagName !== "div" && tagName !== "section" && tagName !== "main") {
+    return false;
+  }
+  if (name.length < 160) {
+    return false;
+  }
+  const childButtons = element.querySelectorAll("button,[role='button'],[role='tab'],[tabindex]").length;
+  return childButtons >= 3 || /측정 기준|그래프|차트|graph|chart/i.test(name);
 }
 
 function findClickableAncestor(element: HTMLElement, boundary: ParentNode): HTMLElement {
@@ -648,6 +669,12 @@ function hasDatePickerDropdownSignal(element: HTMLElement): boolean {
     });
 }
 
+function isDatePickerCandidateSized(element: HTMLElement, shell: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  const shellRect = shell.getBoundingClientRect();
+  return rect.height <= 140 && rect.width <= Math.min(shellRect.width * 0.85, 900);
+}
+
 export function isDatePickerTriggerName(name: string): boolean {
   const normalizedName = normalizeText(name);
   return Boolean(normalizedName) && DATE_PICKER_TRIGGER_PATTERNS.some((pattern) => pattern.test(normalizedName));
@@ -675,6 +702,11 @@ function isCompactIconLikeChild(parent: HTMLElement, child: HTMLElement): boolea
   }
   const siblings = Array.from(parent.children).filter((sibling) => isVisible(sibling as HTMLElement));
   return siblings.length >= 2 && siblings.some((sibling) => sibling !== child && isDatePickerTriggerName((sibling as HTMLElement).innerText || sibling.textContent || ""));
+}
+
+function isLargeCompositeDatePickerCandidate(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  return rect.height > 140 || rect.width > Math.min(window.innerWidth * 0.85, 900);
 }
 
 function isOversizedContainer(element: HTMLElement, shell: HTMLElement): boolean {

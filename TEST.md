@@ -10,7 +10,7 @@ npm.cmd run verify
 
 Latest local verification:
 
-- 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 21 tests. Build output refreshed in `dist/`.
+- 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 22 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
 
@@ -37,6 +37,7 @@ Current automated coverage:
 - Date/year picker triggers such as `2025년`, `2026년`, and `2026년 5월 7일 목` are not same-depth tabs. When they expose a dropdown affordance and open a bottom sheet, they are scanned as terminal overlays.
 - Period paging controls such as `이전 연도`, `다음 연도`, `이전 월`, and `다음 주` are skipped as state controls
 - Chart X-axis/touchframe controls are skipped as `chart-data-control`
+- Large static composite containers around chart/date content are skipped as `static-composite-container`
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens
@@ -65,7 +66,8 @@ Current automated coverage:
 - If IBM check fails on one screen, the run records an error report for that screen and continues.
 - IBM checks are scoped to the current ThinQ screen shell and captured ACE rule exceptions are stored in report metadata.
 - Back/home navigation controls are blocked from normal traversal candidates.
-- Restore attempts use overlay close, in-shell back controls, Escape, and branch root re-entry; browser history is not used.
+- Restore attempts use overlay close, Escape, in-shell back controls, and branch root re-entry; browser history is not used.
+- Date picker modal restore does not use in-overlay back controls, and failed child restore stops parent restore from cascading further back.
 - Back controls are searched only inside the current safe shell, not across the whole document.
 - Bottom sheets are closed after their IBM check by pressing an explicit close/cancel/dismiss button or Escape.
 - If `START_RUN` fails because the content script receiving end does not exist, the background injects `content.js` and retries.

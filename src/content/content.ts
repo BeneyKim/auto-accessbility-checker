@@ -8,6 +8,8 @@ const TRANSITION_TIMEOUT_MS = 6000;
 const TRANSITION_STABLE_MS = 700;
 const UNSAFE_TRANSITION_STABLE_MS = 1200;
 const TRANSITION_POLL_MS = 150;
+const OVERLAY_SELECTOR =
+  '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"]';
 
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
@@ -377,6 +379,11 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     context.log("error", "Cannot click candidate without a safe shell.", { frame, candidateSnapshot });
     return;
   }
+  const restoreFrame: NavigationFrame = {
+    ...frame,
+    rootSignature: before.signature,
+    shellSelector: describeStableShell(before.shell)
+  };
 
   const candidate = collectClickCandidates(before.shell).find((item) => candidateAttemptKey(frame, item.snapshot) === candidateAttemptKey(frame, candidateSnapshot));
   if (!candidate) {
@@ -471,8 +478,13 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     await traverseFrame(context, childFrame);
   } finally {
     context.state = "RESTORE_PENDING";
-    context.log("info", "restore started.", { targetFrame: frame, childFrame });
-    restored = await restoreToFrame(context, frame);
+    context.log("info", "restore started.", { targetFrame: restoreFrame, childFrame });
+    if (context.aborted) {
+      restored = { restored: false, method: "failed", reason: "traversal-already-aborted" };
+      context.log("warn", "restore skipped because traversal is already aborted.", { targetFrame: restoreFrame, childFrame });
+    } else {
+      restored = await restoreToFrame(context, restoreFrame);
+    }
     context.navigationStack.pop();
     context.log(restored.restored ? "info" : "error", "depth popped.", {
       triggerName,
@@ -620,6 +632,7 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
     return { restored: true, method: "already-restored" };
   }
 
+  const hadOverlay = Boolean(findTopOverlay(getProductBoundary()));
   const closeButton = findOverlayCloseButton();
   if (closeButton) {
     await clickAndWait(closeButton);
@@ -630,9 +643,23 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
     }
   }
 
+  if (hadOverlay) {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
+    await waitForIdle();
+    const snapshot = getCurrentScreenSnapshot();
+    if (isFrameRestored(frame, snapshot)) {
+      return { restored: true, method: "escape" };
+    }
+    context.log("warn", "Overlay restore did not return to target frame; skipping in-overlay back button to avoid home navigation.", {
+      frame,
+      snapshot: summarizeSnapshot(snapshot)
+    });
+  }
+
   const current = getCurrentScreenSnapshot();
   const backButton = current.shell ? findBackButton(current.shell) : undefined;
-  if (backButton) {
+  if (backButton && !hadOverlay) {
     context.log("info", "Restoring with in-shell back button.", { name: getAccessibleName(backButton), frame });
     await clickAndWait(backButton);
     await wait(250);
@@ -642,12 +669,15 @@ async function restoreToFrame(context: TraversalContext, frame: NavigationFrame)
     }
   }
 
-  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-  document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
-  await waitForIdle();
   let snapshot = getCurrentScreenSnapshot();
-  if (isFrameRestored(frame, snapshot)) {
-    return { restored: true, method: "escape" };
+  if (!hadOverlay) {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
+    await waitForIdle();
+    snapshot = getCurrentScreenSnapshot();
+    if (isFrameRestored(frame, snapshot)) {
+      return { restored: true, method: "escape" };
+    }
   }
 
   const controls = getBranchControls();
@@ -809,9 +839,7 @@ function isInternalThinQProductRoute(): boolean {
 
 function findTopOverlay(boundary?: HTMLElement): HTMLElement | undefined {
   const overlays = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
-    )
+    document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR)
   )
     .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
     .sort((a, b) => areaOf(b) - areaOf(a));
@@ -820,9 +848,7 @@ function findTopOverlay(boundary?: HTMLElement): HTMLElement | undefined {
 
 function getOverlayDescriptors(boundary?: HTMLElement): string[] {
   return Array.from(
-    document.querySelectorAll<HTMLElement>(
-      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
-    )
+    document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR)
   )
     .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
     .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${getAccessibleName(element).slice(0, 80)}:${Math.round(areaOf(element))}`)

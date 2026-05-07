@@ -31,7 +31,9 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Chart data controls such as SVG graph touchframes and X-axis point selectors are skipped as `chart-data-control`; the chart remains part of the IBM scan for the current screen.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
-- Restore order is overlay close, in-shell back, Escape, then branch root re-entry. Back controls are searched only inside the current safe shell.
+- Restore order is overlay close, Escape, in-shell back, then branch root re-entry. Back controls are searched only inside the current safe shell and are not used while an overlay is present.
+- Modal/portal overlays include `[data-modal="true"]`, `[bottomsheet="1"]`, and `#portal_container`, so date picker popups are treated as terminal overlays rather than nested product pages.
+- Child restore targets the screen signature captured immediately before the click, not an older frame signature, so same-depth period tab changes do not make later overlay restore fail.
 - If a transition is classified as `home-navigation`, `out-of-scope`, or `unknown`, the run aborts without an automatic recovery click to avoid moving several browser/app history entries away from ThinQ Web.
 - If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.
 - Browser history is not used for restoration because it can return to Home on ThinQ Web.

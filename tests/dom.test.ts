@@ -270,6 +270,29 @@ describe("ThinQ DOM helpers", () => {
     expect(skipped.map((candidate) => candidate.reason)).toContain("chart-data-control");
   });
 
+  it("skips large static composite containers around chart and date controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <div tabindex="0" data-width="850" data-height="200">
+          <span>1일</span><span>1주</span><span>1개월</span><span>1년</span>
+          <span>2026년 5월 7일 목</span><span>⌄</span>
+          <div>0 15 35 75 100 1 5 9 13 17 21 25 29 (㎍/㎥)</div>
+          <div>초미세먼지(PM2.5) 측정 기준 단위: ㎍/㎥ 좋음 0-15 보통 16-35 나쁨 36-75 매우 나쁨 76- 측정된 수치는 실제와 차이가 있을 수 있습니다.</div>
+        </div>
+        <div data-width="240" data-height="48">
+          <span>2026년 5월 7일 목</span><span>⌄</span>
+        </div>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["2026년 5월 7일 목⌄"]);
+    expect(skipped.map((candidate) => candidate.reason)).toContain("static-composite-container");
+  });
+
   it("does not use blocked navigation headings as screen titles", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">
