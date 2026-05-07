@@ -85,8 +85,25 @@ async function startRun(settings: CheckerSettings): Promise<unknown> {
   await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings, [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
   appendLog("info", "Run started.", { maxDepth: settings.maxDepth });
 
-  await chrome.tabs.sendMessage(tab.id, { type: "START_RUN", settings } satisfies RuntimeMessage);
+  await sendStartRunMessage(tab.id, settings);
   return { ok: true };
+}
+
+async function sendStartRunMessage(tabId: number, settings: CheckerSettings): Promise<void> {
+  const message = { type: "START_RUN", settings } satisfies RuntimeMessage;
+  try {
+    await chrome.tabs.sendMessage(tabId, message);
+    return;
+  } catch (error) {
+    if (!isMissingReceivingEnd(error)) {
+      throw error;
+    }
+  }
+
+  appendLog("warn", "Content script was not attached; injecting and retrying START_RUN.");
+  await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+  await wait(250);
+  await chrome.tabs.sendMessage(tabId, message);
 }
 
 async function stopRun(): Promise<unknown> {
@@ -167,6 +184,15 @@ function appendLog(level: LogEntry["level"], message: string, data?: unknown, ti
     logs: [...state.logs, entry].slice(-200)
   };
   void chrome.storage.local.set({ [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
+}
+
+function isMissingReceivingEnd(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Receiving end does not exist|Could not establish connection/i.test(message);
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function toDataUrl(content: string, mime: string): string {

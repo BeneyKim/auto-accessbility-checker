@@ -25,10 +25,20 @@ import {
   isVisible,
   screenSignature
 } from "./dom";
-import { shouldTraverseFrameCandidates } from "./traversal";
+import { isSameDepthVariantName, shouldTraverseFrameCandidates } from "./traversal";
 
 let stopRequested = false;
 let activeRun: Promise<void> | undefined;
+
+async function sendRuntimeMessageSafely(message: RuntimeMessage): Promise<unknown> {
+  try {
+    return await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.warn(`${LOG_PREFIX} Runtime message delivery failed.`, { type: message.type, message: errorMessage });
+    return { ok: false, error: errorMessage };
+  }
+}
 
 chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResponse) => {
   if (message.type === "START_RUN") {
@@ -62,7 +72,7 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
     const entry = { timestamp: new Date().toISOString(), level, message, data };
     logs.push(entry);
     console[level === "debug" ? "debug" : level](`${LOG_PREFIX} ${message}`, data ?? "");
-    void chrome.runtime.sendMessage({ type: "RUN_LOG", entry } satisfies RuntimeMessage);
+    void sendRuntimeMessageSafely({ type: "RUN_LOG", entry } satisfies RuntimeMessage);
   };
 
   try {
@@ -119,11 +129,11 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
       logs
     };
 
-    await chrome.runtime.sendMessage({ type: "RUN_COMPLETE", result } satisfies RuntimeMessage);
+    await sendRuntimeMessageSafely({ type: "RUN_COMPLETE", result } satisfies RuntimeMessage);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log("error", message);
-    await chrome.runtime.sendMessage({ type: "RUN_FAILED", error: message } satisfies RuntimeMessage);
+    await sendRuntimeMessageSafely({ type: "RUN_FAILED", error: message } satisfies RuntimeMessage);
   }
 }
 
@@ -396,6 +406,11 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     after: summarizeSnapshot(transition.after)
   });
 
+  if (isSameDepthVariantName(triggerName) && (transition.classification === "state-change" || transition.classification === "in-product-child")) {
+    await recordSameDepthVariantResult(context, frame, candidate.snapshot, transition);
+    return;
+  }
+
   if (transition.classification === "no-change" || transition.classification === "state-change") {
     context.log("debug", "candidate skipped.", { triggerName, classification: transition.classification, reason: transition.reason });
     return;
@@ -474,6 +489,53 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     context.state = "ABORTED";
     await recordFailureResult(context, frame.branch, childFrame.menuPath, getCurrentScreenSnapshot(), "restore-failed");
   }
+}
+
+async function recordSameDepthVariantResult(
+  context: TraversalContext,
+  frame: NavigationFrame,
+  candidateSnapshot: CandidateSnapshot,
+  transition: ClassifiedTransition
+): Promise<void> {
+  const snapshot = getCurrentScreenSnapshot();
+  const triggerName = candidateSnapshot.name || candidateSnapshot.role;
+  if (!snapshot.shell || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+    context.log("error", "Same-depth variant became unsafe; aborting traversal.", {
+      triggerName,
+      frame,
+      snapshot: summarizeSnapshot(snapshot)
+    });
+    context.aborted = true;
+    context.state = "ABORTED";
+    await recordFailureResult(context, frame.branch, [...frame.menuPath, triggerName], snapshot, "same-depth-variant-unsafe");
+    return;
+  }
+
+  const variantFrame: NavigationFrame = {
+    ...frame,
+    depth: frame.depth,
+    menuPath: [...frame.menuPath, triggerName],
+    rootSignature: snapshot.signature,
+    shellSelector: describeStableShell(snapshot.shell),
+    candidateSnapshot,
+    transitionClassification: transition.classification,
+    terminalOverlay: false
+  };
+  const visitKey = `${variantFrame.branch}:${variantFrame.menuPath.join(">")}:${snapshot.signature}`;
+  context.log("info", "same-depth variant scanned.", {
+    triggerName,
+    depth: frame.depth,
+    classification: transition.classification,
+    reason: transition.reason,
+    snapshot: summarizeSnapshot(snapshot)
+  });
+  if (context.visited.has(visitKey)) {
+    context.log("debug", "Skipping already visited same-depth variant.", { visitKey, variantFrame });
+    return;
+  }
+
+  context.visited.add(visitKey);
+  await recordScreenResult(context, variantFrame, snapshot);
 }
 
 async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = TRANSITION_TIMEOUT_MS): Promise<ClassifiedTransition> {
@@ -970,8 +1032,8 @@ async function runIbmCheckSafely(
 }
 
 async function requestScreenshot(log: (level: LogEntry["level"], message: string, data?: unknown) => void): Promise<string | undefined> {
-  const response = await chrome.runtime.sendMessage({ type: "CAPTURE_SCREENSHOT" } satisfies RuntimeMessage);
-  if (response?.ok && response.screenshot) {
+  const response = await sendRuntimeMessageSafely({ type: "CAPTURE_SCREENSHOT" } satisfies RuntimeMessage);
+  if (response && typeof response === "object" && "ok" in response && "screenshot" in response && response.ok && response.screenshot) {
     return response.screenshot as string;
   }
   log("warn", "Screenshot not available.", response);

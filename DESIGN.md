@@ -25,12 +25,15 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
 - `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel button or the first visible overlay button.
+- Same-screen tab variants such as `1일`, `1주`, `1개월`, and `1년` do not push depth. Each variant is activated, scanned at the current depth, and then traversal continues from the updated same-depth screen.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
 - Restore order is overlay close, in-shell back, Escape, then branch root re-entry. Back controls are searched only inside the current safe shell.
 - If a transition is classified as `home-navigation`, `out-of-scope`, or `unknown`, the run aborts without an automatic recovery click to avoid moving several browser/app history entries away from ThinQ Web.
 - If restoration cannot prove the previous screen signature, the run is aborted with a failure result instead of continuing from a stale screen.
 - Browser history is not used for restoration because it can return to Home on ThinQ Web.
+- If the extension is reloaded while ThinQ Web is already open, the background worker injects `content.js` and retries `START_RUN` when Chrome reports that the receiving end does not exist.
+- Content-script runtime messages are best-effort for logs, screenshots, and completion notifications so a transient missing receiver does not crash traversal.
 
 ## Data Model
 

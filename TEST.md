@@ -10,7 +10,7 @@ npm.cmd run verify
 
 Latest local verification:
 
-- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 17 tests. Build output refreshed in `dist/`.
+- 2026-05-06: `npm.cmd run verify` passed. Vitest: 3 files, 18 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
 
@@ -33,6 +33,7 @@ Current automated coverage:
 - ThinQ internal `GPM-20` route child screens can use a route shell fallback without using generic `document.body` as the product boundary
 - Candidate activation uses center hit-target touch/pointer/mouse/native click plus keyboard fallback after no-change
 - Bottom sheet and overlay screens are scanned as terminal leaf screens; inner picker/buttons such as fan-speed up/down are not traversed as child candidates
+- Same-screen period tabs such as `1일`, `1주`, `1개월`, and `1년` are scanned at the current depth without pushing a child frame
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens
@@ -64,6 +65,8 @@ Current automated coverage:
 - Restore attempts use overlay close, in-shell back controls, Escape, and branch root re-entry; browser history is not used.
 - Back controls are searched only inside the current safe shell, not across the whole document.
 - Bottom sheets are closed after their IBM check by pressing an explicit close/cancel button, or the first visible overlay button when no close/cancel label exists.
+- If `START_RUN` fails because the content script receiving end does not exist, the background injects `content.js` and retries.
+- Runtime log/screenshot/completion messages from the content script tolerate missing receivers and do not crash traversal.
 - If restore cannot return to the previous signature, the run aborts with a failure result instead of clicking stale elements from the wrong screen.
 - If the page context cannot resolve the current-shell IBM selector, IBM check falls back to `document` and records `targetFound: false`.
 - Screenshots are captured as compressed JPEG to reduce report payload size.
