@@ -249,6 +249,27 @@ describe("ThinQ DOM helpers", () => {
     expect(isDatePickerTriggerName("2025년")).toBe(true);
   });
 
+  it("skips chart x-axis and touchframe controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <div tabindex="0" role="img" aria-label="실내 초미세먼지 이력 그래프" class="X_GRAPH_SVG" data-width="700" data-height="200">
+          <div class="canvas">
+            <div class="touchframe" tabindex="0" aria-label="12시" data-width="600" data-height="120"></div>
+          </div>
+          <div class="graph"></div>
+        </div>
+        <button>공기질 측정 기준</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["공기질 측정 기준"]);
+    expect(skipped.map((candidate) => candidate.reason)).toContain("chart-data-control");
+  });
+
   it("does not use blocked navigation headings as screen titles", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">

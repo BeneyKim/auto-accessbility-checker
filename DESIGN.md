@@ -28,6 +28,7 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Same-screen tab variants such as `1일`, `1주`, `1개월`, and `1년` do not push depth. Each variant is activated, scanned at the current depth, and then traversal continues from the updated same-depth screen.
 - Date/year picker triggers such as `2025년`, `2026년`, or `2026년 5월 7일 목` are normal candidates when they expose a dropdown affordance such as a chevron/down marker. When they open a bottom sheet, they follow the same terminal overlay flow as 청정세기 and 취침예약.
 - Period paging controls such as `이전 연도`, `다음 연도`, `이전 월`, and `다음 주` are state controls and are not traversed as child screens.
+- Chart data controls such as SVG graph touchframes and X-axis point selectors are skipped as `chart-data-control`; the chart remains part of the IBM scan for the current screen.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
 - Restore order is overlay close, in-shell back, Escape, then branch root re-entry. Back controls are searched only inside the current safe shell.

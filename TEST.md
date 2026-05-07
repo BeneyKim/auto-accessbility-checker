@@ -10,7 +10,7 @@ npm.cmd run verify
 
 Latest local verification:
 
-- 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 20 tests. Build output refreshed in `dist/`.
+- 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 21 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
 
@@ -36,6 +36,7 @@ Current automated coverage:
 - Same-screen period tabs such as `1일`, `1주`, `1개월`, and `1년` are scanned at the current depth without pushing a child frame
 - Date/year picker triggers such as `2025년`, `2026년`, and `2026년 5월 7일 목` are not same-depth tabs. When they expose a dropdown affordance and open a bottom sheet, they are scanned as terminal overlays.
 - Period paging controls such as `이전 연도`, `다음 연도`, `이전 월`, and `다음 주` are skipped as state controls
+- Chart X-axis/touchframe controls are skipped as `chart-data-control`
 - Product-detail screens where the root boundary disappears are treated as unsafe, not as child screens
 - The traversal refuses to scan `document.body` as a child screen when the product shell disappears during refresh/navigation
 - The traversal waits through transient background-only refresh layers and does not count them as navigable child screens

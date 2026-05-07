@@ -45,6 +45,18 @@ const DATE_PICKER_TRIGGER_PATTERNS = [
 
 const DROPDOWN_MARKER_PATTERN = /[∨⌄⌵˅▾▿▼▽﹀]|chevron|arrow.*down|down.*arrow|dropdown|drop-down|select/i;
 
+const CHART_CONTROL_PATTERN = /그래프|차트|graph|chart/i;
+const CHART_STRUCTURE_SELECTOR = [
+  ".touchframe",
+  "g.graph",
+  "g.canvas",
+  "[class*='GRAPH']",
+  "[class*='graph']",
+  "[class*='chart']",
+  "[aria-label*='그래프']",
+  "[aria-label*='차트']"
+].join(",");
+
 const INTERACTIVE_SELECTORS = [
   "button",
   "a[href]",
@@ -466,6 +478,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (STATE_CONTROL_PATTERNS.some((pattern) => pattern.test(name))) {
     return "state-control";
   }
+  if (isChartDataControl(element, name)) {
+    return "chart-data-control";
+  }
   const role = getRole(element);
   if (role === "tab") {
     return "root-branch-tab";
@@ -504,6 +519,29 @@ function isSwitchLike(element: HTMLElement): boolean {
 function hasNavigationHint(element: HTMLElement): boolean {
   const name = getAccessibleName(element);
   return /상세|보기|예약|설정|관리|이동|next|open|detail|more/i.test(name);
+}
+
+function isChartDataControl(element: HTMLElement, name: string): boolean {
+  const tagName = element.tagName.toLowerCase();
+  const descriptor = `${name} ${element.getAttribute("aria-label") ?? ""} ${String(element.className ?? "")} ${element.id}`;
+  const closestSvg = (tagName === "svg" ? element : element.closest("svg")) as HTMLElement | null;
+  const closestChart = element.closest(CHART_STRUCTURE_SELECTOR) as HTMLElement | null;
+
+  if (tagName === "svg" && CHART_CONTROL_PATTERN.test(descriptor)) {
+    return true;
+  }
+
+  if (CHART_CONTROL_PATTERN.test(descriptor) && (closestSvg || element.querySelector(CHART_STRUCTURE_SELECTOR))) {
+    return true;
+  }
+
+  if (!closestSvg && !closestChart) {
+    return false;
+  }
+
+  const chartRoot = (closestSvg ?? closestChart)!;
+  const chartDescriptor = `${getAccessibleName(chartRoot)} ${chartRoot.getAttribute("aria-label") ?? ""} ${String(chartRoot.className ?? "")}`;
+  return CHART_CONTROL_PATTERN.test(chartDescriptor);
 }
 
 function findClickableAncestor(element: HTMLElement, boundary: ParentNode): HTMLElement {
