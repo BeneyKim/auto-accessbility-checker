@@ -68,6 +68,7 @@ Current automated coverage:
 - Back/home navigation controls are blocked from normal traversal candidates.
 - Restore attempts use overlay close, Escape, in-shell back controls, and branch root re-entry; browser history is not used.
 - Date picker modal restore does not use in-overlay back controls, and failed child restore stops parent restore from cascading further back.
+- Generated-class picker modals with cancel/confirm and year/month/day values are detected as overlays even without explicit modal/sheet class names.
 - Back controls are searched only inside the current safe shell, not across the whole document.
 - Bottom sheets are closed after their IBM check by pressing an explicit close/cancel/dismiss button or Escape.
 - If `START_RUN` fails because the content script receiving end does not exist, the background injects `content.js` and retries.

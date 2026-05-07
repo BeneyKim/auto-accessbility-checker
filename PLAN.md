@@ -18,6 +18,7 @@
 - [x] Date picker dropdown triggers are collected across period tabs when a date/year label has a chevron/down affordance
 - [x] Graph X-axis/touchframe controls are skipped while keeping the chart in the current-screen accessibility scan
 - [x] Date picker modal overlays are restored with close/Escape and no cascading parent back after abort
+- [x] Generated-class picker modals with cancel/confirm and year/month/day values are detected as terminal overlays
 - [x] Large static composite chart/date containers are skipped as candidates
 - [x] Missing content-script receiving end is recovered by script injection and retry
 - [x] IBM Equal Access page runner injection

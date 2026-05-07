@@ -24,6 +24,7 @@ import {
   getProductBoundary,
   findProductShell,
   findRequiredControls,
+  isDatePickerTriggerName,
   isVisible,
   screenSignature
 } from "./dom";
@@ -838,21 +839,52 @@ function isInternalThinQProductRoute(): boolean {
 }
 
 function findTopOverlay(boundary?: HTMLElement): HTMLElement | undefined {
-  const overlays = Array.from(
-    document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR)
-  )
-    .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
+  const overlays = collectOverlayElements(boundary)
     .sort((a, b) => areaOf(b) - areaOf(a));
   return overlays[0];
 }
 
 function getOverlayDescriptors(boundary?: HTMLElement): string[] {
-  return Array.from(
-    document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR)
-  )
-    .filter((element) => isVisible(element) && element !== boundary && !boundary?.contains(element))
+  return collectOverlayElements(boundary)
     .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${getAccessibleName(element).slice(0, 80)}:${Math.round(areaOf(element))}`)
     .slice(0, 10);
+}
+
+function collectOverlayElements(boundary?: HTMLElement): HTMLElement[] {
+  const overlays = new Set<HTMLElement>();
+  for (const element of Array.from(document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR))) {
+    if (isVisible(element) && element !== boundary && !boundary?.contains(element)) {
+      overlays.add(element);
+    }
+  }
+
+  if (boundary && isModalLikeOverlayElement(boundary)) {
+    overlays.add(boundary);
+  }
+
+  for (const element of Array.from(document.querySelectorAll<HTMLElement>("div,section,main"))) {
+    if (isVisible(element) && element !== document.body && element !== boundary && !boundary?.contains(element) && isModalLikeOverlayElement(element)) {
+      overlays.add(element);
+    }
+  }
+
+  return Array.from(overlays);
+}
+
+function isModalLikeOverlayElement(element: HTMLElement): boolean {
+  const descriptor = `${element.getAttribute("role") ?? ""} ${element.getAttribute("aria-modal") ?? ""} ${element.getAttribute("data-modal") ?? ""} ${element.getAttribute("bottomsheet") ?? ""} ${String(element.className ?? "")}`;
+  if (/dialog|true|bottomsheet|bottom|sheet|popup|modal/i.test(descriptor)) {
+    return true;
+  }
+
+  const title = extractScreenTitle(element, "");
+  const candidateNames = collectClickCandidates(element).map((candidate) => candidate.snapshot.name || candidate.snapshot.role);
+  const hasCancel = candidateNames.some((name) => /취소|cancel/i.test(name));
+  const hasConfirm = candidateNames.some((name) => /확인|저장|ok|confirm|apply|save/i.test(name));
+  const hasPickerValues = candidateNames.some((name) => /\b\d{4}\b|\d{4}\s*년|\d{1,2}\s*(월|일)/.test(name));
+  const isPickerTitle = /^\d{4}$/.test(title) || isDatePickerTriggerName(title);
+
+  return hasCancel && hasConfirm && (hasPickerValues || isPickerTitle);
 }
 
 function findOverlayCloseButton(): HTMLElement | undefined {
