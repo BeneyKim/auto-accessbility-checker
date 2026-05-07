@@ -15,6 +15,7 @@
 - [x] Same-screen period tab variants are scanned without increasing depth
 - [x] Period paging controls are skipped as state controls
 - [x] Date/year picker bottom sheets use terminal overlay handling without arbitrary option clicks
+- [x] Date picker dropdown triggers are collected across period tabs when a date/year label has a chevron/down affordance
 - [x] Missing content-script receiving end is recovered by script injection and retry
 - [x] IBM Equal Access page runner injection
 - [x] JSON, Markdown, HTML report generation

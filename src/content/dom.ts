@@ -35,6 +35,16 @@ const STATE_CONTROL_PATTERNS = [
   /(세기|모드|단계|레벨).*\b(이전|다음)\b/
 ];
 
+const DATE_PICKER_TRIGGER_PATTERNS = [
+  /\d{4}\s*년/,
+  /\d{1,2}\s*월/,
+  /\d{1,2}\s*일/,
+  /\b(today|yesterday|tomorrow)\b/i,
+  /오늘|어제|내일|이번\s*(주|달|월|년)|지난\s*(주|달|월|년)/
+];
+
+const DROPDOWN_MARKER_PATTERN = /[∨⌄⌵˅▾▿▼▽﹀]|chevron|arrow.*down|down.*arrow|dropdown|drop-down|select/i;
+
 const INTERACTIVE_SELECTORS = [
   "button",
   "a[href]",
@@ -44,6 +54,8 @@ const INTERACTIVE_SELECTORS = [
   "[role='option']",
   "[role='tab']",
   "[tabindex]:not([tabindex='-1'])",
+  "[aria-haspopup]",
+  "[aria-expanded]",
   "[data-nscreenfocusable]",
   "[data-tux-id]",
   "summary",
@@ -230,6 +242,8 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     candidates.push({ element, snapshot });
   }
 
+  collectDatePickerDropdownCandidates(shell, seen, candidates);
+
   return candidates.sort((a, b) => {
     const ar = a.element.getBoundingClientRect();
     const br = b.element.getBoundingClientRect();
@@ -255,6 +269,25 @@ export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[
       return snapshot;
     })
     .filter((snapshot) => Boolean(snapshot.reason));
+}
+
+function collectDatePickerDropdownCandidates(shell: HTMLElement, seen: Set<HTMLElement>, candidates: ClickCandidate[]): void {
+  for (const rawElement of shell.querySelectorAll<HTMLElement>("*")) {
+    if (!isVisible(rawElement) || !hasDatePickerDropdownSignal(rawElement)) {
+      continue;
+    }
+    const element = findActionableCandidate(rawElement, shell);
+    if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
+      continue;
+    }
+    const snapshot = toCandidateSnapshot(element);
+    const skipReason = getSkipReason(element, snapshot.name);
+    if (skipReason) {
+      continue;
+    }
+    seen.add(element);
+    candidates.push({ element, snapshot });
+  }
 }
 
 export function toCandidateSnapshot(element: HTMLElement): CandidateSnapshot {
@@ -440,6 +473,9 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (isBlockedNavigationName(name)) {
     return "blocked-navigation";
   }
+  if (hasDatePickerDropdownSignal(element)) {
+    return undefined;
+  }
   if (
     !NAVIGABLE_ROLES.has(role) &&
     element.tagName.toLowerCase() !== "summary" &&
@@ -519,6 +555,7 @@ function isClickableLike(element: HTMLElement): boolean {
     element.hasAttribute("tabindex") ||
     element.hasAttribute("onclick") ||
     hasThinQInteractionHint(element) ||
+    hasDatePickerDropdownSignal(element) ||
     style.cursor === "pointer"
   );
 }
@@ -533,7 +570,7 @@ function hasThinQInteractionHint(element: HTMLElement): boolean {
 }
 
 function hasUsefulCandidateSignal(element: HTMLElement): boolean {
-  return hasMeaningfulText(element) || Boolean(getAccessibleName(element)) || hasIconOnlyNavigationSignal(element);
+  return hasMeaningfulText(element) || Boolean(getAccessibleName(element)) || hasIconOnlyNavigationSignal(element) || hasDatePickerDropdownSignal(element);
 }
 
 function hasMeaningfulText(element: HTMLElement): boolean {
@@ -544,6 +581,62 @@ function hasIconOnlyNavigationSignal(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect();
   const className = String(element.className ?? "");
   return rect.width <= 120 && rect.height <= 120 && /arrow|next|more|chevron/i.test(className);
+}
+
+function hasDatePickerDropdownSignal(element: HTMLElement): boolean {
+  const name = getAccessibleName(element);
+  if (!isDatePickerTriggerName(name) || STATE_CONTROL_PATTERNS.some((pattern) => pattern.test(name))) {
+    return false;
+  }
+  if (
+    element.hasAttribute("aria-haspopup") ||
+    element.getAttribute("aria-expanded") === "false" ||
+    element.getAttribute("aria-expanded") === "true" ||
+    isClickableLikeWithoutDatePicker(element) ||
+    hasThinQInteractionHint(element)
+  ) {
+    return true;
+  }
+  const descriptor = `${element.innerText ?? ""} ${element.textContent ?? ""} ${String(element.className ?? "")}`;
+  if (DROPDOWN_MARKER_PATTERN.test(descriptor)) {
+    return true;
+  }
+  return Array.from(element.querySelectorAll<HTMLElement>("svg,i,span,div"))
+    .filter(isVisible)
+    .some((child) => {
+      const childDescriptor = `${child.innerText ?? ""} ${child.textContent ?? ""} ${String(child.className ?? "")} ${child.getAttribute("aria-label") ?? ""}`;
+      const rect = child.getBoundingClientRect();
+      return rect.width <= 120 && rect.height <= 80 && (DROPDOWN_MARKER_PATTERN.test(childDescriptor) || isCompactIconLikeChild(element, child));
+    });
+}
+
+export function isDatePickerTriggerName(name: string): boolean {
+  const normalizedName = normalizeText(name);
+  return Boolean(normalizedName) && DATE_PICKER_TRIGGER_PATTERNS.some((pattern) => pattern.test(normalizedName));
+}
+
+function isClickableLikeWithoutDatePicker(element: HTMLElement): boolean {
+  const tagName = element.tagName.toLowerCase();
+  const role = getRole(element);
+  const style = getComputedStyle(element);
+  return (
+    tagName === "button" ||
+    tagName === "a" ||
+    NAVIGABLE_ROLES.has(role) ||
+    element.hasAttribute("tabindex") ||
+    element.hasAttribute("onclick") ||
+    hasThinQInteractionHint(element) ||
+    style.cursor === "pointer"
+  );
+}
+
+function isCompactIconLikeChild(parent: HTMLElement, child: HTMLElement): boolean {
+  const childText = normalizeText(child.innerText || child.textContent || "");
+  if (childText.length > 2) {
+    return false;
+  }
+  const siblings = Array.from(parent.children).filter((sibling) => isVisible(sibling as HTMLElement));
+  return siblings.length >= 2 && siblings.some((sibling) => sibling !== child && isDatePickerTriggerName((sibling as HTMLElement).innerText || sibling.textContent || ""));
 }
 
 function isOversizedContainer(element: HTMLElement, shell: HTMLElement): boolean {

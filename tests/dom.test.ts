@@ -7,6 +7,7 @@ import {
   findRequiredControls,
   getProductBoundary,
   isBlockedNavigationName,
+  isDatePickerTriggerName,
   screenSignature
 } from "../src/content/dom";
 
@@ -220,6 +221,32 @@ describe("ThinQ DOM helpers", () => {
 
     expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["공기질 측정 기준"]);
     expect(skipped.map((candidate) => candidate.reason)).toEqual(["state-control", "state-control", "state-control", "state-control"]);
+  });
+
+  it("keeps date picker dropdown triggers while skipping period paging controls", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button>이전 날짜</button>
+        <div data-width="240" data-height="48">
+          <span>2026년 5월 7일 목</span>
+          <span aria-hidden="true">⌄</span>
+        </div>
+        <button>다음 날짜</button>
+        <div data-width="180" data-height="48">
+          <span>2025년</span>
+          <span class="chevron-down"></span>
+        </div>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((candidate) => candidate.snapshot.name)).toEqual(["2026년 5월 7일 목 ⌄", "2025년"]);
+    expect(skipped.map((candidate) => candidate.reason)).toEqual(["state-control", "state-control"]);
+    expect(isDatePickerTriggerName("2026년 5월 7일 목")).toBe(true);
+    expect(isDatePickerTriggerName("2025년")).toBe(true);
   });
 
   it("does not use blocked navigation headings as screen titles", () => {
