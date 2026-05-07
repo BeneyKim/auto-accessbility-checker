@@ -16,6 +16,8 @@ describe("ThinQ traversal frame policy", () => {
     expect(isSameDepthVariantName("1주")).toBe(true);
     expect(isSameDepthVariantName("1개월")).toBe(true);
     expect(isSameDepthVariantName("1년")).toBe(true);
+    expect(isSameDepthVariantName("2026년")).toBe(false);
+    expect(isSameDepthVariantName("2026년 5월")).toBe(false);
     expect(isSameDepthVariantName("실내 초미세먼지(PM2.5) 이력")).toBe(false);
   });
 });

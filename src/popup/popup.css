@@ -85,7 +85,8 @@ button:disabled {
   opacity: 0.55;
 }
 
-#download {
+#download,
+#downloadLog {
   grid-column: 1 / -1;
 }
 

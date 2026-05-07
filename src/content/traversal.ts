@@ -8,9 +8,9 @@ export function shouldTraverseFrameCandidates(frame: TraversalFrameFlags): boole
 }
 
 const SAME_DEPTH_VARIANT_PATTERNS = [
-  /^\d+\s*(일|주|개월|월|년)$/,
+  /^1\s*(일|주|개월|년)$/,
   /^(day|week|month|year)$/i,
-  /^\d+\s*(day|days|week|weeks|month|months|year|years)$/i
+  /^1\s*(day|days|week|weeks|month|months|year|years)$/i
 ];
 
 export function isSameDepthVariantName(name: string): boolean {

@@ -835,8 +835,7 @@ function findOverlayCloseButton(): HTMLElement | undefined {
   const buttonCandidates = Array.from(overlayRoot.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex]")).filter((element) =>
     isVisible(element)
   );
-  const explicitClose = buttonCandidates.find((element) => /close|cancel|dismiss|^x$|닫기|취소|팝업/i.test(getAccessibleName(element).trim()));
-  return explicitClose ?? (overlay ? buttonCandidates[0] : undefined);
+  return buttonCandidates.find((element) => /close|cancel|dismiss|^x$|닫기|취소|팝업.*닫기|창.*닫기/i.test(getAccessibleName(element).trim()));
 }
 
 function summarizeSnapshot(snapshot: ScreenSnapshot): Record<string, unknown> {

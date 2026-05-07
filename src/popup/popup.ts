@@ -93,6 +93,9 @@ function renderState(state: RunState, hasResult: boolean): void {
   if (downloadButton) {
     downloadButton.disabled = !hasResult && state.status !== "completed";
   }
+  if (downloadLogButton) {
+    downloadLogButton.disabled = state.logs.length === 0 && state.status === "idle";
+  }
   if (startButton) {
     startButton.disabled = state.status === "running" || state.status === "stopping";
   }

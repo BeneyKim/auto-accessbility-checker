@@ -24,8 +24,9 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Candidate activation targets the element under the click center and dispatches touch, pointer, mouse, native click, and keyboard fallback when the primary click produces no change.
 - Product controls disappearing is unsafe by default. It is not scanned as a child screen unless a safe product boundary or overlay is still present.
 - `overlay-opened` and `in-product-child` push depth; restore runs in a `finally` block before the next candidate is collected.
-- `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel button or the first visible overlay button.
+- `overlay-opened` screens, including ThinQ bottom sheets, are terminal leaf screens: the extension scans the overlay once, skips all inner picker/button candidates, and closes it with an explicit close/cancel/dismiss button or Escape.
 - Same-screen tab variants such as `1일`, `1주`, `1개월`, and `1년` do not push depth. Each variant is activated, scanned at the current depth, and then traversal continues from the updated same-depth screen.
+- Date/year picker triggers such as `2026년` or `2026년 5월` are normal candidates. When they open a bottom sheet, they follow the same terminal overlay flow as 청정세기 and 취침예약.
 - Period paging controls such as `이전 연도`, `다음 연도`, `이전 월`, and `다음 주` are state controls and are not traversed as child screens.
 - Buttons that look like ThinQ PLAY, close, home, branch tabs, or switch/toggle controls are skipped.
 - Global navigation labels such as ThinQ Home dashboard movement, popup/window close, and refresh/reload are blocked both as click candidates and as inferred screen titles.
@@ -35,6 +36,7 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - Browser history is not used for restoration because it can return to Home on ThinQ Web.
 - If the extension is reloaded while ThinQ Web is already open, the background worker injects `content.js` and retries `START_RUN` when Chrome reports that the receiving end does not exist.
 - Content-script runtime messages are best-effort for logs, screenshots, and completion notifications so a transient missing receiver does not crash traversal.
+- Overlay restore only clicks explicit close/cancel/dismiss controls; it no longer clicks the first arbitrary overlay button because picker popups may expose selectable year/month values as buttons.
 
 ## Data Model
 
