@@ -39,7 +39,7 @@ async function sendRuntimeMessageSafely(message: RuntimeMessage): Promise<unknow
     return await chrome.runtime.sendMessage(message);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.warn(`${LOG_PREFIX} Runtime message delivery failed.`, { type: message.type, message: errorMessage });
+    console.log(`${LOG_PREFIX} [WARN] Runtime message delivery failed.`, { type: message.type, message: errorMessage });
     return { ok: false, error: errorMessage };
   }
 }
@@ -75,7 +75,9 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
   const log = (level: LogEntry["level"], message: string, data?: unknown): void => {
     const entry = { timestamp: new Date().toISOString(), level, message, data };
     logs.push(entry);
-    console[level === "debug" ? "debug" : level](`${LOG_PREFIX} ${message}`, data ?? "");
+    const consoleMethod = level === "debug" ? "debug" : "log";
+    const prefix = `${LOG_PREFIX} [${level.toUpperCase()}]`;
+    console[consoleMethod](`${prefix} ${message}`, data ?? "");
     void sendRuntimeMessageSafely({ type: "RUN_LOG", entry } satisfies RuntimeMessage);
   };
 
