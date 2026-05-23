@@ -930,7 +930,7 @@ function findInternalRouteShell(): HTMLElement | undefined {
 function isInternalThinQProductRoute(): boolean {
   try {
     const url = new URL(location.href);
-    return url.hostname === THINQ_HOST && /\/GPM-20\//.test(url.pathname) && !looksLikeThinQHome();
+    return url.hostname === THINQ_HOST && /\/[A-Za-z0-9]+-[A-Za-z0-9]+\//.test(url.pathname) && !looksLikeThinQHome();
   } catch {
     return false;
   }
@@ -1075,7 +1075,7 @@ function describeElement(element: HTMLElement): Record<string, unknown> {
 function isUrlInProductRoute(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.hostname === THINQ_HOST && /\/GPM-20\//.test(parsed.pathname);
+    return parsed.hostname === THINQ_HOST && /\/[A-Za-z0-9]+-[A-Za-z0-9]+\//.test(parsed.pathname);
   } catch {
     return false;
   }
