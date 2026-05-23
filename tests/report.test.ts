@@ -31,7 +31,7 @@ describe("report helpers", () => {
     expect(base).toBe("ThinQ-Web-Air-Purifier-20260505-010203");
     expect(JSON.parse(buildJsonReport(result)).results).toHaveLength(1);
     expect(buildMarkdownReport(result)).toContain("| 제품 > 예약 | product | 1 | 1 | 0 | 0 |");
-    expect(buildHtmlReport(result)).toContain("<title>ThinQ Web</title>");
+    expect(buildHtmlReport(result)).toContain("<title>ThinQ Web - Accessibility Report</title>");
   });
 });
 
