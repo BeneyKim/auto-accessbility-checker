@@ -1,4 +1,5 @@
 import type { Branch, CandidateSnapshot } from "../shared/types";
+import { matchForbiddenRule, ruleToSkipReason } from "../shared/forbidden-registry";
 
 const BLOCKED_TEXT_PATTERNS = [
   /ThinQ\s*Web/i,
@@ -22,7 +23,7 @@ const BLOCKED_TEXT_PATTERNS = [
   /^유용한\s*기능$/
 ];
 
-const BACK_TEXT_PATTERNS = [/^뒤로$/, /^이전$/, /^back$/i];
+const BACK_TEXT_PATTERNS = [/뒤로/, /이전/, /back/i];
 
 const NAVIGABLE_ROLES = new Set(["button", "link", "menuitem", "option", "tab"]);
 
@@ -353,30 +354,43 @@ export function extractScreenTitle(shell: HTMLElement, fallback: string): string
 }
 
 export function isBlockedNavigationName(name: string): boolean {
-  return BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name));
+  return BLOCKED_TEXT_PATTERNS.some((pattern) => pattern.test(name)) || Boolean(matchForbiddenRule(name));
 }
 
 export function findBackButton(shell: HTMLElement): HTMLElement | undefined {
-  const candidates = Array.from(shell.querySelectorAll<HTMLElement>("button,[role='button'],a[href]")).filter(
-    (element) => isVisible(element) && !isDisabled(element)
-  );
-  const namedBack = candidates.find((element) => BACK_TEXT_PATTERNS.some((pattern) => pattern.test(getAccessibleName(element))));
-  if (namedBack) {
-    return namedBack;
+  const queryFrom = (root: HTMLElement): HTMLElement | undefined => {
+    const candidates = Array.from(root.querySelectorAll<HTMLElement>("button,[role='button'],a[href]")).filter(
+      (element) => isVisible(element) && !isDisabled(element)
+    );
+    const namedBack = candidates.find((element) => BACK_TEXT_PATTERNS.some((pattern) => pattern.test(getAccessibleName(element))));
+    if (namedBack) {
+      return namedBack;
+    }
+
+    const shellRect = shell.getBoundingClientRect();
+    return candidates.find((element) => {
+      const rect = element.getBoundingClientRect();
+      const name = getAccessibleName(element);
+      return (
+        rect.top < shellRect.top + 120 &&
+        rect.left < shellRect.left + 120 &&
+        !isBlockedNavigationName(name) &&
+        rect.width <= 80 &&
+        rect.height <= 80
+      );
+    });
+  };
+
+  const localBack = queryFrom(shell);
+  if (localBack) {
+    return localBack;
   }
 
-  const shellRect = shell.getBoundingClientRect();
-  return candidates.find((element) => {
-    const rect = element.getBoundingClientRect();
-    const name = getAccessibleName(element);
-    return (
-      rect.top < shellRect.top + 120 &&
-      rect.left < shellRect.left + 120 &&
-      !isBlockedNavigationName(name) &&
-      rect.width <= 80 &&
-      rect.height <= 80
-    );
-  });
+  if (shell !== document.body) {
+    return queryFrom(document.body);
+  }
+
+  return undefined;
 }
 
 export function branchLabel(branch: Branch): string {
@@ -475,12 +489,13 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   if (isSwitchLike(element)) {
     return "switch-toggle";
   }
-  if (BACK_TEXT_PATTERNS.some((pattern) => pattern.test(name))) {
-    return "blocked-back-navigation";
+
+  // Registry-based check (covers all categories including new ones)
+  const forbiddenMatch = matchForbiddenRule(name, element);
+  if (forbiddenMatch) {
+    return ruleToSkipReason(forbiddenMatch);
   }
-  if (STATE_CONTROL_PATTERNS.some((pattern) => pattern.test(name))) {
-    return "state-control";
-  }
+
   if (isChartDataControl(element, name)) {
     return "chart-data-control";
   }
@@ -488,12 +503,6 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
     return "static-composite-container";
   }
   const role = getRole(element);
-  if (role === "tab") {
-    return "root-branch-tab";
-  }
-  if (isBlockedNavigationName(name)) {
-    return "blocked-navigation";
-  }
   if (hasDatePickerDropdownSignal(element)) {
     if (isLargeCompositeDatePickerCandidate(element)) {
       return "static-composite-container";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSameDepthVariantName, shouldTraverseFrameCandidates } from "../src/content/traversal";
+import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates } from "../src/content/traversal";
 
 describe("ThinQ traversal frame policy", () => {
   it("treats bottom sheet overlays as terminal screens", () => {
@@ -9,6 +9,13 @@ describe("ThinQ traversal frame policy", () => {
 
   it("continues collecting candidates on in-product child screens", () => {
     expect(shouldTraverseFrameCandidates({ transitionClassification: "in-product-child" })).toBe(true);
+  });
+
+  it("identifies deep in-product route screens for back-button restore", () => {
+    expect(isDeepProductRouteFrame({ transitionClassification: "in-product-child", depth: 1 })).toBe(false);
+    expect(isDeepProductRouteFrame({ transitionClassification: "in-product-child", depth: 2 })).toBe(true);
+    expect(isDeepProductRouteFrame({ transitionClassification: "in-product-child", depth: 3 })).toBe(true);
+    expect(isDeepProductRouteFrame({ transitionClassification: "overlay-opened", depth: 3 })).toBe(false);
   });
 
   it("recognizes period tabs as same-depth variants", () => {

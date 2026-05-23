@@ -4,3 +4,9 @@ coverage/
 .vite/
 *.log
 *.tsbuildinfo
+e2e/.session/
+e2e/screenshots/
+test-results/
+playwright-report/
+log/
+recon/

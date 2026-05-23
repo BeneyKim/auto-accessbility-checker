@@ -11,6 +11,7 @@ const startButton = document.querySelector<HTMLButtonElement>("#start");
 const stopButton = document.querySelector<HTMLButtonElement>("#stop");
 const downloadButton = document.querySelector<HTMLButtonElement>("#download");
 const downloadLogButton = document.querySelector<HTMLButtonElement>("#downloadLog");
+const reconButton = document.querySelector<HTMLButtonElement>("#recon");
 const statusText = document.querySelector<HTMLElement>("#status");
 const screenCountText = document.querySelector<HTMLElement>("#screenCount");
 const logsList = document.querySelector<HTMLOListElement>("#logs");
@@ -33,6 +34,7 @@ async function initialize(): Promise<void> {
   stopButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "STOP_RUN" }));
   downloadButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_REPORT" }));
   downloadLogButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_DEBUG_LOG" }));
+  reconButton?.addEventListener("click", () => void runRecon());
 
   setInterval(() => void refreshStatus(), 1000);
 }
@@ -61,6 +63,21 @@ async function startRun(): Promise<void> {
   const settings = readSettings();
   await saveSettings(settings);
   const response = await sendRuntimeMessage({ type: "START_RUN", settings });
+  if (!readOk(response)) {
+    renderError(readError(response));
+  }
+}
+
+async function runRecon(): Promise<void> {
+  if (reconButton) {
+    reconButton.disabled = true;
+    reconButton.textContent = "⏳ Scanning...";
+  }
+  const response = await sendRuntimeMessage({ type: "RECON_SCAN" });
+  if (reconButton) {
+    reconButton.disabled = false;
+    reconButton.textContent = "🔍 Recon Scan";
+  }
   if (!readOk(response)) {
     renderError(readError(response));
   }

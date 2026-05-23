@@ -130,3 +130,16 @@ button:disabled {
 .log-warn {
   background: #fef3c7 !important;
 }
+
+#recon {
+  grid-column: 1 / -1;
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+  font-weight: 700;
+}
+
+#recon:disabled {
+  background: #fbbf24;
+  border-color: #fbbf24;
+}

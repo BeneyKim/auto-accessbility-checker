@@ -69,6 +69,7 @@ Current automated coverage:
 - Restore attempts use overlay close, Escape, in-shell back controls, and branch root re-entry; browser history is not used.
 - Date picker modal restore does not use in-overlay back controls, and failed child restore stops parent restore from cascading further back.
 - Restore controls use a single native click path instead of the candidate activation sequence to avoid repeated app back navigation.
+- Deep internal route screens at depth 2 or deeper do not use app back restoration; after local tabs/date pickers are scanned, the run stops with a diagnostic failure instead of leaving the product.
 - Generated-class picker modals with cancel/confirm and year/month/day values are detected as overlays even without explicit modal/sheet class names.
 - Back controls are searched only inside the current safe shell, not across the whole document.
 - Bottom sheets are closed after their IBM check by pressing an explicit close/cancel/dismiss button or Escape.

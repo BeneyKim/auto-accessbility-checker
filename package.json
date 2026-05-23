@@ -8,12 +8,16 @@
     "build": "vite build && node scripts/copy-ace.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "verify": "npm.cmd run typecheck && npm.cmd run test && npm.cmd run build"
+    "verify": "npm.cmd run typecheck && npm.cmd run test && npm.cmd run build",
+    "e2e:setup": "npx tsx e2e/setup-session.ts",
+    "e2e:recon": "npx playwright test --config playwright.config.ts e2e/recon.spec.ts",
+    "e2e": "npx playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "accessibility-checker-engine": "^4.0.9"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/chrome": "^0.0.326",
     "@types/node": "^24.10.1",
     "jsdom": "^27.2.0",

@@ -114,6 +114,19 @@ export interface RunFailedMessage {
   error: string;
 }
 
+export interface ReconScanMessage {
+  type: "RECON_SCAN";
+}
+
+export interface ReconCompleteMessage {
+  type: "RECON_COMPLETE";
+  snapshot: ReconSnapshot;
+}
+
+export interface DownloadReconMessage {
+  type: "DOWNLOAD_RECON";
+}
+
 export type RuntimeMessage =
   | StartRunMessage
   | StopRunMessage
@@ -123,7 +136,10 @@ export type RuntimeMessage =
   | CaptureScreenshotMessage
   | RunLogMessage
   | RunCompleteMessage
-  | RunFailedMessage;
+  | RunFailedMessage
+  | ReconScanMessage
+  | ReconCompleteMessage
+  | DownloadReconMessage;
 
 export interface CandidateSnapshot {
   id: string;
@@ -140,4 +156,76 @@ export interface IssuePublisherPayload {
 
 export interface IssuePublisher {
   publish(payload: IssuePublisherPayload): Promise<void>;
+}
+
+// ─── Recon Mode Types ───────────────────────────────
+
+export interface ReconElement {
+  /** Stable element ID (hash of role + name + position) */
+  id: string;
+  /** Element tag name */
+  tagName: string;
+  /** Accessible name (aria-label, innerText, title, etc.) */
+  name: string;
+  /** ARIA role or tag name */
+  role: string;
+  /** CSS class names */
+  className: string;
+  /** data-* attributes relevant to ThinQ */
+  dataAttributes: Record<string, string>;
+  /** aria-* attributes */
+  ariaAttributes: Record<string, string>;
+  /** Bounding rect */
+  rect: { top: number; left: number; width: number; height: number };
+  /** Whether element is visible */
+  visible: boolean;
+  /** Skip reason from getSkipReason() — undefined if not skipped */
+  skipReason?: string;
+  /** Whether this element is an interactive candidate */
+  isCandidate: boolean;
+  /** href attribute if present */
+  href?: string;
+  /** innerHTML snippet (first 200 chars) for debugging */
+  innerHtmlSnippet: string;
+  /** Depth of element in DOM tree from shell */
+  domDepth: number;
+}
+
+export interface ReconSnapshot {
+  /** Timestamp of snapshot */
+  timestamp: string;
+  /** Current page URL */
+  url: string;
+  /** Detected product shell description */
+  shell: {
+    tagName: string;
+    id: string;
+    className: string;
+    role: string;
+    dataName: string;
+    rect: { top: number; left: number; width: number; height: number };
+  };
+  /** Screen title */
+  title: string;
+  /** Screen signature hash */
+  signature: string;
+  /** All interactive elements found (both candidates and skipped) */
+  elements: ReconElement[];
+  /** Summary counts */
+  summary: {
+    totalInteractive: number;
+    candidates: number;
+    skipped: number;
+    skippedByReason: Record<string, number>;
+  };
+  /** Detected overlays */
+  overlays: string[];
+  /** Required controls diagnostic */
+  requiredControls: {
+    productTabFound: boolean;
+    usefulFeaturesTabFound: boolean;
+    settingsButtonFound: boolean;
+  };
+  /** Screenshot as data URL */
+  screenshot?: string;
 }

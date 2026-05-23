@@ -379,4 +379,47 @@ describe("ThinQ DOM helpers", () => {
 
     expect(screenSignature(shell)).not.toBe(first);
   });
+
+  it("blocks external service buttons: 소모품 정보, 가전세척, 스마트 진단, ThinQ PLAY", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button>소모품 정보</button>
+        <button>가전세척 서비스 신청하기</button>
+        <button>스마트 진단</button>
+        <button>ThinQ PLAY</button>
+        <button>스마트 루틴</button>
+        <button>예약</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+    const skipped = collectSkippedCandidates(shell);
+
+    expect(candidates.map((c) => c.snapshot.name)).toEqual(["예약"]);
+    expect(skipped.map((c) => c.name)).toContain("소모품 정보");
+    expect(skipped.map((c) => c.name)).toContain("가전세척 서비스 신청하기");
+    expect(skipped.map((c) => c.name)).toContain("스마트 진단");
+    expect(skipped.map((c) => c.name)).toContain("ThinQ PLAY");
+    expect(skipped.map((c) => c.name)).toContain("스마트 루틴");
+    expect(skipped.map((c) => c.reason)).toContain("blocked-external-service");
+    expect(skipped.map((c) => c.reason)).toContain("blocked-navigation");
+  });
+
+  it("blocks external service buttons with partial text matching", () => {
+    expect(isBlockedNavigationName("소모품 정보")).toBe(true);
+    expect(isBlockedNavigationName("가전세척 서비스 신청하기")).toBe(true);
+    expect(isBlockedNavigationName("스마트 진단")).toBe(true);
+    expect(isBlockedNavigationName("ThinQ PLAY")).toBe(true);
+    expect(isBlockedNavigationName("스마트 루틴")).toBe(true);
+    // Recon 발견: 쇼핑링크 차단
+    expect(isBlockedNavigationName("LG 360° 공기청정기 퓨리청정 H 필터 할인가 58,900원 새 창 열림")).toBe(true);
+    // Recon 발견: 이전 날/달 차단
+    expect(isBlockedNavigationName("이전 날")).toBe(true);
+    expect(isBlockedNavigationName("이전 달")).toBe(true);
+    // 날짜 표시는 차단하지 않음
+    expect(isBlockedNavigationName("2026년 5월 10일 일요일")).toBe(false);
+    expect(isBlockedNavigationName("예약")).toBe(false);
+    expect(isBlockedNavigationName("실내 공기질")).toBe(false);
+  });
 });

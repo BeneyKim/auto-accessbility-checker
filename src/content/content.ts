@@ -7,6 +7,7 @@ const THINQ_HOST = "my.lgthinq.com";
 const TRANSITION_TIMEOUT_MS = 6000;
 const TRANSITION_STABLE_MS = 700;
 const UNSAFE_TRANSITION_STABLE_MS = 1200;
+const NO_CHANGE_STABLE_MS = 1800;
 const TRANSITION_POLL_MS = 150;
 const OVERLAY_SELECTOR =
   '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"]';
@@ -162,12 +163,24 @@ interface TraversalContext {
   aborted: boolean;
 }
 
+type RestoreMethod = "overlay-close" | "escape" | "back-button" | "history-back" | "tab-reentry";
+
+interface SemanticIdentity {
+  title: string;
+  urlPathname: string;
+  overlayCount: number;
+  signature: string;
+}
+
 interface NavigationFrame {
   branch: Branch;
   depth: number;
   menuPath: string[];
   rootSignature: string;
+  rootTitle: string;
   shellSelector: string;
+  restoreMethod?: RestoreMethod;
+  semanticIdentity?: SemanticIdentity;
   candidateSnapshot?: CandidateSnapshot;
   transitionClassification?: TransitionClassification;
   terminalOverlay?: boolean;
@@ -197,7 +210,7 @@ interface ClassifiedTransition {
 
 interface RestoreResult {
   restored: boolean;
-  method: "already-restored" | "overlay-close" | "back-button" | "escape" | "branch-entry" | "failed";
+  method: RestoreMethod | "already-restored" | "failed";
   reason?: string;
 }
 
@@ -227,7 +240,14 @@ async function traverseBranch(context: TraversalContext, branch: Branch): Promis
     depth: 0,
     menuPath: [branchLabel(branch)],
     rootSignature: snapshot.signature,
-    shellSelector: describeStableShell(snapshot.shell)
+    rootTitle: snapshot.title,
+    shellSelector: describeStableShell(snapshot.shell),
+    semanticIdentity: {
+      title: snapshot.title,
+      urlPathname: new URL(snapshot.url, location.href).pathname,
+      overlayCount: snapshot.overlayDescriptors.length,
+      signature: snapshot.signature
+    }
   };
 
   context.navigationStack = [frame];
@@ -251,7 +271,7 @@ async function ensureProductRoot(context: TraversalContext, branch: Branch): Pro
 
   const recoveryFrame = context.navigationStack.at(-1);
   if (recoveryFrame) {
-    const restored = await restoreToFrame(context, recoveryFrame);
+    const restored = await restoreFrame(context, recoveryFrame, recoveryFrame);
     snapshot = getCurrentScreenSnapshot();
     context.log(restored.restored ? "info" : "error", "Product root recovery result.", {
       branch,
@@ -380,10 +400,16 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     context.log("error", "Cannot click candidate without a safe shell.", { frame, candidateSnapshot });
     return;
   }
-  const restoreFrame: NavigationFrame = {
+  const restoreTarget: NavigationFrame = {
     ...frame,
     rootSignature: before.signature,
-    shellSelector: describeStableShell(before.shell)
+    shellSelector: describeStableShell(before.shell),
+    semanticIdentity: {
+      title: before.title,
+      urlPathname: new URL(before.url, location.href).pathname,
+      overlayCount: before.overlayDescriptors.length,
+      signature: before.signature
+    }
   };
 
   const candidate = collectClickCandidates(before.shell).find((item) => candidateAttemptKey(frame, item.snapshot) === candidateAttemptKey(frame, candidateSnapshot));
@@ -399,12 +425,24 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
 
   let transition = await waitAndClassifyTransition(before, candidate.snapshot);
   if (transition.classification === "no-change") {
-    context.log("warn", "candidate primary click produced no change; retrying keyboard activation.", {
-      triggerName,
-      candidate: candidate.snapshot
-    });
-    await activateWithKeyboard(candidate.element);
-    transition = await waitAndClassifyTransition(before, candidate.snapshot);
+    const isKeyboardInteractive =
+      ["button", "a"].includes(candidate.element.tagName.toLowerCase()) ||
+      ["button", "link", "tab", "menuitem", "option", "checkbox", "radio"].includes(candidate.snapshot.role) ||
+      candidate.element.hasAttribute("tabindex");
+
+    if (isKeyboardInteractive) {
+      context.log("warn", "candidate primary click produced no change; retrying keyboard activation.", {
+        triggerName,
+        candidate: candidate.snapshot
+      });
+      await activateWithKeyboard(candidate.element);
+      transition = await waitAndClassifyTransition(before, candidate.snapshot);
+    } else {
+      context.log("debug", "candidate primary click produced no change; skipping keyboard activation retry for non-interactive role.", {
+        triggerName,
+        role: candidate.snapshot.role
+      });
+    }
   }
   context.log("info", "transition classified.", {
     triggerName,
@@ -436,7 +474,7 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   }
 
   if (transition.classification === "branch-changed") {
-    const restored = await restoreToFrame(context, frame);
+    const restored = await restoreFrame(context, frame, frame);
     context.log(restored.restored ? "warn" : "error", "Unexpected branch transition recovery result.", restored);
     if (!restored.restored) {
       context.aborted = true;
@@ -458,10 +496,18 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     depth: frame.depth + 1,
     menuPath: [...frame.menuPath, triggerName],
     rootSignature: childSnapshot.signature,
+    rootTitle: childSnapshot.title,
     shellSelector: describeStableShell(childSnapshot.shell),
     candidateSnapshot: candidate.snapshot,
     transitionClassification: transition.classification,
-    terminalOverlay: transition.classification === "overlay-opened"
+    terminalOverlay: transition.classification === "overlay-opened",
+    restoreMethod: transition.classification === "overlay-opened" ? "overlay-close" : "back-button",
+    semanticIdentity: {
+      title: childSnapshot.title,
+      urlPathname: new URL(childSnapshot.url, location.href).pathname,
+      overlayCount: childSnapshot.overlayDescriptors.length,
+      signature: childSnapshot.signature
+    }
   };
 
   context.navigationStack.push(childFrame);
@@ -479,12 +525,12 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     await traverseFrame(context, childFrame);
   } finally {
     context.state = "RESTORE_PENDING";
-    context.log("info", "restore started.", { targetFrame: restoreFrame, childFrame });
+    context.log("info", "restore started.", { targetFrame: restoreTarget, childFrame });
     if (context.aborted) {
       restored = { restored: false, method: "failed", reason: "traversal-already-aborted" };
-      context.log("warn", "restore skipped because traversal is already aborted.", { targetFrame: restoreFrame, childFrame });
+      context.log("warn", "restore skipped because traversal is already aborted.", { targetFrame: restoreTarget, childFrame });
     } else {
-      restored = await restoreToFrame(context, restoreFrame);
+      restored = await restoreFrame(context, restoreTarget, childFrame);
     }
     context.navigationStack.pop();
     context.log(restored.restored ? "info" : "error", "depth popped.", {
@@ -529,6 +575,7 @@ async function recordSameDepthVariantResult(
     depth: frame.depth,
     menuPath: [...frame.menuPath, triggerName],
     rootSignature: snapshot.signature,
+    rootTitle: snapshot.title,
     shellSelector: describeStableShell(snapshot.shell),
     candidateSnapshot,
     transitionClassification: transition.classification,
@@ -580,9 +627,11 @@ async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: Candid
     }
     if (latestClassification.classification !== "no-change") {
       lastSafeTransition = latestClassification;
-    }
-    if (latestClassification.classification !== "no-change") {
       if (stableFor >= TRANSITION_STABLE_MS) {
+        return latestClassification;
+      }
+    } else {
+      if (stableFor >= NO_CHANGE_STABLE_MS) {
         return latestClassification;
       }
     }
@@ -596,13 +645,18 @@ function transitionStableKey(transition: ClassifiedTransition): string {
 }
 
 function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigger: CandidateSnapshot): ClassifiedTransition {
-  if (after.isHomeLike) {
+  const stillInProductRoute = isUrlInProductRoute(after.url);
+
+  if (after.isHomeLike && !stillInProductRoute) {
     return { classification: "home-navigation", reason: "home-like-screen-detected", before, after };
   }
-  if (after.isOutOfScopeLike) {
+  if (after.isOutOfScopeLike && !stillInProductRoute) {
     return { classification: "out-of-scope", reason: "out-of-scope-screen-detected", before, after };
   }
   if (!after.boundaryPresent && after.overlayDescriptors.length === 0) {
+    if (stillInProductRoute) {
+      return { classification: "no-change", reason: "product-route-loading", before, after };
+    }
     return { classification: "out-of-scope", reason: "product-boundary-missing", before, after };
   }
   if (before.selectedBranch && after.selectedBranch && before.selectedBranch !== after.selectedBranch) {
@@ -627,69 +681,100 @@ function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigg
   return { classification: "unknown", reason: "no-transition-rule-matched", before, after };
 }
 
-async function restoreToFrame(context: TraversalContext, frame: NavigationFrame): Promise<RestoreResult> {
+async function restoreFrame(context: TraversalContext, targetFrame: NavigationFrame, childFrame: NavigationFrame): Promise<RestoreResult> {
   const already = getCurrentScreenSnapshot();
-  if (isFrameRestored(frame, already)) {
-    return { restored: true, method: "already-restored" };
+  const verifiedAlready = verifyRestore(context, targetFrame, already, "already-restored");
+  if (verifiedAlready.restored) {
+    return verifiedAlready;
   }
 
-  const hadOverlay = Boolean(findTopOverlay(getProductBoundary()));
-  const closeButton = findOverlayCloseButton();
-  if (closeButton) {
-    await clickRestoreControlAndWait(closeButton);
-    const snapshot = await waitForFrameRestore(frame, 2500);
-    if (isFrameRestored(frame, snapshot)) {
-      return { restored: true, method: "overlay-close" };
+  const method = childFrame.restoreMethod ?? "back-button";
+  context.log("info", `Executing restore via: ${method}`, { targetTitle: targetFrame.rootTitle, currentTitle: already.title });
+
+  if (method === "overlay-close") {
+    const closeButton = findOverlayCloseButton();
+    if (closeButton) {
+      context.log("info", `Clicking overlay close button: ${getAccessibleName(closeButton)}`);
+      await clickRestoreControlAndWait(closeButton);
+      const snapshot = await waitForFrameRestore(targetFrame, 2500);
+      const verified = verifyRestore(context, targetFrame, snapshot, "overlay-close");
+      if (verified.restored) {
+        return verified;
+      }
     }
-  }
 
-  if (hadOverlay) {
+    context.log("info", "Overlay close button not found or failed; sending Escape.");
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
     await waitForIdle();
     const snapshot = getCurrentScreenSnapshot();
-    if (isFrameRestored(frame, snapshot)) {
-      return { restored: true, method: "escape" };
+    const verified = verifyRestore(context, targetFrame, snapshot, "escape");
+    if (verified.restored) {
+      return verified;
     }
-    context.log("warn", "Overlay restore did not return to target frame; skipping in-overlay back button to avoid home navigation.", {
-      frame,
-      snapshot: summarizeSnapshot(snapshot)
-    });
-  }
-
-  const current = getCurrentScreenSnapshot();
-  const backButton = current.shell ? findBackButton(current.shell) : undefined;
-  if (backButton && !hadOverlay) {
-    context.log("info", "Restoring with in-shell back button.", { name: getAccessibleName(backButton), frame });
-    await clickRestoreControlAndWait(backButton);
-    const snapshot = await waitForFrameRestore(frame, 3500);
-    if (isFrameRestored(frame, snapshot)) {
-      return { restored: true, method: "back-button" };
+  } else {
+    const current = getCurrentScreenSnapshot();
+    const backButton = current.shell ? findBackButton(current.shell) : undefined;
+    if (backButton) {
+      context.log("info", `Clicking back button: ${getAccessibleName(backButton)}`);
+      await clickRestoreControlAndWait(backButton);
+      const snapshot = await waitForFrameRestore(targetFrame, 3500);
+      const verified = verifyRestore(context, targetFrame, snapshot, "back-button");
+      if (verified.restored) {
+        return verified;
+      }
     }
-  }
 
-  let snapshot = getCurrentScreenSnapshot();
-  if (!hadOverlay) {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-    document.dispatchEvent(new KeyboardEvent("keyup", { key: "Escape", bubbles: true }));
-    await waitForIdle();
-    snapshot = getCurrentScreenSnapshot();
-    if (isFrameRestored(frame, snapshot)) {
-      return { restored: true, method: "escape" };
+    context.log("warn", "Back button not found or failed; trying history.back() fallback.");
+    window.history.back();
+    const snapshot = await waitForFrameRestore(targetFrame, 3500);
+    const verified = verifyRestore(context, targetFrame, snapshot, "history-back");
+    if (verified.restored) {
+      return verified;
     }
   }
 
-  const controls = getBranchControls();
-  if (controls) {
-    const target = frame.branch === "product" ? controls.productTab : frame.branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
-    await clickRestoreControlAndWait(target);
-    snapshot = await waitForFrameRestore(frame, 2500);
-    if (isFrameRestored(frame, snapshot)) {
-      return { restored: true, method: "branch-entry" };
+  if (targetFrame.depth === 0) {
+    context.log("warn", "Standard restore methods failed to reach branch root; attempting Tab Re-entry.");
+    const controls = getBranchControls();
+    if (controls) {
+      const target = targetFrame.branch === "product" ? controls.productTab : targetFrame.branch === "usefulFeatures" ? controls.usefulFeaturesTab : controls.settingsButton;
+      await clickRestoreControlAndWait(target);
+      const snapshot = await waitForFrameRestore(targetFrame, 2500);
+      const verified = verifyRestore(context, targetFrame, snapshot, "tab-reentry");
+      if (verified.restored) {
+        return verified;
+      }
     }
   }
 
   return { restored: false, method: "failed", reason: "frame-signature-or-branch-not-restored" };
+}
+
+function verifyRestore(context: TraversalContext, frame: NavigationFrame, snapshot: ScreenSnapshot, method: RestoreResult["method"]): { restored: boolean; method: RestoreResult["method"] } {
+  if (isFrameRestored(frame, snapshot)) {
+    return { restored: true, method };
+  }
+  if (snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.title === frame.rootTitle) {
+    const targetOverlayCount = frame.semanticIdentity?.overlayCount ?? 0;
+    const currentOverlayCount = snapshot.overlayDescriptors.length;
+    if (currentOverlayCount > targetOverlayCount) {
+      context.log("debug", "Title matched but overlay count is higher than target; reject relaxed restore.", {
+        targetOverlayCount,
+        currentOverlayCount
+      });
+      return { restored: false, method: "failed" };
+    }
+
+    context.log("info", `Restore accepted via title match (method: ${method}).`, {
+      targetTitle: frame.rootTitle,
+      oldSignature: frame.rootSignature,
+      newSignature: snapshot.signature
+    });
+    frame.rootSignature = snapshot.signature;
+    return { restored: true, method };
+  }
+  return { restored: false, method: "failed" };
 }
 
 function isFrameRestored(frame: NavigationFrame, snapshot: ScreenSnapshot): boolean {
@@ -700,7 +785,8 @@ async function waitForFrameRestore(frame: NavigationFrame, timeoutMs: number): P
   const started = performance.now();
   let snapshot = getCurrentScreenSnapshot();
   while (performance.now() - started < timeoutMs) {
-    if (isFrameRestored(frame, snapshot) || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+    const isRelaxed = snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.title === frame.rootTitle;
+    if (isFrameRestored(frame, snapshot) || isRelaxed || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
       return snapshot;
     }
     await wait(150);
@@ -903,7 +989,11 @@ function findOverlayCloseButton(): HTMLElement | undefined {
   const buttonCandidates = Array.from(overlayRoot.querySelectorAll<HTMLElement>("button,[role='button'],a[href],[tabindex]")).filter((element) =>
     isVisible(element)
   );
-  return buttonCandidates.find((element) => /close|cancel|dismiss|^x$|닫기|취소|팝업.*닫기|창.*닫기/i.test(getAccessibleName(element).trim()));
+  const standardClose = buttonCandidates.find((element) => /close|cancel|dismiss|^x$|닫기|취소|팝업.*닫기|창.*닫기/i.test(getAccessibleName(element).trim()));
+  if (standardClose) {
+    return standardClose;
+  }
+  return buttonCandidates.find((element) => /ok|confirm|yes|확인/i.test(getAccessibleName(element).trim()));
 }
 
 function summarizeSnapshot(snapshot: ScreenSnapshot): Record<string, unknown> {
@@ -928,6 +1018,9 @@ function describeStableShell(shell: HTMLElement): string {
 
 function candidateAttemptKey(frame: NavigationFrame, candidate: CandidateSnapshot): string {
   const normalizedName = (candidate.name || candidate.role).replace(/\s+/g, " ").trim().toLowerCase();
+  if (isSameDepthVariantName(normalizedName)) {
+    return `${frame.branch}:${frame.depth}:variant:${normalizedName}`;
+  }
   return `${frame.branch}:${frame.depth}:${normalizedName}:${candidate.role}:${candidate.tagName}`;
 }
 
@@ -977,7 +1070,19 @@ function describeElement(element: HTMLElement): Record<string, unknown> {
   };
 }
 
+function isUrlInProductRoute(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === THINQ_HOST && /\/GPM-20\//.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function looksLikeThinQHome(): boolean {
+  if (isUrlInProductRoute(location.href)) {
+    return false;
+  }
   const text = document.body.innerText?.replace(/\s+/g, " ").trim() ?? "";
   return [
     "3D \uD648",

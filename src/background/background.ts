@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS, STORAGE_KEYS, THINQ_HOST } from "../shared/constants";
 import { buildHtmlReport, buildJsonReport, buildMarkdownReport, makeFileBase } from "../shared/report";
-import type { CheckerSettings, LogEntry, RunResult, RunState, RuntimeMessage } from "../shared/types";
+import type { CheckerSettings, LogEntry, ReconSnapshot, RunResult, RunState, RuntimeMessage } from "../shared/types";
 
 let state: RunState = {
   status: "idle",
@@ -9,6 +9,7 @@ let state: RunState = {
 };
 
 let lastResult: RunResult | undefined;
+let lastRecon: ReconSnapshot | undefined;
 let debugLog: LogEntry[] = [];
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -64,6 +65,15 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       appendLog("error", message.error);
       await chrome.storage.local.set({ [STORAGE_KEYS.status]: state });
       return { ok: true };
+    case "RECON_SCAN":
+      return startRecon();
+    case "RECON_COMPLETE":
+      lastRecon = message.snapshot;
+      appendLog("info", "Recon scan complete.", message.snapshot.summary);
+      await downloadRecon();
+      return { ok: true };
+    case "DOWNLOAD_RECON":
+      return downloadRecon();
     default:
       return { ok: false, error: "Unknown message type" };
   }
@@ -173,6 +183,48 @@ async function downloadDebugLog(): Promise<unknown> {
     saveAs: false
   });
   appendLog("info", "Debug log download started.", { count: debugLog.length });
+  return { ok: true };
+}
+
+async function startRecon(): Promise<unknown> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id || !tab.url) {
+    throw new Error("No active tab found.");
+  }
+  const url = new URL(tab.url);
+  if (url.hostname !== THINQ_HOST || url.protocol !== "https:") {
+    throw new Error("Open https://my.lgthinq.com/ and enter a product page before running Recon.");
+  }
+  appendLog("info", "Starting Recon scan...");
+
+  try {
+    await chrome.tabs.sendMessage(tab.id, { type: "RECON_SCAN" } satisfies RuntimeMessage);
+  } catch (error) {
+    if (!isMissingReceivingEnd(error)) throw error;
+    appendLog("warn", "Content script not attached for Recon; injecting and retrying.");
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+    await wait(250);
+    await chrome.tabs.sendMessage(tab.id, { type: "RECON_SCAN" } satisfies RuntimeMessage);
+  }
+
+  return { ok: true };
+}
+
+async function downloadRecon(): Promise<unknown> {
+  if (!lastRecon) {
+    throw new Error("No recon snapshot available. Run Recon first.");
+  }
+
+  const storedSettings = await chrome.storage.local.get(STORAGE_KEYS.settings);
+  const settings = { ...DEFAULT_SETTINGS, ...(storedSettings[STORAGE_KEYS.settings] as Partial<CheckerSettings> | undefined) };
+  const base = makeFileBase(`${settings.title || "ThinQ"}-recon`);
+  const content = JSON.stringify(lastRecon, null, 2);
+  await chrome.downloads.download({
+    url: toDataUrl(content, "application/json"),
+    filename: `${base}.json`,
+    saveAs: false
+  });
+  appendLog("info", "Recon snapshot download started.", { elements: lastRecon.elements.length, candidates: lastRecon.summary.candidates });
   return { ok: true };
 }
 
