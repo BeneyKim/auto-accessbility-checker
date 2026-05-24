@@ -438,7 +438,7 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   context.log("info", "candidate click started.", { frame, candidate: candidate.snapshot, snapshot: summarizeSnapshot(before) });
   await clickAndWait(candidate.element);
 
-  let transition = await waitAndClassifyTransition(before, candidate.snapshot);
+  let transition = await waitAndClassifyTransition(before, candidate.snapshot, candidate.element);
   if (transition.classification === "no-change") {
     const isKeyboardInteractive =
       ["button", "a"].includes(candidate.element.tagName.toLowerCase()) ||
@@ -451,7 +451,7 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
         candidate: candidate.snapshot
       });
       await activateWithKeyboard(candidate.element);
-      transition = await waitAndClassifyTransition(before, candidate.snapshot);
+      transition = await waitAndClassifyTransition(before, candidate.snapshot, candidate.element);
     } else {
       context.log("debug", "candidate primary click produced no change; skipping keyboard activation retry for non-interactive role.", {
         triggerName,
@@ -613,19 +613,29 @@ async function recordSameDepthVariantResult(
   await recordScreenResult(context, variantFrame, snapshot);
 }
 
-async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: CandidateSnapshot, timeoutMs = TRANSITION_TIMEOUT_MS): Promise<ClassifiedTransition> {
+async function waitAndClassifyTransition(
+  before: ScreenSnapshot,
+  trigger: CandidateSnapshot,
+  triggerElement?: HTMLElement,
+  timeoutMs = TRANSITION_TIMEOUT_MS
+): Promise<ClassifiedTransition> {
   const started = performance.now();
   let latest = getCurrentScreenSnapshot();
-  let latestClassification = classifyTransition(before, latest, trigger);
+  let latestClassification = classifyTransition(before, latest, trigger, triggerElement);
   let lastUnsafeTransition: ClassifiedTransition | undefined;
   let lastSafeTransition: ClassifiedTransition | undefined;
   let stableKey = transitionStableKey(latestClassification);
   let stableSince = performance.now();
 
+  const isTab = Boolean(
+    trigger.role === "tab" ||
+    (triggerElement && (triggerElement.closest("[role='tab']") || triggerElement.closest("[role='tablist'] > *")))
+  );
+
   while (performance.now() - started < timeoutMs) {
     await wait(TRANSITION_POLL_MS);
     latest = getCurrentScreenSnapshot();
-    latestClassification = classifyTransition(before, latest, trigger);
+    latestClassification = classifyTransition(before, latest, trigger, triggerElement);
     const nextStableKey = transitionStableKey(latestClassification);
     if (nextStableKey !== stableKey) {
       stableKey = nextStableKey;
@@ -640,12 +650,22 @@ async function waitAndClassifyTransition(before: ScreenSnapshot, trigger: Candid
       }
       continue;
     }
-    if (latestClassification.classification !== "no-change") {
+
+    const isStableSuccess =
+      latestClassification.classification === "in-product-child" ||
+      latestClassification.classification === "overlay-opened" ||
+      latestClassification.classification === "branch-changed" ||
+      (latestClassification.classification === "state-change" && isTab);
+
+    if (isStableSuccess) {
       lastSafeTransition = latestClassification;
       if (stableFor >= TRANSITION_STABLE_MS) {
         return latestClassification;
       }
     } else {
+      if (latestClassification.classification !== "no-change") {
+        lastSafeTransition = latestClassification;
+      }
       if (stableFor >= NO_CHANGE_STABLE_MS) {
         return latestClassification;
       }
@@ -659,7 +679,12 @@ function transitionStableKey(transition: ClassifiedTransition): string {
   return `${transition.classification}:${transition.after.url}:${transition.after.signature}:${transition.after.boundaryPresent}:${transition.after.overlayDescriptors.join("|")}`;
 }
 
-function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigger: CandidateSnapshot): ClassifiedTransition {
+function classifyTransition(
+  before: ScreenSnapshot,
+  after: ScreenSnapshot,
+  trigger: CandidateSnapshot,
+  triggerElement?: HTMLElement
+): ClassifiedTransition {
   const stillInProductRoute = isUrlInProductRoute(after.url);
 
   if (after.isHomeLike && !stillInProductRoute) {
@@ -682,6 +707,17 @@ function classifyTransition(before: ScreenSnapshot, after: ScreenSnapshot, trigg
   }
   if (after.signature === before.signature) {
     return { classification: "no-change", reason: "signature-unchanged", before, after };
+  }
+
+  const isTab = Boolean(
+    trigger.role === "tab" ||
+    (triggerElement && (triggerElement.closest("[role='tab']") || triggerElement.closest("[role='tablist'] > *")))
+  );
+
+  if (isTab) {
+    if (after.boundaryPresent) {
+      return { classification: "state-change", reason: "tab-selected", before, after };
+    }
   }
 
   const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");

@@ -422,4 +422,22 @@ describe("ThinQ DOM helpers", () => {
     expect(isBlockedNavigationName("예약")).toBe(false);
     expect(isBlockedNavigationName("실내 공기질")).toBe(false);
   });
+
+  it("sorts elements with role='tab' or children of role='tablist' at the end of the candidate list", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button role="tab" id="tab1">냉장실</button>
+        <button id="btn1">식품 추가</button>
+        <button role="tab" id="tab2">냉동실</button>
+        <button id="btn2">검색</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+
+    // Candidates should have buttons first, then tabs sorted last
+    const ids = candidates.map(c => c.element.id);
+    expect(ids).toEqual(["btn1", "btn2", "tab1", "tab2"]);
+  });
 });

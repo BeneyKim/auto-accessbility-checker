@@ -258,6 +258,11 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   collectDatePickerDropdownCandidates(shell, seen, candidates);
 
   candidates.sort((a, b) => {
+    const aIsTab = Boolean(a.element.closest("[role='tab']") || a.element.closest("[role='tablist'] > *"));
+    const bIsTab = Boolean(b.element.closest("[role='tab']") || b.element.closest("[role='tablist'] > *"));
+    if (aIsTab !== bIsTab) {
+      return aIsTab ? 1 : -1;
+    }
     const ar = a.element.getBoundingClientRect();
     const br = b.element.getBoundingClientRect();
     return ar.top - br.top || ar.left - br.left;
