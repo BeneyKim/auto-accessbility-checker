@@ -440,4 +440,29 @@ describe("ThinQ DOM helpers", () => {
     const ids = candidates.map(c => c.element.id);
     expect(ids).toEqual(["btn1", "btn2", "tab1", "tab2"]);
   });
+
+  it("assigns occurrenceIndex to duplicate-named candidates", () => {
+    document.body.innerHTML = `
+      <section role="dialog" data-width="900" data-height="700">
+        <button id="btn1">6일 남음</button>
+        <button id="btn2">6일 남음</button>
+        <button id="btn3">6일 남음</button>
+        <button id="btn4">다른 버튼</button>
+      </section>
+    `;
+
+    const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+    const candidates = collectClickCandidates(shell);
+
+    // Candidates should be in DOM order, btn1/btn2/btn3 should have occurrenceIndex 0, 1, 2
+    const btn1 = candidates.find(c => c.element.id === "btn1")!;
+    const btn2 = candidates.find(c => c.element.id === "btn2")!;
+    const btn3 = candidates.find(c => c.element.id === "btn3")!;
+    const btn4 = candidates.find(c => c.element.id === "btn4")!;
+
+    expect(btn1.snapshot.occurrenceIndex).toBe(0);
+    expect(btn2.snapshot.occurrenceIndex).toBe(1);
+    expect(btn3.snapshot.occurrenceIndex).toBe(2);
+    expect(btn4.snapshot.occurrenceIndex).toBe(0);
+  });
 });

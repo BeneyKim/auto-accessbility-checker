@@ -151,6 +151,7 @@ export interface CandidateSnapshot {
   role: string;
   tagName: string;
   reason?: string;
+  occurrenceIndex?: number;
 }
 
 export interface IssuePublisherPayload {

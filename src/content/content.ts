@@ -178,7 +178,7 @@ interface TraversalContext {
   aborted: boolean;
 }
 
-type RestoreMethod = "overlay-close" | "escape" | "back-button" | "history-back" | "tab-reentry";
+type RestoreMethod = "overlay-close" | "escape" | "back-button" | "history-back" | "tab-reentry" | "self-healing";
 
 interface SemanticIdentity {
   title: string;
@@ -722,9 +722,31 @@ function classifyTransition(
 
   const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");
   const titleChanged = after.title !== before.title;
+  const urlChanged = after.url !== before.url;
   const triggerName = trigger.name || trigger.role;
-  if (after.boundaryPresent && (candidateSetChanged || titleChanged || after.title === triggerName)) {
-    return { classification: "in-product-child", reason: titleChanged ? "title-changed" : "candidate-set-changed", before, after };
+
+  let isChildScreen = false;
+  let reason = "state-change";
+  if (after.boundaryPresent) {
+    if (titleChanged || urlChanged || after.title === triggerName) {
+      isChildScreen = true;
+      reason = titleChanged ? "title-changed" : (urlChanged ? "url-changed" : "title-matches-trigger");
+    } else if (candidateSetChanged) {
+      const beforeSet = new Set(before.candidateNames);
+      const afterSet = new Set(after.candidateNames);
+      const intersection = new Set([...beforeSet].filter(x => afterSet.has(x)));
+      const union = new Set([...beforeSet, ...afterSet]);
+      const similarity = union.size === 0 ? 1.0 : intersection.size / union.size;
+
+      if (similarity < 0.4) {
+        isChildScreen = true;
+        reason = `candidate-set-low-similarity-${similarity.toFixed(2)}`;
+      }
+    }
+  }
+
+  if (isChildScreen) {
+    return { classification: "in-product-child", reason, before, after };
   }
   if (after.boundaryPresent) {
     return { classification: "state-change", reason: "signature-changed-without-child-evidence", before, after };
@@ -799,7 +821,72 @@ async function restoreFrame(context: TraversalContext, targetFrame: NavigationFr
     }
   }
 
+  const selfHealed = await reNavigateToFrame(context, targetFrame);
+  if (selfHealed) {
+    return { restored: true, method: "self-healing" };
+  }
+
   return { restored: false, method: "failed", reason: "frame-signature-or-branch-not-restored" };
+}
+
+async function reNavigateToFrame(context: TraversalContext, targetFrame: NavigationFrame): Promise<boolean> {
+  context.log("info", `Attempting self-healing re-navigation to frame with menu path: ${targetFrame.menuPath.join(" > ")}`);
+  
+  const controls = getBranchControls();
+  if (!controls) {
+    context.log("warn", "Cannot re-navigate: branch controls not found.");
+    return false;
+  }
+  
+  const rootTarget = targetFrame.branch === "product" 
+    ? controls.productTab 
+    : targetFrame.branch === "usefulFeatures" 
+      ? controls.usefulFeaturesTab 
+      : controls.settingsButton;
+      
+  context.log("info", `Re-navigating: clicking branch tab for ${targetFrame.branch}`);
+  await clickRestoreControlAndWait(rootTarget);
+  await waitForIdle();
+
+  const pathItems = targetFrame.menuPath.filter(item => {
+    const norm = item.replace(/\s+/g, " ").trim().toLowerCase();
+    return norm !== "제품" && norm !== "유용한 기능" && norm !== "설정" && norm !== "settings";
+  });
+
+  context.log("info", `Cleaned menu path for re-navigation: ${pathItems.join(" > ")}`);
+
+  for (const item of pathItems) {
+    const snapshot = getCurrentScreenSnapshot();
+    if (!snapshot.shell) {
+      context.log("warn", "Cannot re-navigate: missing shell.");
+      return false;
+    }
+
+    const candidates = collectClickCandidates(snapshot.shell);
+    const targetCandidate = candidates.find(c => {
+      const name = (c.snapshot.name || c.snapshot.role).replace(/\s+/g, " ").trim().toLowerCase();
+      const match = item.replace(/\s+/g, " ").trim().toLowerCase();
+      return name === match;
+    });
+
+    if (!targetCandidate) {
+      context.log("warn", `Cannot re-navigate: menu item "${item}" not found in current candidates.`);
+      return false;
+    }
+
+    context.log("info", `Re-navigating: clicking menu item "${item}"`);
+    await clickRestoreControlAndWait(targetCandidate.element);
+    await waitForIdle();
+  }
+
+  const finalSnapshot = getCurrentScreenSnapshot();
+  if (isFrameRestored(targetFrame, finalSnapshot) || finalSnapshot.title === targetFrame.rootTitle) {
+    context.log("info", "Self-healing re-navigation succeeded!");
+    return true;
+  }
+
+  context.log("warn", `Self-healing re-navigation finished, but target frame signature was not restored (expected: ${targetFrame.rootSignature}, got: ${finalSnapshot.signature})`);
+  return false;
 }
 
 function verifyRestore(context: TraversalContext, frame: NavigationFrame, snapshot: ScreenSnapshot, method: RestoreResult["method"]): { restored: boolean; method: RestoreResult["method"] } {
@@ -1000,6 +1087,10 @@ function getOverlayDescriptors(boundary?: HTMLElement): string[] {
 function collectOverlayElements(boundary?: HTMLElement): HTMLElement[] {
   const overlays = new Set<HTMLElement>();
   for (const element of Array.from(document.querySelectorAll<HTMLElement>(OVERLAY_SELECTOR))) {
+    const tag = element.tagName.toLowerCase();
+    if (tag === "body" || tag === "html") {
+      continue;
+    }
     if (isVisible(element) && element !== boundary && !boundary?.contains(element)) {
       overlays.add(element);
     }
@@ -1072,7 +1163,8 @@ function candidateAttemptKey(frame: NavigationFrame, candidate: CandidateSnapsho
   if (isSameDepthVariantName(normalizedName)) {
     return `${frame.branch}:${frame.depth}:variant:${normalizedName}`;
   }
-  return `${frame.branch}:${frame.depth}:${normalizedName}:${candidate.role}:${candidate.tagName}`;
+  const occ = candidate.occurrenceIndex ?? 0;
+  return `${frame.branch}:${frame.depth}:${normalizedName}:${candidate.role}:${candidate.tagName}:${occ}`;
 }
 
 function makeDocumentSignature(title: string, overlays: string[], candidates: string[]): string {
@@ -1124,7 +1216,7 @@ function describeElement(element: HTMLElement): Record<string, unknown> {
 function isUrlInProductRoute(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.hostname === THINQ_HOST && /\/[A-Za-z0-9]+-[A-Za-z0-9]+\//.test(parsed.pathname);
+    return parsed.hostname === THINQ_HOST && /\/[A-Za-z0-9_-]+\/[A-Za-z0-9_=-]+\//.test(parsed.pathname);
   } catch {
     return false;
   }
@@ -1263,10 +1355,44 @@ async function requestScreenshot(log: (level: LogEntry["level"], message: string
   return undefined;
 }
 
+function triggerSelectOrDateInput(element: HTMLElement): boolean {
+  const targets = element.tagName.toLowerCase() === "input" || element.tagName.toLowerCase() === "select"
+    ? [element]
+    : Array.from(element.querySelectorAll<HTMLElement>("input, select"));
+
+  let triggered = false;
+  for (const t of targets) {
+    if (t instanceof HTMLSelectElement) {
+      if (typeof t.showPicker === "function") {
+        try {
+          t.showPicker();
+          triggered = true;
+        } catch (e) {
+          // ignore
+        }
+      }
+    } else if (t instanceof HTMLInputElement) {
+      const type = t.getAttribute("type") || "text";
+      if (["date", "time", "datetime-local", "month", "week"].includes(type)) {
+        if (typeof t.showPicker === "function") {
+          try {
+            t.showPicker();
+            triggered = true;
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    }
+  }
+  return triggered;
+}
+
 async function clickAndWait(element: HTMLElement): Promise<void> {
   element.scrollIntoView({ block: "center", inline: "center" });
   await wait(120);
   dispatchActivationSequence(element);
+  triggerSelectOrDateInput(element);
   await waitForIdle();
 }
 

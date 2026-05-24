@@ -270,12 +270,23 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
 
   // Deduplicate nested elements: if candidate A's element contains candidate B's element,
   // we filter out candidate A (the container) to prevent clicking the same interactive area twice.
-  return candidates.filter((c1) => {
+  const finalCandidates = candidates.filter((c1) => {
     const hasNestedCandidate = candidates.some(
       (c2) => c2 !== c1 && c1.element.contains(c2.element)
     );
     return !hasNestedCandidate;
   });
+
+  const occurrenceCounts = new Map<string, number>();
+  for (const c of finalCandidates) {
+    const normalizedName = (c.snapshot.name || c.snapshot.role).replace(/\s+/g, " ").trim().toLowerCase();
+    const signature = `${normalizedName}:${c.snapshot.role}:${c.snapshot.tagName}`;
+    const count = occurrenceCounts.get(signature) || 0;
+    c.snapshot.occurrenceIndex = count;
+    occurrenceCounts.set(signature, count + 1);
+  }
+
+  return finalCandidates;
 }
 
 export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[] {
