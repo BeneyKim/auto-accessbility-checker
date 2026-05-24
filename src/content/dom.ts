@@ -257,10 +257,19 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
 
   collectDatePickerDropdownCandidates(shell, seen, candidates);
 
-  return candidates.sort((a, b) => {
+  candidates.sort((a, b) => {
     const ar = a.element.getBoundingClientRect();
     const br = b.element.getBoundingClientRect();
     return ar.top - br.top || ar.left - br.left;
+  });
+
+  // Deduplicate nested elements: if candidate A's element contains candidate B's element,
+  // we filter out candidate A (the container) to prevent clicking the same interactive area twice.
+  return candidates.filter((c1) => {
+    const hasNestedCandidate = candidates.some(
+      (c2) => c2 !== c1 && c1.element.contains(c2.element)
+    );
+    return !hasNestedCandidate;
   });
 }
 
@@ -521,17 +530,32 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
 }
 
 function isSwitchLike(element: HTMLElement): boolean {
-  const role = getRole(element);
-  const tag = element.tagName.toLowerCase();
-  const type = element.getAttribute("type");
-  const className = String(element.className ?? "");
-  return (
-    role === "switch" ||
-    role === "checkbox" ||
-    (tag === "input" && ["checkbox", "radio"].includes(type ?? "")) ||
-    /switch|toggle/i.test(className) ||
-    (element.hasAttribute("aria-pressed") && !hasNavigationHint(element))
-  );
+  const checkSelf = (el: HTMLElement): boolean => {
+    const role = getRole(el);
+    const tag = el.tagName.toLowerCase();
+    const type = el.getAttribute("type");
+    const className = String(el.className ?? "");
+    return (
+      role === "switch" ||
+      role === "checkbox" ||
+      (tag === "input" && ["checkbox", "radio"].includes(type ?? "")) ||
+      /switch|toggle/i.test(className) ||
+      (el.hasAttribute("aria-pressed") && !hasNavigationHint(el))
+    );
+  };
+
+  if (checkSelf(element)) {
+    return true;
+  }
+
+  // Also check if any descendant is a switch (e.g. wrapper rows wrapping switch buttons)
+  const descendants = Array.from(element.querySelectorAll<HTMLElement>("*"));
+  const hasDescendantSwitch = descendants.some(checkSelf);
+  if (hasDescendantSwitch && !hasNavigationHint(element)) {
+    return true;
+  }
+
+  return false;
 }
 
 function hasNavigationHint(element: HTMLElement): boolean {

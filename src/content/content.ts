@@ -71,6 +71,7 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
   const startedAt = new Date().toISOString();
   const results: ScreenResult[] = [];
   const logs: LogEntry[] = [];
+  let traversalContext: TraversalContext | undefined;
 
   const log = (level: LogEntry["level"], message: string, data?: unknown): void => {
     const entry = { timestamp: new Date().toISOString(), level, message, data };
@@ -78,7 +79,18 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
     const consoleMethod = level === "debug" ? "debug" : "log";
     const prefix = `${LOG_PREFIX} [${level.toUpperCase()}]`;
     console[consoleMethod](`${prefix} ${message}`, data ?? "");
-    void sendRuntimeMessageSafely({ type: "RUN_LOG", entry } satisfies RuntimeMessage);
+
+    let currentDepth = 0;
+    if (traversalContext && traversalContext.navigationStack) {
+      currentDepth = traversalContext.navigationStack.at(-1)?.depth ?? 0;
+    }
+
+    void sendRuntimeMessageSafely({
+      type: "RUN_LOG",
+      entry,
+      currentDepth,
+      maxDepth: settings.maxDepth
+    } satisfies RuntimeMessage);
   };
 
   try {
@@ -105,6 +117,7 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
       state: "ROOT_BRANCH",
       aborted: false
     };
+    traversalContext = traversal;
     const branches: Branch[] = ["product", "usefulFeatures", "settings"];
 
     for (const branch of branches) {

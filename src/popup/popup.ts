@@ -13,6 +13,7 @@ const downloadButton = document.querySelector<HTMLButtonElement>("#download");
 const downloadLogButton = document.querySelector<HTMLButtonElement>("#downloadLog");
 const reconButton = document.querySelector<HTMLButtonElement>("#recon");
 const statusText = document.querySelector<HTMLElement>("#status");
+const depthText = document.querySelector<HTMLElement>("#depth");
 const screenCountText = document.querySelector<HTMLElement>("#screenCount");
 const logsList = document.querySelector<HTMLOListElement>("#logs");
 
@@ -103,6 +104,11 @@ async function sendRuntimeMessage(message: RuntimeMessage): Promise<unknown> {
 function renderState(state: RunState, hasResult: boolean): void {
   if (statusText) {
     statusText.textContent = state.error ? `${state.status}: ${state.error}` : state.status;
+  }
+  if (depthText) {
+    const cur = typeof state.currentDepth === "number" ? state.currentDepth : 0;
+    const max = typeof state.maxDepth === "number" ? state.maxDepth : 0;
+    depthText.textContent = `${cur}/${max}`;
   }
   if (screenCountText) {
     screenCountText.textContent = String(state.screenCount);

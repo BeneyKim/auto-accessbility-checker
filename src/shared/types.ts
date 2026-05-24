@@ -20,6 +20,8 @@ export interface RunState {
   status: RunStatus;
   logs: LogEntry[];
   screenCount: number;
+  currentDepth?: number;
+  maxDepth?: number;
   error?: string;
 }
 
@@ -102,6 +104,8 @@ export interface CaptureScreenshotMessage {
 export interface RunLogMessage {
   type: "RUN_LOG";
   entry: LogEntry;
+  currentDepth?: number;
+  maxDepth?: number;
 }
 
 export interface RunCompleteMessage {

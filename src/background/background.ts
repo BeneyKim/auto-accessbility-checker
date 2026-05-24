@@ -46,6 +46,13 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       return captureScreenshot(sender.tab?.windowId);
     case "RUN_LOG":
       appendLog(message.entry.level, message.entry.message, message.entry.data, message.entry.timestamp);
+      if (typeof message.currentDepth === "number" && typeof message.maxDepth === "number") {
+        state = {
+          ...state,
+          currentDepth: message.currentDepth,
+          maxDepth: message.maxDepth
+        };
+      }
       return { ok: true };
     case "RUN_COMPLETE":
       lastResult = message.result;
@@ -91,7 +98,7 @@ async function startRun(settings: CheckerSettings): Promise<unknown> {
 
   lastResult = undefined;
   debugLog = [];
-  state = { status: "running", logs: [], screenCount: 0 };
+  state = { status: "running", logs: [], screenCount: 0, currentDepth: 0, maxDepth: settings.maxDepth };
   await chrome.storage.local.set({ [STORAGE_KEYS.settings]: settings, [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
   appendLog("info", "Run started.", { maxDepth: settings.maxDepth });
 
