@@ -1,3 +1,10 @@
+export class ParentRedirection extends Error {
+  constructor(public targetDepth: number) {
+    super(`Redirection to parent depth ${targetDepth}`);
+    Object.setPrototypeOf(this, ParentRedirection.prototype);
+  }
+}
+
 export interface TraversalFrameFlags {
   transitionClassification?: string;
   terminalOverlay?: boolean;

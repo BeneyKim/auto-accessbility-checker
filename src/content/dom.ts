@@ -354,7 +354,7 @@ export function screenSignature(shell: HTMLElement): string {
     .join("|");
   const overlays = Array.from(
     document.querySelectorAll<HTMLElement>(
-      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"]'
+      '[role="dialog"], [aria-modal="true"], [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"], [class*="calendar" i], [class*="picker" i], [class*="date" i], [class*="time" i], [class*="select" i]'
     )
   )
     .filter(isVisible)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates } from "../src/content/traversal";
+import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection } from "../src/content/traversal";
 
 describe("ThinQ traversal frame policy", () => {
   it("treats bottom sheet overlays as terminal screens", () => {
@@ -26,5 +26,13 @@ describe("ThinQ traversal frame policy", () => {
     expect(isSameDepthVariantName("2026년")).toBe(false);
     expect(isSameDepthVariantName("2026년 5월")).toBe(false);
     expect(isSameDepthVariantName("실내 초미세먼지(PM2.5) 이력")).toBe(false);
+  });
+
+  it("verifies ParentRedirection exception properties", () => {
+    const error = new ParentRedirection(2);
+    expect(error).toBeInstanceOf(ParentRedirection);
+    expect(error).toBeInstanceOf(Error);
+    expect(error.targetDepth).toBe(2);
+    expect(error.message).toBe("Redirection to parent depth 2");
   });
 });

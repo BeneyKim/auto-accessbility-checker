@@ -10,7 +10,7 @@ const UNSAFE_TRANSITION_STABLE_MS = 1200;
 const NO_CHANGE_STABLE_MS = 1800;
 const TRANSITION_POLL_MS = 150;
 const OVERLAY_SELECTOR =
-  '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"]';
+  '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"], [class*="calendar" i], [class*="picker" i], [class*="date" i], [class*="time" i], [class*="select" i]';
 
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
@@ -29,7 +29,7 @@ import {
   isVisible,
   screenSignature
 } from "./dom";
-import { isSameDepthVariantName, shouldTraverseFrameCandidates } from "./traversal";
+import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection } from "./traversal";
 
 let stopRequested = false;
 let activeRun: Promise<void> | undefined;
@@ -405,7 +405,19 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
 
     const key = candidateAttemptKey(frame, candidate.snapshot);
     context.attemptedCandidates.add(key);
-    await clickCandidateAndHandleTransition(context, frame, candidate.snapshot);
+    try {
+      await clickCandidateAndHandleTransition(context, frame, candidate.snapshot);
+    } catch (err) {
+      if (err instanceof ParentRedirection) {
+        if (err.targetDepth === frame.depth) {
+          context.log("info", `Unwinding stopped at target frame "${frame.rootTitle}" (depth ${frame.depth}). Continuing traversal here.`);
+        } else {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
   }
 }
 
@@ -499,6 +511,15 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
   }
 
   const childSnapshot = transition.after;
+  const matchingParentFrame = context.navigationStack.find(f => 
+    f.rootTitle === childSnapshot.title &&
+    f.semanticIdentity?.urlPathname === new URL(childSnapshot.url, location.href).pathname
+  );
+  if (matchingParentFrame && matchingParentFrame.depth < frame.depth) {
+    context.log("info", `Redirected back to parent frame "${matchingParentFrame.rootTitle}" (depth ${matchingParentFrame.depth}) via candidate "${triggerName}". Unwinding stack.`);
+    throw new ParentRedirection(matchingParentFrame.depth);
+  }
+
   if (!childSnapshot.shell) {
     context.log("error", "Accepted child transition without a shell; aborting.", { triggerName, transition });
     context.aborted = true;
@@ -535,27 +556,48 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     classification: transition.classification
   });
 
+  let redirectionThrown = false;
+  let targetRedirectionDepth = -1;
   let restored: RestoreResult = { restored: false, method: "failed" };
   try {
     await traverseFrame(context, childFrame);
-  } finally {
-    context.state = "RESTORE_PENDING";
-    context.log("info", "restore started.", { targetFrame: restoreTarget, childFrame });
-    if (context.aborted) {
-      restored = { restored: false, method: "failed", reason: "traversal-already-aborted" };
-      context.log("warn", "restore skipped because traversal is already aborted.", { targetFrame: restoreTarget, childFrame });
+  } catch (err) {
+    if (err instanceof ParentRedirection) {
+      redirectionThrown = true;
+      targetRedirectionDepth = err.targetDepth;
+      context.log("info", `Propagating parent redirection to depth ${targetRedirectionDepth} (current frame depth: ${childFrame.depth})`);
+      throw err;
     } else {
-      restored = await restoreFrame(context, restoreTarget, childFrame);
+      throw err;
     }
-    context.navigationStack.pop();
-    context.log(restored.restored ? "info" : "error", "depth popped.", {
-      triggerName,
-      fromDepth: childFrame.depth,
-      toDepth: frame.depth,
-      restored: restored.restored,
-      method: restored.method,
-      reason: restored.reason
-    });
+  } finally {
+    if (redirectionThrown) {
+      restored = { restored: true, method: "self-healing", reason: "unwinding-redirection" };
+      context.navigationStack.pop();
+      context.log("info", "depth popped due to unwinding redirection.", {
+        triggerName,
+        fromDepth: childFrame.depth,
+        toDepth: frame.depth
+      });
+    } else {
+      context.state = "RESTORE_PENDING";
+      context.log("info", "restore started.", { targetFrame: restoreTarget, childFrame });
+      if (context.aborted) {
+        restored = { restored: false, method: "failed", reason: "traversal-already-aborted" };
+        context.log("warn", "restore skipped because traversal is already aborted.", { targetFrame: restoreTarget, childFrame });
+      } else {
+        restored = await restoreFrame(context, restoreTarget, childFrame);
+      }
+      context.navigationStack.pop();
+      context.log(restored.restored ? "info" : "error", "depth popped.", {
+        triggerName,
+        fromDepth: childFrame.depth,
+        toDepth: frame.depth,
+        restored: restored.restored,
+        method: restored.method,
+        reason: restored.reason
+      });
+    }
   }
 
   if (!restored.restored) {
@@ -613,6 +655,32 @@ async function recordSameDepthVariantResult(
   await recordScreenResult(context, variantFrame, snapshot);
 }
 
+function isPageLoading(): boolean {
+  const progress = document.querySelector('[role="progressbar"], [aria-busy="true"]');
+  if (progress && isVisible(progress as HTMLElement)) {
+    return true;
+  }
+  const spinners = document.querySelectorAll('[class*="spinner" i], [class*="loader" i], [class*="loading-spinner" i]');
+  for (const el of Array.from(spinners)) {
+    if (el instanceof HTMLElement && isVisible(el)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isPageLoadingOrEmpty(snapshot: ScreenSnapshot): boolean {
+  if (isPageLoading()) {
+    return true;
+  }
+  if (snapshot.boundaryPresent && snapshot.candidateNames.length === 0) {
+    if (snapshot.overlayDescriptors.length === 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function waitAndClassifyTransition(
   before: ScreenSnapshot,
   trigger: CandidateSnapshot,
@@ -651,11 +719,15 @@ async function waitAndClassifyTransition(
       continue;
     }
 
+    const isLoading = isPageLoadingOrEmpty(latest);
+
     const isStableSuccess =
-      latestClassification.classification === "in-product-child" ||
-      latestClassification.classification === "overlay-opened" ||
-      latestClassification.classification === "branch-changed" ||
-      (latestClassification.classification === "state-change" && isTab);
+      !isLoading && (
+        latestClassification.classification === "in-product-child" ||
+        latestClassification.classification === "overlay-opened" ||
+        latestClassification.classification === "branch-changed" ||
+        (latestClassification.classification === "state-change" && isTab)
+      );
 
     if (isStableSuccess) {
       lastSafeTransition = latestClassification;
@@ -666,7 +738,7 @@ async function waitAndClassifyTransition(
       if (latestClassification.classification !== "no-change") {
         lastSafeTransition = latestClassification;
       }
-      if (stableFor >= NO_CHANGE_STABLE_MS) {
+      if (stableFor >= NO_CHANGE_STABLE_MS && !isLoading) {
         return latestClassification;
       }
     }
@@ -924,7 +996,8 @@ async function waitForFrameRestore(frame: NavigationFrame, timeoutMs: number): P
   let snapshot = getCurrentScreenSnapshot();
   while (performance.now() - started < timeoutMs) {
     const isRelaxed = snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.title === frame.rootTitle;
-    if (isFrameRestored(frame, snapshot) || isRelaxed || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
+    const isLoading = isPageLoadingOrEmpty(snapshot);
+    if (!isLoading && (isFrameRestored(frame, snapshot) || isRelaxed || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent)) {
       return snapshot;
     }
     await wait(150);
