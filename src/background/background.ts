@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import { DEFAULT_SETTINGS, STORAGE_KEYS, THINQ_HOST } from "../shared/constants";
 import { buildHtmlReport, buildJsonReport, buildMarkdownReport, makeFileBase } from "../shared/report";
 import type { CheckerSettings, LogEntry, ReconSnapshot, RunResult, RunState, RuntimeMessage } from "../shared/types";
@@ -158,20 +159,42 @@ async function downloadReport(): Promise<unknown> {
   }
 
   const base = makeFileBase(lastResult.metadata.title);
-  const files = [
-    { filename: `${base}.json`, content: buildJsonReport(lastResult), mime: "application/json" },
-    { filename: `${base}.md`, content: buildMarkdownReport(lastResult), mime: "text/markdown" },
-    { filename: `${base}.html`, content: buildHtmlReport(lastResult), mime: "text/html" }
-  ];
+  
+  // Clone to avoid mutating in-memory lastResult
+  const reportResult = JSON.parse(JSON.stringify(lastResult)) as RunResult;
 
-  for (const file of files) {
-    await chrome.downloads.download({
-      url: toDataUrl(file.content, file.mime),
-      filename: file.filename,
-      saveAs: false
-    });
-  }
-  appendLog("info", "Report downloads started.", { files: files.map((file) => file.filename) });
+  // Package reports into a single ZIP file
+  const zip = new JSZip();
+
+  // Extract base64 screenshots to separate files in ZIP and replace with relative paths
+  reportResult.results.forEach((screen, index) => {
+    if (screen.screenshot) {
+      const match = screen.screenshot.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+      if (match) {
+        const ext = match[1];
+        const base64Data = match[2];
+        const relativePath = `screenshots/screenshot_${index + 1}.${ext}`;
+        zip.file(relativePath, base64Data, { base64: true });
+        screen.screenshot = relativePath;
+      }
+    }
+  });
+
+  zip.file(`${base}.json`, buildJsonReport(reportResult));
+  zip.file(`${base}.md`, buildMarkdownReport(reportResult));
+  zip.file(`${base}.html`, buildHtmlReport(reportResult));
+  
+  // Generate base64 ZIP content for compatibility with MV3 Service Worker
+  const base64Data = await zip.generateAsync({ type: "base64" });
+  const dataUrl = `data:application/zip;base64,${base64Data}`;
+
+  await chrome.downloads.download({
+    url: dataUrl,
+    filename: `${base}.zip`,
+    saveAs: false
+  });
+
+  appendLog("info", "Report ZIP download started.", { filename: `${base}.zip` });
   return { ok: true };
 }
 

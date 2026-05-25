@@ -1,6 +1,12 @@
 import type { Branch, CandidateSnapshot } from "../shared/types";
 import { matchForbiddenRule, ruleToSkipReason } from "../shared/forbidden-registry";
 
+declare global {
+  interface Window {
+    __thinqSeed__?: number;
+  }
+}
+
 const BLOCKED_TEXT_PATTERNS = [
   /ThinQ\s*Web/i,
   /ThinQ\s*PLAY/i,
@@ -284,8 +290,11 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     ? deduplicatedCandidates.filter((c) => !isSaveLikeName(c.snapshot.name))
     : deduplicatedCandidates;
 
+  // Filter out duplicate-named candidates in the same group (sibling/cousin list items)
+  const dedupedNameCandidates = filterDuplicateNamesInGroups(finalCandidates);
+
   // Sample large repeating lists to prevent timeouts and redundant clicks
-  const sampledCandidates = sampleLargeLists(finalCandidates);
+  const sampledCandidates = sampleLargeLists(dedupedNameCandidates);
 
   const occurrenceCounts = new Map<string, number>();
   for (const c of sampledCandidates) {
@@ -824,12 +833,67 @@ export function isSaveLikeName(name: string): boolean {
   return /저장|등록|확인|완료|적용|추가|생성|save|confirm|apply|submit|done|add|create|register/i.test(norm);
 }
 
+export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): ClickCandidate[] {
+  const groupMap = new Map<HTMLElement, Map<string, ClickCandidate[]>>();
+
+  for (const c of candidates) {
+    let curr = c.element.parentElement;
+    for (let level = 1; level <= 2; level++) {
+      if (!curr || curr === document.body) break;
+      
+      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      if (!groupMap.has(curr)) {
+        groupMap.set(curr, new Map());
+      }
+      const typeMap = groupMap.get(curr)!;
+      if (!typeMap.has(typeKey)) {
+        typeMap.set(typeKey, []);
+      }
+      typeMap.get(typeKey)!.push(c);
+      
+      curr = curr.parentElement;
+    }
+  }
+
+  const candidateToGroup = new Map<ClickCandidate, ClickCandidate[]>();
+  for (const c of candidates) {
+    let curr = c.element.parentElement;
+    for (let level = 1; level <= 2; level++) {
+      if (!curr || curr === document.body) break;
+      
+      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      const group = groupMap.get(curr)?.get(typeKey) || [];
+      if (group.length >= 2) {
+        candidateToGroup.set(c, group);
+        break;
+      }
+      curr = curr.parentElement;
+    }
+  }
+
+  const uniqueGroups = new Set<ClickCandidate[]>(candidateToGroup.values());
+  const candidatesToRemove = new Set<ClickCandidate>();
+
+  for (const group of uniqueGroups) {
+    const seenNames = new Set<string>();
+    for (const c of group) {
+      const name = c.snapshot.name || c.snapshot.role;
+      if (seenNames.has(name)) {
+        candidatesToRemove.add(c);
+      } else {
+        seenNames.add(name);
+      }
+    }
+  }
+
+  return candidates.filter(c => !candidatesToRemove.has(c));
+}
+
 export function sampleLargeLists(candidates: ClickCandidate[]): ClickCandidate[] {
-  // We want to find common ancestors (up to 3 levels: parent, grandparent, great-grandparent)
-  // where there are 5 or more candidates of the same tagName and role at the same depth level.
-  
-  // For each ancestor at a specific level, count candidates of the same type.
-  // Key: ancestor element. Value: Map of "tagName:role:level" -> array of candidates
+  if (typeof window !== "undefined" && !window.__thinqSeed__) {
+    window.__thinqSeed__ = Math.random();
+  }
+
   const groupMap = new Map<HTMLElement, Map<string, ClickCandidate[]>>();
 
   // Populate counts
@@ -877,9 +941,17 @@ export function sampleLargeLists(candidates: ClickCandidate[]): ClickCandidate[]
   for (const group of uniqueGroups) {
     if (group.length >= 5) {
       const first = group[0];
-      const midIndex = 1 + Math.floor(Math.random() * (group.length - 2));
-      const mid = group[midIndex];
       const last = group[group.length - 1];
+
+      // Compute a stable hash of the group signatures to determine the index deterministically during the run
+      const groupSignature = group.map(c => c.snapshot.name || c.snapshot.role).join("|");
+      const seedVal = typeof window !== "undefined" ? (window.__thinqSeed__ || 0.5) : 0.5;
+      const hashStr = `${groupSignature}:${seedVal}`;
+      const hashInt = parseInt(hash(hashStr), 36);
+      const randVal = (hashInt % 10000) / 10000;
+
+      const midIndex = 1 + Math.floor(randVal * (group.length - 2));
+      const mid = group[midIndex];
 
       for (const c of group) {
         if (c !== first && c !== mid && c !== last) {

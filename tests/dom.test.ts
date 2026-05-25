@@ -11,7 +11,8 @@ import {
   screenSignature,
   isCancelLikeName,
   isSaveLikeName,
-  sampleLargeLists
+  sampleLargeLists,
+  filterDuplicateNamesInGroups
 } from "../src/content/dom";
 
 beforeEach(() => {
@@ -447,10 +448,10 @@ describe("ThinQ DOM helpers", () => {
   it("assigns occurrenceIndex to duplicate-named candidates", () => {
     document.body.innerHTML = `
       <section role="dialog" data-width="900" data-height="700">
-        <button id="btn1">6일 남음</button>
-        <button id="btn2">6일 남음</button>
-        <button id="btn3">6일 남음</button>
-        <button id="btn4">다른 버튼</button>
+        <div><div><button id="btn1">6일 남음</button></div></div>
+        <div><div><button id="btn2">6일 남음</button></div></div>
+        <div><div><button id="btn3">6일 남음</button></div></div>
+        <div><div><button id="btn4">다른 버튼</button></div></div>
       </section>
     `;
 
@@ -599,6 +600,70 @@ describe("ThinQ DOM helpers", () => {
 
       const ids = candidates.map(c => c.element.id);
       expect(ids).toEqual(["item0", "item1", "item2", "item3"]);
+    });
+  });
+
+  describe("Sibling/cousin duplicate name filtering", () => {
+    it("filters out duplicate-named candidates in sibling groups", () => {
+      document.body.innerHTML = `
+        <div id="container" role="dialog" data-width="900" data-height="700">
+          <div id="list">
+            <button id="btn1">5일 남음</button>
+            <button id="btn2">5일 남음</button>
+            <button id="btn3">14일 남음</button>
+            <button id="btn4">14일 남음</button>
+          </div>
+        </div>
+      `;
+
+      const shell = document.getElementById("container")!;
+      const candidates = collectClickCandidates(shell);
+
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toEqual(["btn1", "btn3"]);
+    });
+  });
+
+  describe("Stable randomized list sampling", () => {
+    it("selects the same middle element on multiple calls with same candidates, but changes with seed", () => {
+      document.body.innerHTML = `
+        <div id="container" role="dialog" data-width="900" data-height="700">
+          <div id="list">
+            <button id="item0">Item 0</button>
+            <button id="item1">Item 1</button>
+            <button id="item2">Item 2</button>
+            <button id="item3">Item 3</button>
+            <button id="item4">Item 4</button>
+            <button id="item5">Item 5</button>
+            <button id="item6">Item 6</button>
+            <button id="item7">Item 7</button>
+            <button id="item8">Item 8</button>
+            <button id="item9">Item 9</button>
+          </div>
+        </div>
+      `;
+
+      const shell = document.getElementById("container")!;
+      
+      // Call 1
+      window.__thinqSeed__ = 0.12345;
+      const c1 = collectClickCandidates(shell).map(c => c.element.id);
+
+      // Call 2 (with same seed, should be identical)
+      const c2 = collectClickCandidates(shell).map(c => c.element.id);
+      expect(c2).toEqual(c1);
+
+      // Call 3 (with different seed, may pick a different middle element)
+      let differentResultFound = false;
+      for (let s = 1; s <= 20; s++) {
+        window.__thinqSeed__ = s / 20;
+        const c3 = collectClickCandidates(shell).map(c => c.element.id);
+        if (c3[1] !== c1[1]) {
+          differentResultFound = true;
+          break;
+        }
+      }
+      expect(differentResultFound).toBe(true);
     });
   });
 });

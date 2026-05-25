@@ -1,6 +1,6 @@
 {
   "name": "thinq-web-ibm-accessibility-checker",
-  "version": "0.99.1",
+  "version": "0.99.2",
   "private": true,
   "description": "Chrome/Edge MV3 extension that crawls ThinQ Web product screens and runs IBM Equal Access accessibility checks.",
   "type": "module",
@@ -14,7 +14,8 @@
     "e2e": "npx playwright test --config playwright.config.ts"
   },
   "dependencies": {
-    "accessibility-checker-engine": "^4.0.9"
+    "accessibility-checker-engine": "^4.0.9",
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

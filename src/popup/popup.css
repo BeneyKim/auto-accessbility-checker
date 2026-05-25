@@ -85,9 +85,22 @@ button:disabled {
   opacity: 0.55;
 }
 
-#download,
 #downloadLog {
   grid-column: 1 / -1;
+}
+
+#download {
+  grid-column: 1 / -1;
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+  font-weight: 700;
+}
+
+#download:disabled {
+  background: #34d399;
+  border-color: #34d399;
+  opacity: 0.55;
 }
 
 .status-panel {
