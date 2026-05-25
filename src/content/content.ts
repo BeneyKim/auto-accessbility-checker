@@ -29,7 +29,7 @@ import {
   isVisible,
   screenSignature
 } from "./dom";
-import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection } from "./traversal";
+import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "./traversal";
 
 let stopRequested = false;
 let activeRun: Promise<void> | undefined;
@@ -376,6 +376,7 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   }
 
   while (!stopRequested && !context.aborted) {
+    await waitPageSettle();
     snapshot = getCurrentScreenSnapshot();
     if (!snapshot.shell || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent) {
       context.log("error", "Frame became unsafe before collecting next candidate.", { frame, snapshot: summarizeSnapshot(snapshot) });
@@ -660,10 +661,19 @@ function isPageLoading(): boolean {
   if (progress && isVisible(progress as HTMLElement)) {
     return true;
   }
-  const spinners = document.querySelectorAll('[class*="spinner" i], [class*="loader" i], [class*="loading-spinner" i]');
+  const spinners = document.querySelectorAll('[class*="spinner" i], [class*="loader" i], [class*="loading-spinner" i], [class*="loading_dimmed" i]');
   for (const el of Array.from(spinners)) {
     if (el instanceof HTMLElement && isVisible(el)) {
       return true;
+    }
+  }
+  const overlays = document.querySelectorAll('[class*="dimmed" i], [class*="loading" i], [id*="loading" i]');
+  for (const el of Array.from(overlays)) {
+    if (el instanceof HTMLElement && isVisible(el)) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > window.innerWidth * 0.9 && rect.height > window.innerHeight * 0.9) {
+        return true;
+      }
     }
   }
   return false;
@@ -680,6 +690,28 @@ function isPageLoadingOrEmpty(snapshot: ScreenSnapshot): boolean {
   }
   return false;
 }
+
+async function waitPageSettle(timeoutMs = 3000): Promise<void> {
+  const started = performance.now();
+  let lastSig = "";
+  let stableSince = performance.now();
+  while (performance.now() - started < timeoutMs) {
+    if (isPageLoading()) {
+      stableSince = performance.now();
+    } else {
+      const snap = getCurrentScreenSnapshot();
+      const currentSig = snap.signature;
+      if (currentSig !== lastSig) {
+        lastSig = currentSig;
+        stableSince = performance.now();
+      } else if (performance.now() - stableSince > 300) {
+        return;
+      }
+    }
+    await wait(100);
+  }
+}
+
 
 async function waitAndClassifyTransition(
   before: ScreenSnapshot,
@@ -904,9 +936,20 @@ async function restoreFrame(context: TraversalContext, targetFrame: NavigationFr
 async function reNavigateToFrame(context: TraversalContext, targetFrame: NavigationFrame): Promise<boolean> {
   context.log("info", `Attempting self-healing re-navigation to frame with menu path: ${targetFrame.menuPath.join(" > ")}`);
   
-  const controls = getBranchControls();
+  let controls = getBranchControls();
   if (!controls) {
-    context.log("warn", "Cannot re-navigate: branch controls not found.");
+    context.log("warn", "Cannot re-navigate: branch controls not found. Attempting branch root URL navigation fallback.");
+    const rootUrlPath = context.navigationStack[0]?.semanticIdentity?.urlPathname;
+    if (rootUrlPath) {
+      location.href = rootUrlPath;
+      await wait(1000);
+      await waitPageSettle();
+      controls = getBranchControls();
+    }
+  }
+  
+  if (!controls) {
+    context.log("warn", "Cannot re-navigate: branch controls not found after root URL recovery.");
     return false;
   }
   
@@ -1232,7 +1275,8 @@ function describeStableShell(shell: HTMLElement): string {
 }
 
 function candidateAttemptKey(frame: NavigationFrame, candidate: CandidateSnapshot): string {
-  const normalizedName = (candidate.name || candidate.role).replace(/\s+/g, " ").trim().toLowerCase();
+  const rawName = candidate.name || candidate.role;
+  const normalizedName = normalizeStateIndicators(rawName).toLowerCase();
   if (isSameDepthVariantName(normalizedName)) {
     return `${frame.branch}:${frame.depth}:variant:${normalizedName}`;
   }

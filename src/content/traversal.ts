@@ -29,3 +29,12 @@ export function isSameDepthVariantName(name: string): boolean {
   const normalizedName = name.replace(/\s+/g, " ").trim();
   return SAME_DEPTH_VARIANT_PATTERNS.some((pattern) => pattern.test(normalizedName));
 }
+
+export function normalizeStateIndicators(name: string): string {
+  let res = name;
+  // Strip prefixes
+  res = res.replace(/^(현재 다운로드 코스|선택됨|사용 중|사용|켜짐|꺼짐),\s*/i, "");
+  // Strip suffixes
+  res = res.replace(/,\s*(다운로드됨|사용 중|사용|선택됨|켜짐|꺼짐|선택 목록)$/i, "");
+  return res.replace(/\s+/g, " ").trim();
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection } from "../src/content/traversal";
+import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "../src/content/traversal";
 
 describe("ThinQ traversal frame policy", () => {
   it("treats bottom sheet overlays as terminal screens", () => {
@@ -34,5 +34,14 @@ describe("ThinQ traversal frame policy", () => {
     expect(error).toBeInstanceOf(Error);
     expect(error.targetDepth).toBe(2);
     expect(error.message).toBe("Redirection to parent depth 2");
+  });
+
+  it("normalizes state indicators from candidate names", () => {
+    expect(normalizeStateIndicators("현재 다운로드 코스, 기름기 많은 식기 (P6)")).toBe("기름기 많은 식기 (P6)");
+    expect(normalizeStateIndicators("기름기 많은 식기 (P6), 다운로드됨")).toBe("기름기 많은 식기 (P6)");
+    expect(normalizeStateIndicators("스마트케어+, 사용")).toBe("스마트케어+");
+    expect(normalizeStateIndicators("켜짐, 오토모드")).toBe("오토모드");
+    expect(normalizeStateIndicators("식기세척기, 선택 목록")).toBe("식기세척기");
+    expect(normalizeStateIndicators("고기류 구이 (P5)")).toBe("고기류 구이 (P5)");
   });
 });
