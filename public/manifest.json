@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ThinQ Web IBM Accessibility Checker",
   "short_name": "ThinQ A11y",
-  "version": "0.99",
+  "version": "0.99.1",
   "description": "Crawls ThinQ Web product screens and generates IBM Equal Access accessibility reports.",
   "action": {
     "default_popup": "popup.html",
@@ -12,7 +12,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "downloads", "scripting", "storage", "tabs"],
+  "permissions": ["activeTab", "downloads", "scripting", "storage", "tabs", "unlimitedStorage"],
   "host_permissions": ["https://my.lgthinq.com/*"],
   "content_scripts": [
     {

@@ -793,6 +793,37 @@ export function buildHtmlReport(result: RunResult): string {
 }
 
 function buildScreenMarkdown(screen: ScreenResult): string[] {
+  const report = screen.ibmReport;
+  const results = (report && typeof report === "object" && "results" in report && Array.isArray(report.results)) ? report.results : [];
+  const issues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+
+  const issueLines: string[] = [];
+  if (issues.length > 0) {
+    issueLines.push("### Issues", "");
+    issueLines.push("| Level | Rule ID | Message | Selector |");
+    issueLines.push("| --- | --- | --- | --- |");
+    for (const issue of issues) {
+      const type = issue.value ? issue.value[1] : "unknown"; // FAIL, POTENTIAL, MANUAL
+      const severity = issue.value ? issue.value[0] : "unknown"; // VIOLATION, RECOMMENDATION, etc.
+      let badge = "";
+      if (type === "FAIL") {
+        badge = `❌ Violation (${severity})`;
+      } else if (type === "POTENTIAL") {
+        badge = `⚠️ Potential (${severity})`;
+      } else if (type === "MANUAL") {
+        badge = `ℹ️ Manual`;
+      } else {
+        badge = `❓ ${type} (${severity})`;
+      }
+      const ruleId = issue.ruleId || "unknown-rule";
+      const message = (issue.message || "No description.").replace(/\r?\n/g, " ");
+      const selector = (issue.path?.dom || "unknown").replace(/\|/g, "\\|");
+      issueLines.push(`| ${badge} | ${ruleId} | ${escapeMarkdown(message)} | \`${selector}\` |`);
+    }
+  } else {
+    issueLines.push("🎉 **All Accessibility Checks Passed**", "");
+  }
+
   return [
     `## ${screen.menuPath.join(" > ") || screen.title}`,
     "",
@@ -805,9 +836,7 @@ function buildScreenMarkdown(screen: ScreenResult): string[] {
     "",
     screen.screenshot ? `![Screenshot](${screen.screenshot})` : "No screenshot captured.",
     "",
-    "```json",
-    JSON.stringify(screen.ibmReport, null, 2),
-    "```",
+    ...issueLines,
     ""
   ];
 }

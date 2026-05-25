@@ -8,7 +8,10 @@ import {
   getProductBoundary,
   isBlockedNavigationName,
   isDatePickerTriggerName,
-  screenSignature
+  screenSignature,
+  isCancelLikeName,
+  isSaveLikeName,
+  sampleLargeLists
 } from "../src/content/dom";
 
 beforeEach(() => {
@@ -464,5 +467,138 @@ describe("ThinQ DOM helpers", () => {
     expect(btn2.snapshot.occurrenceIndex).toBe(1);
     expect(btn3.snapshot.occurrenceIndex).toBe(2);
     expect(btn4.snapshot.occurrenceIndex).toBe(0);
+  });
+
+  describe("Cancel vs Save button prioritization", () => {
+    it("identifies cancel-like and save-like button names correctly", () => {
+      expect(isCancelLikeName("취소")).toBe(true);
+      expect(isCancelLikeName("닫기")).toBe(true);
+      expect(isCancelLikeName("뒤로가기")).toBe(true);
+      expect(isCancelLikeName("cancel")).toBe(true);
+      expect(isCancelLikeName("close")).toBe(true);
+      expect(isCancelLikeName("아니오")).toBe(true);
+
+      expect(isSaveLikeName("저장")).toBe(true);
+      expect(isSaveLikeName("등록")).toBe(true);
+      expect(isSaveLikeName("확인")).toBe(true);
+      expect(isSaveLikeName("완료")).toBe(true);
+      expect(isSaveLikeName("적용")).toBe(true);
+      expect(isSaveLikeName("추가")).toBe(true);
+      expect(isSaveLikeName("생성")).toBe(true);
+      expect(isSaveLikeName("save")).toBe(true);
+      expect(isSaveLikeName("yes")).toBe(true);
+
+      // Should not false-positive match keywords
+      expect(isSaveLikeName("예약")).toBe(false);
+      expect(isSaveLikeName("식품 정보")).toBe(false);
+      expect(isCancelLikeName("소모품 정보")).toBe(false);
+    });
+
+    it("filters out Save-like button when BOTH Cancel-like and Save-like buttons are present", () => {
+      document.body.innerHTML = `
+        <section role="dialog" data-width="900" data-height="700">
+          <button id="btnCancel">취소</button>
+          <button id="btnSave">저장</button>
+          <button id="btnOther">일반 버튼</button>
+        </section>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+
+      const names = candidates.map(c => c.snapshot.name);
+      expect(names).toContain("취소");
+      expect(names).toContain("일반 버튼");
+      expect(names).not.toContain("저장");
+    });
+
+    it("does NOT filter out Save-like button when NO Cancel-like button is present", () => {
+      document.body.innerHTML = `
+        <section role="dialog" data-width="900" data-height="700">
+          <button id="btnSave">저장</button>
+          <button id="btnOther">일반 버튼</button>
+        </section>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+
+      const names = candidates.map(c => c.snapshot.name);
+      expect(names).toContain("저장");
+      expect(names).toContain("일반 버튼");
+    });
+
+    it("does NOT filter out Cancel-like button when NO Save-like button is present", () => {
+      document.body.innerHTML = `
+        <section role="dialog" data-width="900" data-height="700">
+          <button id="btnCancel">취소</button>
+          <button id="btnOther">일반 버튼</button>
+        </section>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+
+      const names = candidates.map(c => c.snapshot.name);
+      expect(names).toContain("취소");
+      expect(names).toContain("일반 버튼");
+    });
+  });
+
+  describe("Repeating list sampling optimization", () => {
+    it("samples 10 sibling buttons to exactly 3 buttons (first, middle, last)", () => {
+      document.body.innerHTML = `
+        <div id="container" role="dialog" data-width="900" data-height="700">
+          <div id="list">
+            <button id="item0">Item 0</button>
+            <button id="item1">Item 1</button>
+            <button id="item2">Item 2</button>
+            <button id="item3">Item 3</button>
+            <button id="item4">Item 4</button>
+            <button id="item5">Item 5</button>
+            <button id="item6">Item 6</button>
+            <button id="item7">Item 7</button>
+            <button id="item8">Item 8</button>
+            <button id="item9">Item 9</button>
+          </div>
+          <button id="isolated">Isolated Settings</button>
+        </div>
+      `;
+
+      const shell = document.getElementById("container")!;
+      const candidates = collectClickCandidates(shell);
+
+      // Candidates of the list should be sampled to exactly 3 items:
+      // index 0 (item0), index 9 (item9), and exactly one middle item from [item1..item8].
+      // The isolated settings button should remain.
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("item0");
+      expect(ids).toContain("item9");
+      expect(ids).toContain("isolated");
+      expect(ids.length).toBe(4);
+
+      const middleItems = ids.filter(id => id.startsWith("item") && id !== "item0" && id !== "item9");
+      expect(middleItems.length).toBe(1);
+      expect(["item1", "item2", "item3", "item4", "item5", "item6", "item7", "item8"]).toContain(middleItems[0]);
+    });
+
+    it("does NOT sample lists with fewer than 5 items", () => {
+      document.body.innerHTML = `
+        <div id="container" role="dialog" data-width="900" data-height="700">
+          <div id="list">
+            <button id="item0">Item 0</button>
+            <button id="item1">Item 1</button>
+            <button id="item2">Item 2</button>
+            <button id="item3">Item 3</button>
+          </div>
+        </div>
+      `;
+
+      const shell = document.getElementById("container")!;
+      const candidates = collectClickCandidates(shell);
+
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toEqual(["item0", "item1", "item2", "item3"]);
+    });
   });
 });

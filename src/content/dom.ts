@@ -270,15 +270,25 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
 
   // Deduplicate nested elements: if candidate A's element contains candidate B's element,
   // we filter out candidate A (the container) to prevent clicking the same interactive area twice.
-  const finalCandidates = candidates.filter((c1) => {
+  const deduplicatedCandidates = candidates.filter((c1) => {
     const hasNestedCandidate = candidates.some(
       (c2) => c2 !== c1 && c1.element.contains(c2.element)
     );
     return !hasNestedCandidate;
   });
 
+  // Common Policy: If BOTH Cancel-like and Save-like candidates exist on the same screen,
+  // we filter out the Save-like candidates. This prevents state mutation loops while still scanning the screen.
+  const hasCancel = deduplicatedCandidates.some((c) => isCancelLikeName(c.snapshot.name));
+  const finalCandidates = hasCancel
+    ? deduplicatedCandidates.filter((c) => !isSaveLikeName(c.snapshot.name))
+    : deduplicatedCandidates;
+
+  // Sample large repeating lists to prevent timeouts and redundant clicks
+  const sampledCandidates = sampleLargeLists(finalCandidates);
+
   const occurrenceCounts = new Map<string, number>();
-  for (const c of finalCandidates) {
+  for (const c of sampledCandidates) {
     const normalizedName = (c.snapshot.name || c.snapshot.role).replace(/\s+/g, " ").trim().toLowerCase();
     const signature = `${normalizedName}:${c.snapshot.role}:${c.snapshot.tagName}`;
     const count = occurrenceCounts.get(signature) || 0;
@@ -286,7 +296,7 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     occurrenceCounts.set(signature, count + 1);
   }
 
-  return finalCandidates;
+  return sampledCandidates;
 }
 
 export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[] {
@@ -797,3 +807,88 @@ function hash(value: string): string {
   }
   return (result >>> 0).toString(36);
 }
+
+export function isCancelLikeName(name: string): boolean {
+  const norm = name.replace(/\s+/g, "").toLowerCase();
+  if (norm === "no" || norm === "아니오") {
+    return true;
+  }
+  return /취소|닫기|이전|뒤로|cancel|close|back|dismiss/i.test(norm);
+}
+
+export function isSaveLikeName(name: string): boolean {
+  const norm = name.replace(/\s+/g, "").toLowerCase();
+  if (norm === "yes" || norm === "ok" || norm === "예" || norm === "네") {
+    return true;
+  }
+  return /저장|등록|확인|완료|적용|추가|생성|save|confirm|apply|submit|done|add|create|register/i.test(norm);
+}
+
+export function sampleLargeLists(candidates: ClickCandidate[]): ClickCandidate[] {
+  // We want to find common ancestors (up to 3 levels: parent, grandparent, great-grandparent)
+  // where there are 5 or more candidates of the same tagName and role at the same depth level.
+  
+  // For each ancestor at a specific level, count candidates of the same type.
+  // Key: ancestor element. Value: Map of "tagName:role:level" -> array of candidates
+  const groupMap = new Map<HTMLElement, Map<string, ClickCandidate[]>>();
+
+  // Populate counts
+  for (const c of candidates) {
+    let curr = c.element.parentElement;
+    for (let level = 1; level <= 3; level++) {
+      if (!curr || curr === document.body) break;
+      
+      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      if (!groupMap.has(curr)) {
+        groupMap.set(curr, new Map());
+      }
+      const typeMap = groupMap.get(curr)!;
+      if (!typeMap.has(typeKey)) {
+        typeMap.set(typeKey, []);
+      }
+      typeMap.get(typeKey)!.push(c);
+      
+      curr = curr.parentElement;
+    }
+  }
+
+  // Map each candidate to its closest group of size >= 5 (starting from level 1 to 3)
+  const candidateToGroup = new Map<ClickCandidate, ClickCandidate[]>();
+
+  for (const c of candidates) {
+    let curr = c.element.parentElement;
+    for (let level = 1; level <= 3; level++) {
+      if (!curr || curr === document.body) break;
+      
+      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      const group = groupMap.get(curr)?.get(typeKey) || [];
+      if (group.length >= 5) {
+        candidateToGroup.set(c, group);
+        break; // Stop at the closest ancestor meeting the criteria
+      }
+      curr = curr.parentElement;
+    }
+  }
+
+  // Deduplicate and collect the unique groups to sample
+  const uniqueGroups = new Set<ClickCandidate[]>(candidateToGroup.values());
+
+  const candidatesToKeep = new Set<ClickCandidate>(candidates);
+  for (const group of uniqueGroups) {
+    if (group.length >= 5) {
+      const first = group[0];
+      const midIndex = 1 + Math.floor(Math.random() * (group.length - 2));
+      const mid = group[midIndex];
+      const last = group[group.length - 1];
+
+      for (const c of group) {
+        if (c !== first && c !== mid && c !== last) {
+          candidatesToKeep.delete(c);
+        }
+      }
+    }
+  }
+
+  return candidates.filter(c => candidatesToKeep.has(c));
+}
+
