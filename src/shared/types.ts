@@ -23,6 +23,7 @@ export interface RunState {
   currentDepth?: number;
   maxDepth?: number;
   error?: string;
+  currentScreenTitle?: string;
 }
 
 export interface NavigationTrigger {
@@ -106,6 +107,8 @@ export interface RunLogMessage {
   entry: LogEntry;
   currentDepth?: number;
   maxDepth?: number;
+  screenCount?: number;
+  currentScreenTitle?: string;
 }
 
 export interface RunCompleteMessage {

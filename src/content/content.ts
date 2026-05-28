@@ -90,7 +90,9 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
       type: "RUN_LOG",
       entry,
       currentDepth,
-      maxDepth: settings.maxDepth
+      maxDepth: settings.maxDepth,
+      screenCount: results.length,
+      currentScreenTitle: traversalContext?.navigationStack.at(-1)?.rootTitle ?? ""
     } satisfies RuntimeMessage);
   };
 
@@ -557,6 +559,7 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     menuPath: childFrame.menuPath,
     classification: transition.classification
   });
+  await wait(150);
 
   let redirectionThrown = false;
   let targetRedirectionDepth = -1;
@@ -1076,6 +1079,8 @@ async function recordScreenResult(context: TraversalContext, frame: NavigationFr
   }
 
   const skipped = collectSkippedCandidates(shell);
+  context.log("info", `Scanning screen: ${snapshot.title}`, { depth: frame.depth });
+  await wait(150);
   const ibmReport = await runIbmCheckSafely(context.settings.accessibilityStandard, context.settings.ruleSet, shell, context.log);
   const screenshot = await requestScreenshot(context.log);
 

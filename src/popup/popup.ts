@@ -13,6 +13,7 @@ const downloadButton = document.querySelector<HTMLButtonElement>("#download");
 const downloadLogButton = document.querySelector<HTMLButtonElement>("#downloadLog");
 const reconButton = document.querySelector<HTMLButtonElement>("#recon");
 const statusText = document.querySelector<HTMLElement>("#status");
+const currentScreenTitleText = document.querySelector<HTMLElement>("#currentScreenTitle");
 const depthText = document.querySelector<HTMLElement>("#depth");
 const screenCountText = document.querySelector<HTMLElement>("#screenCount");
 const logsList = document.querySelector<HTMLOListElement>("#logs");
@@ -33,11 +34,49 @@ async function initialize(): Promise<void> {
   titleInput.addEventListener("input", () => void saveSettings(readSettings()));
   startButton?.addEventListener("click", () => void startRun());
   stopButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "STOP_RUN" }));
-  downloadButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_REPORT" }));
-  downloadLogButton?.addEventListener("click", () => void sendRuntimeMessage({ type: "DOWNLOAD_DEBUG_LOG" }));
+  
+  downloadButton?.addEventListener("click", async () => {
+    if (!downloadButton) return;
+    const originalText = downloadButton.textContent;
+    downloadButton.disabled = true;
+    downloadButton.textContent = "⏳ Generating report ZIP...";
+    try {
+      const response = await sendRuntimeMessage({ type: "DOWNLOAD_REPORT" });
+      if (!readOk(response)) {
+        renderError(readError(response));
+      }
+    } finally {
+      downloadButton.textContent = originalText;
+      await refreshStatus();
+    }
+  });
+
+  downloadLogButton?.addEventListener("click", async () => {
+    if (!downloadLogButton) return;
+    const originalText = downloadLogButton.textContent;
+    downloadLogButton.disabled = true;
+    downloadLogButton.textContent = "⏳ Generating log...";
+    try {
+      const response = await sendRuntimeMessage({ type: "DOWNLOAD_DEBUG_LOG" });
+      if (!readOk(response)) {
+        renderError(readError(response));
+      }
+    } finally {
+      downloadLogButton.textContent = originalText;
+      await refreshStatus();
+    }
+  });
+
   reconButton?.addEventListener("click", () => void runRecon());
 
-  setInterval(() => void refreshStatus(), 1000);
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message && typeof message === "object" && message.type === "STATUS_UPDATED") {
+      const payload = message as { state: RunState; hasResult: boolean };
+      renderState(payload.state, payload.hasResult);
+    }
+  });
+
+  setInterval(() => void refreshStatus(), 2000);
 }
 
 function applySettings(settings: CheckerSettings): void {
@@ -104,6 +143,9 @@ async function sendRuntimeMessage(message: RuntimeMessage): Promise<unknown> {
 function renderState(state: RunState, hasResult: boolean): void {
   if (statusText) {
     statusText.textContent = state.error ? `${state.status}: ${state.error}` : state.status;
+  }
+  if (currentScreenTitleText) {
+    currentScreenTitleText.textContent = state.currentScreenTitle || "-";
   }
   if (depthText) {
     const cur = typeof state.currentDepth === "number" ? state.currentDepth : 0;

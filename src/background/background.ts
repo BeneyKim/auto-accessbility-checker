@@ -45,24 +45,28 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       return downloadDebugLog();
     case "CAPTURE_SCREENSHOT":
       return captureScreenshot(sender.tab?.windowId);
-    case "RUN_LOG":
+    case "RUN_LOG": {
+      state = {
+        ...state,
+        currentDepth: typeof message.currentDepth === "number" ? message.currentDepth : state.currentDepth,
+        maxDepth: typeof message.maxDepth === "number" ? message.maxDepth : state.maxDepth,
+        screenCount: typeof message.screenCount === "number" ? message.screenCount : state.screenCount,
+        currentScreenTitle: typeof message.currentScreenTitle === "string" ? message.currentScreenTitle : state.currentScreenTitle
+      };
       appendLog(message.entry.level, message.entry.message, message.entry.data, message.entry.timestamp);
-      if (typeof message.currentDepth === "number" && typeof message.maxDepth === "number") {
-        state = {
-          ...state,
-          currentDepth: message.currentDepth,
-          maxDepth: message.maxDepth
-        };
-      }
+      notifyPopup();
       return { ok: true };
+    }
     case "RUN_COMPLETE":
       lastResult = message.result;
       state = {
         ...state,
         status: "completed",
-        screenCount: message.result.results.length
+        screenCount: message.result.results.length,
+        currentScreenTitle: ""
       };
       await chrome.storage.local.set({ [STORAGE_KEYS.result]: lastResult, [STORAGE_KEYS.status]: state });
+      notifyPopup();
       return { ok: true };
     case "RUN_FAILED":
       state = {
@@ -72,6 +76,7 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       };
       appendLog("error", message.error);
       await chrome.storage.local.set({ [STORAGE_KEYS.status]: state });
+      notifyPopup();
       return { ok: true };
     case "RECON_SCAN":
       return startRecon();
@@ -266,6 +271,17 @@ function appendLog(level: LogEntry["level"], message: string, data?: unknown, ti
     logs: [...state.logs, entry].slice(-200)
   };
   void chrome.storage.local.set({ [STORAGE_KEYS.status]: state, [STORAGE_KEYS.debugLog]: debugLog });
+  notifyPopup();
+}
+
+function notifyPopup(): void {
+  chrome.runtime.sendMessage({
+    type: "STATUS_UPDATED",
+    state,
+    hasResult: Boolean(lastResult)
+  }).catch(() => {
+    // Ignore error when popup is closed
+  });
 }
 
 function isMissingReceivingEnd(error: unknown): boolean {
