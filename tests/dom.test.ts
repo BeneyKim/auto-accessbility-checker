@@ -546,6 +546,53 @@ describe("ThinQ DOM helpers", () => {
     });
   });
 
+  describe("Nested candidate deduplication", () => {
+    it("prefers Strong parent button over Weak child div", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <button id="btnParent">
+            <div id="divChild" class="rippleEffect">Nested Child</div>
+          </button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btnParent");
+      expect(ids).not.toContain("divChild");
+    });
+
+    it("prefers Strong child button over Weak parent li", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <li id="liParent" class="rippleEffect">
+            <button id="btnChild">Child Button</button>
+          </li>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btnChild");
+      expect(ids).not.toContain("liParent");
+    });
+
+    it("prefers Weak child div over Weak parent div", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div id="divParent" class="rippleEffect">
+            <div id="divChild" class="rippleEffect">Child Div</div>
+          </div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("divChild");
+      expect(ids).not.toContain("divParent");
+    });
+  });
+
   describe("Repeating list sampling optimization", () => {
     it("samples 10 sibling buttons to exactly 3 buttons (first, middle, last)", () => {
       document.body.innerHTML = `

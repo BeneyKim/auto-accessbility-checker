@@ -144,16 +144,16 @@ export function diagnoseRequiredControls(root: ParentNode = document): RequiredC
 }
 
 export function findProductShell(root: ParentNode = document): HTMLElement {
-  const thinqBodyShell = findThinQBodyShell(root);
-  if (thinqBodyShell) {
-    return thinqBodyShell;
-  }
-
-  const dialog = Array.from(root.querySelectorAll<HTMLElement>('[role="dialog"], [aria-modal="true"]'))
+  const dialog = Array.from(root.querySelectorAll<HTMLElement>('[role="dialog"], [aria-modal="true"], [data-modal="true"]'))
     .filter(isVisible)
     .sort((a, b) => area(b) - area(a))[0];
   if (dialog) {
     return dialog;
+  }
+
+  const thinqBodyShell = findThinQBodyShell(root);
+  if (thinqBodyShell) {
+    return thinqBodyShell;
   }
 
   const fixedPanels = Array.from(root.querySelectorAll<HTMLElement>("body *"))
@@ -239,6 +239,16 @@ function findProductTabbar(root: ParentNode): HTMLElement | undefined {
     .sort((a, b) => area(a) - area(b))[0];
 }
 
+function isStrongInteractive(element: HTMLElement): boolean {
+  const tagName = element.tagName.toLowerCase();
+  const role = getRole(element);
+  return (
+    tagName === "button" ||
+    tagName === "a" ||
+    NAVIGABLE_ROLES.has(role)
+  );
+}
+
 export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   const seen = new Set<HTMLElement>();
   const candidates: ClickCandidate[] = [];
@@ -275,12 +285,26 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   });
 
   // Deduplicate nested elements: if candidate A's element contains candidate B's element,
-  // we filter out candidate A (the container) to prevent clicking the same interactive area twice.
+  // we filter out candidate B (the nested child) to prioritize clicking the parent semantic container.
   const deduplicatedCandidates = candidates.filter((c1) => {
-    const hasNestedCandidate = candidates.some(
-      (c2) => c2 !== c1 && c1.element.contains(c2.element)
-    );
-    return !hasNestedCandidate;
+    const isFilteredOut = candidates.some((c2) => {
+      if (c2 === c1) return false;
+
+      const c2ContainsC1 = c2.element.contains(c1.element);
+      if (c2ContainsC1) {
+        // c2 is parent, c1 is child
+        return isStrongInteractive(c2.element);
+      }
+
+      const c1ContainsC2 = c1.element.contains(c2.element);
+      if (c1ContainsC2) {
+        // c1 is parent, c2 is child
+        return !isStrongInteractive(c1.element);
+      }
+
+      return false;
+    });
+    return !isFilteredOut;
   });
 
   // Common Policy: If BOTH Cancel-like and Save-like candidates exist on the same screen,

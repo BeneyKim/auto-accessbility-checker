@@ -6,6 +6,7 @@ const MESSAGE_SOURCE = "THINQ_A11Y_EXTENSION";
 const THINQ_HOST = "my.lgthinq.com";
 const TRANSITION_TIMEOUT_MS = 6000;
 const TRANSITION_STABLE_MS = 700;
+const CHILD_TRANSITION_STABLE_MS = 1200;
 const UNSAFE_TRANSITION_STABLE_MS = 1200;
 const NO_CHANGE_STABLE_MS = 1800;
 const TRANSITION_POLL_MS = 150;
@@ -763,7 +764,8 @@ async function waitAndClassifyTransition(
 
     if (isStableSuccess) {
       lastSafeTransition = latestClassification;
-      if (stableFor >= TRANSITION_STABLE_MS) {
+      const targetStableMs = latestClassification.classification === "in-product-child" ? CHILD_TRANSITION_STABLE_MS : TRANSITION_STABLE_MS;
+      if (stableFor >= targetStableMs) {
         return latestClassification;
       }
     } else {
@@ -806,13 +808,33 @@ function classifyTransition(
   if (before.selectedBranch && after.selectedBranch && before.selectedBranch !== after.selectedBranch) {
     return { classification: "branch-changed", reason: "selected-branch-changed", before, after };
   }
+
+  const titleChanged = after.title !== before.title;
+  const urlChanged = after.url !== before.url;
+  const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");
+  const triggerName = trigger.name || trigger.role;
+
+  // 1. Overlay count decrease
+  if (after.overlayDescriptors.length < before.overlayDescriptors.length) {
+    return { classification: "state-change", reason: "overlay-count-decreased", before, after };
+  }
+
+  // 2. URL Changed navigation (always prioritize over overlay opening)
+  if (urlChanged) {
+    return { classification: "in-product-child", reason: "url-changed", before, after };
+  }
+
+  // 3. Overlay count increase (when URL is unchanged)
   if (after.overlayDescriptors.length > before.overlayDescriptors.length) {
     return { classification: "overlay-opened", reason: "overlay-count-increased", before, after };
   }
+
+  // 4. Signature unchanged
   if (after.signature === before.signature) {
     return { classification: "no-change", reason: "signature-unchanged", before, after };
   }
 
+  // 5. Tab selection
   const isTab = Boolean(
     trigger.role === "tab" ||
     (triggerElement && (triggerElement.closest("[role='tab']") || triggerElement.closest("[role='tablist'] > *")))
@@ -824,17 +846,13 @@ function classifyTransition(
     }
   }
 
-  const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");
-  const titleChanged = after.title !== before.title;
-  const urlChanged = after.url !== before.url;
-  const triggerName = trigger.name || trigger.role;
-
+  // 6. Child Screen checks (when URL and overlay count are unchanged)
   let isChildScreen = false;
   let reason = "state-change";
   if (after.boundaryPresent) {
-    if (titleChanged || urlChanged || after.title === triggerName) {
+    if (titleChanged || after.title === triggerName) {
       isChildScreen = true;
-      reason = titleChanged ? "title-changed" : (urlChanged ? "url-changed" : "title-matches-trigger");
+      reason = titleChanged ? "title-changed" : "title-matches-trigger";
     } else if (candidateSetChanged) {
       const beforeSet = new Set(before.candidateNames);
       const afterSet = new Set(after.candidateNames);
@@ -852,6 +870,7 @@ function classifyTransition(
   if (isChildScreen) {
     return { classification: "in-product-child", reason, before, after };
   }
+
   if (after.boundaryPresent) {
     return { classification: "state-change", reason: "signature-changed-without-child-evidence", before, after };
   }
