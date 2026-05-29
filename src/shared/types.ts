@@ -69,6 +69,7 @@ export interface RunMetadata {
   url: string;
   userAgent: string;
   settings: CheckerSettings;
+  toolVersion?: string;
 }
 
 export interface RunResult {

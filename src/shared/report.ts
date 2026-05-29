@@ -59,6 +59,7 @@ export function buildMarkdownReport(result: RunResult): string {
     `- Started: ${result.metadata.startedAt}`,
     `- Completed: ${result.metadata.completedAt ?? "not completed"}`,
     `- URL: ${result.metadata.url}`,
+    `- Tool version: v${result.metadata.toolVersion || "0.0.0"}`,
     `- Accessibility standard: ${result.metadata.settings.accessibilityStandard}`,
     `- Rule set: ${result.metadata.settings.ruleSet}`,
     `- Max depth: ${result.metadata.settings.maxDepth}`,
@@ -692,7 +693,8 @@ export function buildHtmlReport(result: RunResult): string {
       <div class="sidebar-title">ThinQ Web A11y</div>
       <div class="sidebar-meta">
         <strong>Standard:</strong> ${escapeHtml(result.metadata.settings.accessibilityStandard)}<br />
-        <strong>Rule Set:</strong> ${escapeHtml(result.metadata.settings.ruleSet)}
+        <strong>Rule Set:</strong> ${escapeHtml(result.metadata.settings.ruleSet)}<br />
+        <strong>Tool Version:</strong> v${escapeHtml(result.metadata.toolVersion || "0.0.0")}
       </div>
     </div>
     <div class="sidebar-filter">

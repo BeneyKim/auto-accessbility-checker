@@ -1,6 +1,6 @@
 {
   "name": "thinq-web-ibm-accessibility-checker",
-  "version": "0.99.4",
+  "version": "0.99.5",
   "private": true,
   "description": "Chrome/Edge MV3 extension that crawls ThinQ Web product screens and runs IBM Equal Access accessibility checks.",
   "type": "module",

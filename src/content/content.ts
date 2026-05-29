@@ -145,7 +145,8 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
         completedAt: new Date().toISOString(),
         url: location.href,
         userAgent: navigator.userAgent,
-        settings
+        settings,
+        toolVersion: chrome.runtime.getManifest().version
       },
       results,
       logs
