@@ -72,10 +72,19 @@ export interface RunMetadata {
   toolVersion?: string;
 }
 
+export interface TransitionLog {
+  triggerName: string;
+  sourceTitle: string;
+  targetTitle: string;
+  targetPathname: string;
+  selector: string;
+}
+
 export interface RunResult {
   metadata: RunMetadata;
   results: ScreenResult[];
   logs: LogEntry[];
+  transitionLogs?: TransitionLog[];
 }
 
 export interface StartRunMessage {

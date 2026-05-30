@@ -1,5 +1,7 @@
 import type { Branch, CandidateSnapshot } from "../shared/types";
 import { matchForbiddenRule, ruleToSkipReason } from "../shared/forbidden-registry";
+import { normalizeStateIndicators } from "./traversal";
+
 
 declare global {
   interface Window {
@@ -392,6 +394,7 @@ export function screenSignature(shell: HTMLElement): string {
   const headings = Array.from(shell.querySelectorAll<HTMLElement>("h1,h2,h3,[role='heading']"))
     .filter(isVisible)
     .map(getAccessibleName)
+    .map((name) => normalizeStateIndicators(name))
     .filter(Boolean)
     .slice(0, 5)
     .join("|");
@@ -418,7 +421,7 @@ export function extractScreenTitle(shell: HTMLElement, fallback: string): string
     .map(getAccessibleName)
     .filter((name) => !isBlockedNavigationName(name))
     .find(Boolean);
-  return heading || fallback;
+  return heading ? normalizeStateIndicators(heading) : fallback;
 }
 
 export function isBlockedNavigationName(name: string): boolean {

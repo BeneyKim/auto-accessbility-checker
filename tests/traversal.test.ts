@@ -43,5 +43,19 @@ describe("ThinQ traversal frame policy", () => {
     expect(normalizeStateIndicators("켜짐, 오토모드")).toBe("오토모드");
     expect(normalizeStateIndicators("식기세척기, 선택 목록")).toBe("식기세척기");
     expect(normalizeStateIndicators("고기류 구이 (P5)")).toBe("고기류 구이 (P5)");
+    
+    // Comma-separated setting names and dynamic values
+    expect(normalizeStateIndicators("공간, 마이홈 - 주방")).toBe("공간");
+    expect(normalizeStateIndicators("냉동실설정 온도, 섭씨 -18도")).toBe("냉동실설정 온도");
+    expect(normalizeStateIndicators("제품 이름, 냉동고")).toBe("제품 이름");
+
+    // Date suffix stripping
+    expect(normalizeStateIndicators("보관 시작일 2026. 5. 31.")).toBe("보관 시작일");
+    expect(normalizeStateIndicators("보관 시작일 2026. 5. 30.")).toBe("보관 시작일");
+    expect(normalizeStateIndicators("등록 시간 2026년 5월 30일 토요일")).toBe("등록 시간");
+
+    // Safe fallbacks for date-only buttons and date ranges
+    expect(normalizeStateIndicators("2026년 5월 30일 토")).toBe("2026년 5월 30일 토");
+    expect(normalizeStateIndicators("2026. 5. 24.-2026. 5. 30.")).toBe("2026. 5. 24.-2026. 5. 30.");
   });
 });
