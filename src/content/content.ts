@@ -13,7 +13,7 @@ const TRANSITION_POLL_MS = 150;
 const OVERLAY_SELECTOR =
   '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"], [class*="calendar" i], [class*="picker" i], [class*="date" i], [class*="time" i], [class*="select" i]';
 
-import exclusions from "../shared/exclusions.json";
+import exclusions from "../../public/exclusions.json";
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
   branchLabel,
