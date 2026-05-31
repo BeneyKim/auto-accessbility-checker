@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ThinQ Web IBM Accessibility Checker",
   "short_name": "ThinQ A11y",
-  "version": "0.99.7",
+  "version": "0.99.8",
   "description": "Crawls ThinQ Web product screens and generates IBM Equal Access accessibility reports.",
   "action": {
     "default_popup": "popup.html",
