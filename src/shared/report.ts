@@ -42,19 +42,64 @@ const EMPTY_SUMMARY: AccessibilitySummary = {
 };
 
 export function extractSummary(ibmReport: unknown): AccessibilitySummary {
-  const report = readObject(readObject(ibmReport).report);
-  const summary = readObject(report.summary);
-  const counts = readObject(summary.counts);
+  const reportObj = readObject(ibmReport);
+  const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+  const results = Array.isArray(report.results) ? report.results : [];
+
+  const countsObj = readObject(readObject(report.summary).counts);
+
+  // If results array is empty but we have summary counts in report (like in mock or fallback)
+  if (results.length === 0 && Object.keys(countsObj).length > 0) {
+    return {
+      violation: toNumber(countsObj.violation),
+      potentialviolation: toNumber(countsObj.potentialviolation),
+      recommendation: toNumber(countsObj.recommendation),
+      potentialrecommendation: toNumber(countsObj.potentialrecommendation),
+      manual: toNumber(countsObj.manual),
+      pass: toNumber(countsObj.pass),
+      ignored: toNumber(countsObj.ignored)
+    };
+  }
+
+  // Calculate from results
+  const rawIssues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+
+  let violation = 0;
+  let potentialviolation = 0;
+  let recommendation = 0;
+  let potentialrecommendation = 0;
+  let manual = 0;
+  let pass = countsObj.pass !== undefined ? toNumber(countsObj.pass) : results.filter((r: any) => r.value && r.value[1] === "PASS").length;
+
+  rawIssues.forEach((issue: any) => {
+    const severity = (issue.value[0] || "").toUpperCase();
+    const type = (issue.value[1] || "").toUpperCase();
+
+    if (type === "MANUAL") {
+      manual++;
+    } else if (severity === "VIOLATION") {
+      if (type === "FAIL") {
+        violation++;
+      } else if (type === "POTENTIAL") {
+        potentialviolation++;
+      }
+    } else if (severity === "RECOMMENDATION") {
+      if (type === "RECOMMENDATION") {
+        recommendation++;
+      } else if (type === "POTENTIAL") {
+        potentialrecommendation++;
+      }
+    }
+  });
 
   return {
-    ...EMPTY_SUMMARY,
-    violation: toNumber(counts.violation),
-    potentialviolation: toNumber(counts.potentialviolation),
-    recommendation: toNumber(counts.recommendation),
-    potentialrecommendation: toNumber(counts.potentialrecommendation),
-    manual: toNumber(counts.manual),
-    pass: toNumber(counts.pass),
-    ignored: toNumber(counts.ignored)
+    violation,
+    potentialviolation,
+    recommendation,
+    potentialrecommendation,
+    manual,
+    pass,
+    ignored: toNumber(countsObj.ignored)
   };
 }
 

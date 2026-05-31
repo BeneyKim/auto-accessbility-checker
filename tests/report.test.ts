@@ -24,6 +24,45 @@ describe("report helpers", () => {
     expect(summary.pass).toBe(120);
   });
 
+  it("extracts summary counts directly from results when report summary counts are missing", () => {
+    const summary = extractSummary({
+      results: [
+        {
+          value: ["VIOLATION", "FAIL"],
+          ruleId: "rule-1",
+          message: "Violation message"
+        },
+        {
+          value: ["VIOLATION", "POTENTIAL"],
+          ruleId: "rule-2",
+          message: "Potential violation message"
+        },
+        {
+          value: ["RECOMMENDATION", "RECOMMENDATION"],
+          ruleId: "rule-3",
+          message: "Recommendation message"
+        },
+        {
+          value: ["VIOLATION", "MANUAL"],
+          ruleId: "rule-4",
+          message: "Manual check"
+        },
+        {
+          value: ["RECOMMENDATION", "PASS"],
+          ruleId: "rule-5",
+          message: "Pass"
+        }
+      ]
+    });
+
+    expect(summary.violation).toBe(1);
+    expect(summary.potentialviolation).toBe(1);
+    expect(summary.recommendation).toBe(1);
+    expect(summary.manual).toBe(1);
+    expect(summary.pass).toBe(1);
+  });
+
+
   it("creates safe file names and report formats with default levels", () => {
     const result = makeRunResult();
     const base = makeFileBase("ThinQ Web: Air/Purifier", new Date("2026-05-05T01:02:03"));
