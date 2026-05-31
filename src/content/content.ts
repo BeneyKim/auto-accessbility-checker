@@ -1730,8 +1730,8 @@ function extractSummary(ibmReport: unknown): ScreenResult["summary"] {
   let pass = countsObj.pass !== undefined ? toNumber(countsObj.pass) : results.filter((r: any) => r.value && r.value[1] === "PASS").length;
 
   rawIssues.forEach((issue: any) => {
-    const severity = (issue.value[0] || "").toUpperCase();
-    const type = (issue.value[1] || "").toUpperCase();
+    const severity = (issue.value?.[0] || "").toUpperCase();
+    const type = (issue.value?.[1] || "").toUpperCase();
 
     if (type === "MANUAL") {
       manual++;
