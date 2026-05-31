@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>ThinQ Web A11y - 미검출 협의 항목 (Exclusions)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --color-violation: #ef4444;
+      --color-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    header {
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.02);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rule-id {
+      font-family: monospace;
+      font-size: 13px;
+      color: #c084fc;
+      background-color: rgba(255, 255, 255, 0.03);
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .violation-msg {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--color-violation);
+    }
+
+    .reason-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .meta-tag {
+      font-size: 11px;
+      background-color: rgba(255, 255, 255, 0.04);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .badge-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .badge-status.no-plan {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .badge-status.deferred {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+  </style>
+  <script type="module" src="/src/exclusions/exclusions-render.ts"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ThinQ Web A11y - 미검출 협의 항목 (Exclusions)</h1>
+      <p class="subtitle">개발 및 품질 부서 간 합의에 의해 수정 대상에서 제외(유예)하기로 결정된 접근성 검사 예외 항목 리스트입니다. 자세한 내용은 <a href="http://collab.lge.com/main/spaces/DXTQUALITY/pages/3589879305/ThinQ+Web+-+IBM+Accessibility+Checker+-+%EC%9D%B4%EC%8A%88+%EC%A0%9C%EC%95%BD+%EC%82%AC%ED%95%AD" target="_blank" style="color: #60a5fa; text-decoration: underline;">Confluence 문서</a>를 참고하세요.</p>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">Rule ID</th>
+          <th style="width: 35%;">Violation 제약 사항</th>
+          <th style="width: 25%;">사유</th>
+          <th style="width: 15%;">현황 / 기한</th>
+        </tr>
+      </thead>
+      <tbody id="exclusions-table-body">
+        <!-- Rendered dynamically -->
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

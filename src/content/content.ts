@@ -13,6 +13,7 @@ const TRANSITION_POLL_MS = 150;
 const OVERLAY_SELECTOR =
   '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"], [class*="calendar" i], [class*="picker" i], [class*="date" i], [class*="time" i], [class*="select" i]';
 
+import exclusions from "../shared/exclusions.json";
 import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
 import {
   branchLabel,
@@ -1460,7 +1461,8 @@ async function runIbmCheckSafely(
   log: (level: LogEntry["level"], message: string, data?: unknown) => void
 ): Promise<unknown> {
   try {
-    return await runIbmCheck(policy, ruleSet, target);
+    const rawReport = await runIbmCheck(policy, ruleSet, target);
+    return filterExclusions(rawReport);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log("error", "IBM accessibility check failed for this screen.", { message });
@@ -1486,6 +1488,65 @@ async function runIbmCheckSafely(
       }
     };
   }
+}
+
+export function filterExclusions(ibmReport: any): any {
+  if (!ibmReport || typeof ibmReport !== "object" || !ibmReport.report) {
+    return ibmReport;
+  }
+
+  const report = ibmReport.report;
+  if (!Array.isArray(report.results)) {
+    return ibmReport;
+  }
+
+  const filteredResults = report.results.filter((issue: any) => {
+    if (!issue.ruleId || !issue.message) return true;
+
+    // Check if it matches any exclusion in the list
+    const isExcluded = exclusions.some((ex) => {
+      return (
+        issue.ruleId === ex.ruleId &&
+        (issue.message || "").trim() === ex.message.trim()
+      );
+    });
+
+    if (isExcluded) {
+      // Decrement the corresponding count in summary.counts
+      const severity = (issue.value?.[0] || "").toUpperCase();
+      const type = (issue.value?.[1] || "").toUpperCase();
+
+      const counts = report.summary?.counts;
+      if (counts) {
+        let key: string | null = null;
+        if (type === "MANUAL") {
+          key = "manual";
+        } else if (severity === "VIOLATION") {
+          if (type === "FAIL") {
+            key = "violation";
+          } else if (type === "POTENTIAL") {
+            key = "potentialviolation";
+          }
+        } else if (severity === "RECOMMENDATION") {
+          if (type === "RECOMMENDATION") {
+            key = "recommendation";
+          } else if (type === "POTENTIAL") {
+            key = "potentialrecommendation";
+          }
+        }
+
+        if (key && typeof counts[key] === "number" && counts[key] > 0) {
+          counts[key]--;
+        }
+      }
+      return false; // exclude this issue
+    }
+
+    return true; // keep this issue
+  });
+
+  report.results = filteredResults;
+  return ibmReport;
 }
 
 async function requestScreenshot(log: (level: LogEntry["level"], message: string, data?: unknown) => void): Promise<string | undefined> {

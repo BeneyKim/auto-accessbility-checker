@@ -1,0 +1,26 @@
+[
+  {
+    "ruleId": "skip_main_exists",
+    "message": "The page does not provide a way to quickly navigate to the main content (ARIA \"main\" landmark or a skip link)",
+    "scope": "ThinQ Web 전체 페이지당 하나씩 검출되고 있음",
+    "reason": "ThinQ UX 구조에 따라 수정 불가",
+    "status": "UX팀과 전체 틀 구조를 바꿔야 하기에 수정 계획 없음",
+    "dueDate": "NA"
+  },
+  {
+    "ruleId": "aria_role_allowed",
+    "message": "The role 'text' defined on the element is not valid per ARIA specification",
+    "scope": "ThinQ Web 전체 페이지당 하나 이상 검출되고 있음",
+    "reason": "ThinQ iOS 모바일앱에서 텍스트 문단 단위로 묶어서 발화해줄 필요가 있어서 지정한 건임 - 유에이랩에서 문단 단위 묶어서 발화하게 하라는 가이드로 수정하면서 나온 솔루션",
+    "status": "WCAG 표준 구현 가이드대로 진행해야 하기에 수정할 필요 있음",
+    "dueDate": "~'26. 6. 까지 유예"
+  },
+  {
+    "ruleId": "label_name_visible",
+    "message": "Accessible name does not match or contain the visible label text",
+    "scope": "접근 가능한 이름이 실제 표시되는 라벨 텍스트와 일치하지 않거나 포함하지 않는 경우",
+    "reason": "사용자에게 추가적인 정보 전달을 위해 커스텀 발화를 추가한 경우는 정상 동작임",
+    "status": "유에이랩에서 권장 및 수정 요청한 사항들이기 때문에 수정 계획 없음",
+    "dueDate": "NA"
+  }
+]

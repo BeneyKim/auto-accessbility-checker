@@ -8,6 +8,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve(__dirname, "popup.html"),
+        exclusions: resolve(__dirname, "exclusions.html"),
         background: resolve(__dirname, "src/background/background.ts"),
         content: resolve(__dirname, "src/content/content.ts"),
         ibmRunner: resolve(__dirname, "src/injected/ibm-runner.ts")
