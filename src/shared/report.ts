@@ -1,5 +1,36 @@
 import type { AccessibilitySummary, RunResult, ScreenResult } from "./types";
 
+export type IssueCategory = "Violation" | "Needs review" | "Recommendation";
+
+export function getIssueCategory(severity: string, type: string): IssueCategory {
+  const normSeverity = (severity || "").toUpperCase();
+  const normType = (type || "").toUpperCase();
+  
+  if (normSeverity === "VIOLATION") {
+    if (normType === "FAIL") {
+      return "Violation";
+    } else {
+      return "Needs review"; // POTENTIAL, MANUAL
+    }
+  }
+  return "Recommendation"; // RECOMMENDATION severity is always Recommendation
+}
+
+export function getFriendlyStandardName(standard: string): string {
+  switch (standard) {
+    case "IBM_Accessibility":
+      return "IBM Accessibility (A, AA)";
+    case "WCAG_2_2":
+      return "WCAG 2.2 (A, AA)";
+    case "WCAG_2_1":
+      return "WCAG 2.1 (A, AA)";
+    case "WCAG_2_0":
+      return "WCAG 2.0 (A, AA)";
+    default:
+      return standard;
+  }
+}
+
 const EMPTY_SUMMARY: AccessibilitySummary = {
   violation: 0,
   potentialviolation: 0,
@@ -49,10 +80,35 @@ export function makeFileBase(title: string, date = new Date()): string {
 }
 
 export function buildJsonReport(result: RunResult): string {
-  return JSON.stringify(result, null, 2);
+  const levels = result.metadata.settings.levels || { violation: true, needsReview: true, recommendation: true };
+  
+  const cloned = JSON.parse(JSON.stringify(result));
+  cloned.results.forEach((screen: any) => {
+    const reportObj = readObject(screen.ibmReport);
+    const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+    if (report && Array.isArray(report.results)) {
+      report.results = report.results.filter((issue: any) => {
+        if (!issue.value || issue.value[1] === "PASS") return true;
+        const cat = getIssueCategory(issue.value[0], issue.value[1]);
+        if (cat === "Violation") return levels.violation;
+        if (cat === "Needs review") return levels.needsReview;
+        return levels.recommendation;
+      });
+    }
+  });
+
+  return JSON.stringify(cloned, null, 2);
 }
 
 export function buildMarkdownReport(result: RunResult): string {
+  const levels = result.metadata.settings.levels || { violation: true, needsReview: true, recommendation: true };
+  
+  const selectedLevels: string[] = [];
+  if (levels.violation) selectedLevels.push("🔴 Violation");
+  if (levels.needsReview) selectedLevels.push("🟡 Needs review");
+  if (levels.recommendation) selectedLevels.push("🔵 Recommendation");
+  const levelsMetadataStr = selectedLevels.length > 0 ? selectedLevels.join(", ") : "None";
+
   const lines = [
     `# ${result.metadata.title}`,
     "",
@@ -60,58 +116,102 @@ export function buildMarkdownReport(result: RunResult): string {
     `- Completed: ${result.metadata.completedAt ?? "not completed"}`,
     `- URL: ${result.metadata.url}`,
     `- Tool version: v${result.metadata.toolVersion || "0.0.0"}`,
-    `- Accessibility standard: ${result.metadata.settings.accessibilityStandard}`,
+    `- Accessibility standard: ${getFriendlyStandardName(result.metadata.settings.accessibilityStandard)}`,
     `- Rule set: ${result.metadata.settings.ruleSet}`,
     `- Max depth: ${result.metadata.settings.maxDepth}`,
+    `- Included levels: ${levelsMetadataStr}`,
     `- Screens scanned: ${result.results.length}`,
     "",
     "## Summary",
     "",
-    "| Screen | Branch | Depth | Violations | Potential | Manual |",
+    "| Screen | Branch | Depth | Violations | Needs Review | Recommendations |",
     "| --- | --- | ---: | ---: | ---: | ---: |",
     ...result.results.map(
-      (screen) =>
-        `| ${escapeMarkdown(screen.menuPath.join(" > ") || screen.title)} | ${screen.branch} | ${screen.depth} | ${screen.summary.violation} | ${screen.summary.potentialviolation} | ${screen.summary.manual} |`
+      (screen) => {
+        const reportObj = readObject(screen.ibmReport);
+        const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+        const results = Array.isArray(report.results) ? report.results : [];
+        const rawIssues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+        
+        const violations = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Violation").length;
+        const needsReview = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Needs review").length;
+        const recommendation = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Recommendation").length;
+
+        const violationsStr = levels.violation ? String(violations) : "N/A";
+        const needsReviewStr = levels.needsReview ? String(needsReview) : "N/A";
+        const recommendationStr = levels.recommendation ? String(recommendation) : "N/A";
+
+        return `| ${escapeMarkdown(screen.menuPath.join(" > ") || screen.title)} | ${screen.branch} | ${screen.depth} | ${violationsStr} | ${needsReviewStr} | ${recommendationStr} |`;
+      }
     ),
     ""
   ];
 
   for (const screen of result.results) {
-    lines.push(...buildScreenMarkdown(screen));
+    lines.push(...buildScreenMarkdown(screen, levels));
   }
 
   return lines.join("\n");
 }
 
 export function buildHtmlReport(result: RunResult): string {
+  const levels = result.metadata.settings.levels || { violation: true, needsReview: true, recommendation: true };
+
   let totalViolations = 0;
-  let totalPotential = 0;
-  let totalManual = 0;
+  let totalNeedsReview = 0;
+  let totalRecommendations = 0;
 
   result.results.forEach((screen) => {
-    const report = screen.ibmReport;
-    const results = (report && typeof report === "object" && "results" in report && Array.isArray(report.results)) ? report.results : [];
+    const reportObj = readObject(screen.ibmReport);
+    const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+    const results = Array.isArray(report.results) ? report.results : [];
     const issues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
-    totalViolations += issues.filter((i: any) => i.value[1] === "FAIL").length;
-    totalPotential += issues.filter((i: any) => i.value[1] === "POTENTIAL").length;
-    totalManual += issues.filter((i: any) => i.value[1] === "MANUAL").length;
+    
+    issues.forEach((issue: any) => {
+      const cat = getIssueCategory(issue.value[0], issue.value[1]);
+      if (cat === "Violation") {
+        totalViolations++;
+      } else if (cat === "Needs review") {
+        totalNeedsReview++;
+      } else if (cat === "Recommendation") {
+        totalRecommendations++;
+      }
+    });
   });
+
+  const violationsStr = levels.violation ? String(totalViolations) : "N/A";
+  const needsReviewStr = levels.needsReview ? String(totalNeedsReview) : "N/A";
+  const recommendationsStr = levels.recommendation ? String(totalRecommendations) : "N/A";
+
+  const selectedLevels: string[] = [];
+  if (levels.violation) selectedLevels.push("🔴 Violation");
+  if (levels.needsReview) selectedLevels.push("🟡 Needs review");
+  if (levels.recommendation) selectedLevels.push("🔵 Recommendation");
+  const levelsMetadataHtml = selectedLevels.length > 0 ? selectedLevels.join(", ") : "None";
 
   const sidebarItems = result.results
     .map((screen, index) => {
-      const report = screen.ibmReport;
-      const results = (report && typeof report === "object" && "results" in report && Array.isArray(report.results)) ? report.results : [];
-      const issues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+      const reportObj = readObject(screen.ibmReport);
+      const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+      const results = Array.isArray(report.results) ? report.results : [];
+      const rawIssues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
       
-      const violations = issues.filter((i: any) => i.value[1] === "FAIL").length;
-      const potential = issues.filter((i: any) => i.value[1] === "POTENTIAL").length;
-      const manual = issues.filter((i: any) => i.value[1] === "MANUAL").length;
+      const violations = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Violation").length;
+      const needsReview = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Needs review").length;
+      const recommendations = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Recommendation").length;
 
-      const badgeHtml = issues.length > 0
+      const filteredIssues = rawIssues.filter((issue: any) => {
+        const cat = getIssueCategory(issue.value[0], issue.value[1]);
+        if (cat === "Violation") return levels.violation;
+        if (cat === "Needs review") return levels.needsReview;
+        return levels.recommendation;
+      });
+
+      const badgeHtml = filteredIssues.length > 0
         ? `
-            ${violations > 0 ? `<span class="mini-badge violation">${violations}</span>` : ""}
-            ${potential > 0 ? `<span class="mini-badge potential">${potential}</span>` : ""}
-            ${manual > 0 ? `<span class="mini-badge manual">${manual}</span>` : ""}
+            ${levels.violation && violations > 0 ? `<span class="mini-badge violation">${violations}</span>` : ""}
+            ${levels.needsReview && needsReview > 0 ? `<span class="mini-badge needs-review">${needsReview}</span>` : ""}
+            ${levels.recommendation && recommendations > 0 ? `<span class="mini-badge recommendation">${recommendations}</span>` : ""}
           `
         : `<span class="mini-badge success">✓</span>`;
 
@@ -131,30 +231,40 @@ export function buildHtmlReport(result: RunResult): string {
 
   const sections = result.results
     .map((screen, index) => {
-      const report = screen.ibmReport;
-      const results = (report && typeof report === "object" && "results" in report && Array.isArray(report.results)) ? report.results : [];
-      const issues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+      const reportObj = readObject(screen.ibmReport);
+      const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+      const results = Array.isArray(report.results) ? report.results : [];
+      const rawIssues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
       
-      const screenIssuesHtml = issues.length > 0
-        ? issues.map((issue: any) => {
+      const filteredIssues = rawIssues.filter((issue: any) => {
+        const cat = getIssueCategory(issue.value[0], issue.value[1]);
+        if (cat === "Violation") return levels.violation;
+        if (cat === "Needs review") return levels.needsReview;
+        return levels.recommendation;
+      });
+      
+      const screenIssuesHtml = filteredIssues.length > 0
+        ? filteredIssues.map((issue: any) => {
             const type = issue.value[1]; // FAIL, POTENTIAL, MANUAL
             const severity = issue.value[0]; // VIOLATION, RECOMMENDATION, etc.
+            const cat = getIssueCategory(severity, type);
+
             let badgeColor = "";
             let badgeText = "";
             let borderColor = "";
 
-            if (type === "FAIL") {
+            if (cat === "Violation") {
               badgeColor = "rgba(239, 68, 68, 0.15)";
               borderColor = "#ef4444";
-              badgeText = `Violation (${severity})`;
-            } else if (type === "POTENTIAL") {
+              badgeText = "Violation";
+            } else if (cat === "Needs review") {
               badgeColor = "rgba(245, 158, 11, 0.15)";
               borderColor = "#f59e0b";
-              badgeText = `Potential (${severity})`;
+              badgeText = "Needs review";
             } else {
               badgeColor = "rgba(59, 130, 246, 0.15)";
               borderColor = "#3b82f6";
-              badgeText = `Manual Check`;
+              badgeText = "Recommendation";
             }
 
             const selector = issue.path?.dom || "unknown selector";
@@ -178,7 +288,7 @@ export function buildHtmlReport(result: RunResult): string {
           <div class="success-card">
             <div class="success-icon">🎉</div>
             <div class="success-title">All Accessibility Checks Passed</div>
-            <div class="success-message">No violations, potential violations, or manual checks were flagged for this screen.</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
           </div>
         `;
 
@@ -194,7 +304,7 @@ export function buildHtmlReport(result: RunResult): string {
             <div class="screen-meta">
               <span class="meta-tag">Branch: ${escapeHtml(screen.branch)}</span>
               <span class="meta-tag">Depth: ${screen.depth}</span>
-              <span class="meta-tag">Issues: ${issues.length}</span>
+              <span class="meta-tag">Issues: ${filteredIssues.length}</span>
             </div>
           </div>
           
@@ -236,8 +346,8 @@ export function buildHtmlReport(result: RunResult): string {
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --color-violation: #ef4444;
-      --color-potential: #f59e0b;
-      --color-manual: #3b82f6;
+      --color-needs-review: #f59e0b;
+      --color-recommendation: #3b82f6;
       --color-success: #10b981;
     }
 
@@ -365,8 +475,8 @@ export function buildHtmlReport(result: RunResult): string {
     }
 
     .mini-badge.violation { background-color: rgba(239, 68, 68, 0.15); color: var(--color-violation); }
-    .mini-badge.potential { background-color: rgba(245, 158, 11, 0.15); color: var(--color-potential); }
-    .mini-badge.manual { background-color: rgba(59, 130, 246, 0.15); color: var(--color-manual); }
+    .mini-badge.needs-review { background-color: rgba(245, 158, 11, 0.15); color: var(--color-needs-review); }
+    .mini-badge.recommendation { background-color: rgba(59, 130, 246, 0.15); color: var(--color-recommendation); }
     .mini-badge.success { background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 
     .menu-item-path {
@@ -415,8 +525,8 @@ export function buildHtmlReport(result: RunResult): string {
     }
 
     .summary-icon.violation { background-color: rgba(239, 68, 68, 0.1); color: var(--color-violation); }
-    .summary-icon.potential { background-color: rgba(245, 158, 11, 0.1); color: var(--color-potential); }
-    .summary-icon.manual { background-color: rgba(59, 130, 246, 0.1); color: var(--color-manual); }
+    .summary-icon.needs-review { background-color: rgba(245, 158, 11, 0.1); color: var(--color-needs-review); }
+    .summary-icon.recommendation { background-color: rgba(59, 130, 246, 0.1); color: var(--color-recommendation); }
     .summary-icon.screens { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
 
     .summary-details {
@@ -692,8 +802,9 @@ export function buildHtmlReport(result: RunResult): string {
     <div class="sidebar-header">
       <div class="sidebar-title">ThinQ Web A11y</div>
       <div class="sidebar-meta">
-        <strong>Standard:</strong> ${escapeHtml(result.metadata.settings.accessibilityStandard)}<br />
+        <strong>Standard:</strong> ${escapeHtml(getFriendlyStandardName(result.metadata.settings.accessibilityStandard))}<br />
         <strong>Rule Set:</strong> ${escapeHtml(result.metadata.settings.ruleSet)}<br />
+        <strong>Included Levels:</strong> ${levelsMetadataHtml}<br />
         <strong>Tool Version:</strong> v${escapeHtml(result.metadata.toolVersion || "0.0.0")}
       </div>
     </div>
@@ -717,22 +828,22 @@ export function buildHtmlReport(result: RunResult): string {
       <div class="summary-card">
         <div class="summary-icon violation">🔴</div>
         <div class="summary-details">
-          <span class="summary-val" style="color: var(--color-violation);">${totalViolations}</span>
+          <span class="summary-val" style="color: var(--color-violation);">${violationsStr}</span>
           <span class="summary-lbl">Violations</span>
         </div>
       </div>
       <div class="summary-card">
-        <div class="summary-icon potential">🟡</div>
+        <div class="summary-icon needs-review">🟡</div>
         <div class="summary-details">
-          <span class="summary-val" style="color: var(--color-potential);">${totalPotential}</span>
-          <span class="summary-lbl">Potential Violations</span>
+          <span class="summary-val" style="color: var(--color-needs-review);">${needsReviewStr}</span>
+          <span class="summary-lbl">Needs Review</span>
         </div>
       </div>
       <div class="summary-card">
-        <div class="summary-icon manual">🔵</div>
+        <div class="summary-icon recommendation">🔵</div>
         <div class="summary-details">
-          <span class="summary-val" style="color: var(--color-manual);">${totalManual}</span>
-          <span class="summary-lbl">Manual Checks</span>
+          <span class="summary-val" style="color: var(--color-recommendation);">${recommendationsStr}</span>
+          <span class="summary-lbl">Recommendations</span>
         </div>
       </div>
     </div>
@@ -794,10 +905,18 @@ export function buildHtmlReport(result: RunResult): string {
 </html>`;
 }
 
-function buildScreenMarkdown(screen: ScreenResult): string[] {
-  const report = screen.ibmReport;
-  const results = (report && typeof report === "object" && "results" in report && Array.isArray(report.results)) ? report.results : [];
-  const issues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+function buildScreenMarkdown(screen: ScreenResult, levels: { violation: boolean; needsReview: boolean; recommendation: boolean }): string[] {
+  const reportObj = readObject(screen.ibmReport);
+  const report = "report" in reportObj ? readObject(reportObj.report) : reportObj;
+  const results = Array.isArray(report.results) ? report.results : [];
+  const rawIssues = results.filter((r: any) => r.value && r.value[1] !== "PASS");
+  
+  const issues = rawIssues.filter((issue: any) => {
+    const cat = getIssueCategory(issue.value[0], issue.value[1]);
+    if (cat === "Violation") return levels.violation;
+    if (cat === "Needs review") return levels.needsReview;
+    return levels.recommendation;
+  });
 
   const issueLines: string[] = [];
   if (issues.length > 0) {
@@ -805,17 +924,14 @@ function buildScreenMarkdown(screen: ScreenResult): string[] {
     issueLines.push("| Level | Rule ID | Message | Selector |");
     issueLines.push("| --- | --- | --- | --- |");
     for (const issue of issues) {
-      const type = issue.value ? issue.value[1] : "unknown"; // FAIL, POTENTIAL, MANUAL
-      const severity = issue.value ? issue.value[0] : "unknown"; // VIOLATION, RECOMMENDATION, etc.
+      const cat = getIssueCategory(issue.value[0], issue.value[1]);
       let badge = "";
-      if (type === "FAIL") {
-        badge = `❌ Violation (${severity})`;
-      } else if (type === "POTENTIAL") {
-        badge = `⚠️ Potential (${severity})`;
-      } else if (type === "MANUAL") {
-        badge = `ℹ️ Manual`;
+      if (cat === "Violation") {
+        badge = `❌ Violation`;
+      } else if (cat === "Needs review") {
+        badge = `⚠️ Needs review`;
       } else {
-        badge = `❓ ${type} (${severity})`;
+        badge = `ℹ️ Recommendation`;
       }
       const ruleId = issue.ruleId || "unknown-rule";
       const message = (issue.message || "No description.").replace(/\r?\n/g, " ");
@@ -826,15 +942,23 @@ function buildScreenMarkdown(screen: ScreenResult): string[] {
     issueLines.push("🎉 **All Accessibility Checks Passed**", "");
   }
 
+  const violations = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Violation").length;
+  const needsReview = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Needs review").length;
+  const recommendation = rawIssues.filter(i => getIssueCategory(i.value[0], i.value[1]) === "Recommendation").length;
+
+  const violationsStr = levels.violation ? String(violations) : "N/A";
+  const needsReviewStr = levels.needsReview ? String(needsReview) : "N/A";
+  const recommendationStr = levels.recommendation ? String(recommendation) : "N/A";
+
   return [
     `## ${screen.menuPath.join(" > ") || screen.title}`,
     "",
     `- Branch: ${screen.branch}`,
     `- Depth: ${screen.depth}`,
     `- URL: ${screen.url}`,
-    `- Violations: ${screen.summary.violation}`,
-    `- Potential violations: ${screen.summary.potentialviolation}`,
-    `- Manual checks: ${screen.summary.manual}`,
+    `- Violations: ${violationsStr}`,
+    `- Needs review: ${needsReviewStr}`,
+    `- Recommendations: ${recommendationStr}`,
     "",
     screen.screenshot ? `![Screenshot](${screen.screenshot})` : "No screenshot captured.",
     "",

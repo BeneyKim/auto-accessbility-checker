@@ -7,6 +7,11 @@ export interface CheckerSettings {
   accessibilityStandard: string;
   ruleSet: string;
   maxDepth: number;
+  levels?: {
+    violation: boolean;
+    needsReview: boolean;
+    recommendation: boolean;
+  };
 }
 
 export interface LogEntry {

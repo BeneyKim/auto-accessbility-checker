@@ -7,6 +7,9 @@ const titleInput = document.querySelector<HTMLInputElement>("#title");
 const standardSelect = document.querySelector<HTMLSelectElement>("#accessibilityStandard");
 const ruleSetSelect = document.querySelector<HTMLSelectElement>("#ruleSet");
 const depthSelect = document.querySelector<HTMLSelectElement>("#maxDepth");
+const levelViolationCheck = document.querySelector<HTMLInputElement>("#level-violation");
+const levelNeedsReviewCheck = document.querySelector<HTMLInputElement>("#level-needs-review");
+const levelRecommendationCheck = document.querySelector<HTMLInputElement>("#level-recommendation");
 const startButton = document.querySelector<HTMLButtonElement>("#start");
 const stopButton = document.querySelector<HTMLButtonElement>("#stop");
 const downloadButton = document.querySelector<HTMLButtonElement>("#download");
@@ -21,7 +24,7 @@ const logsList = document.querySelector<HTMLOListElement>("#logs");
 void initialize();
 
 async function initialize(): Promise<void> {
-  if (!form || !titleInput || !standardSelect || !ruleSetSelect || !depthSelect) {
+  if (!form || !titleInput || !standardSelect || !ruleSetSelect || !depthSelect || !levelViolationCheck || !levelNeedsReviewCheck || !levelRecommendationCheck) {
     throw new Error("Popup UI failed to initialize.");
   }
 
@@ -84,6 +87,16 @@ function applySettings(settings: CheckerSettings): void {
   standardSelect!.value = settings.accessibilityStandard;
   ruleSetSelect!.value = settings.ruleSet;
   depthSelect!.value = String(DEPTH_OPTIONS.includes(settings.maxDepth as (typeof DEPTH_OPTIONS)[number]) ? settings.maxDepth : 5);
+  
+  if (settings.levels) {
+    if (levelViolationCheck) levelViolationCheck.checked = true; // Always checked
+    if (levelNeedsReviewCheck) levelNeedsReviewCheck.checked = settings.levels.needsReview;
+    if (levelRecommendationCheck) levelRecommendationCheck.checked = settings.levels.recommendation;
+  } else {
+    if (levelViolationCheck) levelViolationCheck.checked = true;
+    if (levelNeedsReviewCheck) levelNeedsReviewCheck.checked = false;
+    if (levelRecommendationCheck) levelRecommendationCheck.checked = false;
+  }
 }
 
 function readSettings(): CheckerSettings {
@@ -91,7 +104,12 @@ function readSettings(): CheckerSettings {
     title: titleInput!.value.trim() || DEFAULT_SETTINGS.title,
     accessibilityStandard: standardSelect!.value,
     ruleSet: ruleSetSelect!.value,
-    maxDepth: Number(depthSelect!.value)
+    maxDepth: Number(depthSelect!.value),
+    levels: {
+      violation: true, // Always true
+      needsReview: levelNeedsReviewCheck ? levelNeedsReviewCheck.checked : false,
+      recommendation: levelRecommendationCheck ? levelRecommendationCheck.checked : false
+    }
   };
 }
 

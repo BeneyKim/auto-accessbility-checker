@@ -21,31 +21,51 @@
         <label>
           <span>Accessibility standard</span>
           <select id="accessibilityStandard" name="accessibilityStandard">
-            <option value="IBM_Accessibility">IBM Accessibility</option>
-            <option value="WCAG_2_2">WCAG 2.2</option>
-            <option value="WCAG_2_1">WCAG 2.1</option>
-            <option value="WCAG_2_0">WCAG 2.0</option>
+            <option value="IBM_Accessibility">IBM Accessibility (A, AA)</option>
+            <option value="WCAG_2_2">WCAG 2.2 (A, AA)</option>
+            <option value="WCAG_2_1">WCAG 2.1 (A, AA)</option>
+            <option value="WCAG_2_0">WCAG 2.0 (A, AA)</option>
           </select>
         </label>
 
-        <label>
-          <span>Rule set</span>
-          <select id="ruleSet" name="ruleSet">
-            <option value="latest">latest</option>
-            <option value="versioned">versioned</option>
-          </select>
-        </label>
+        <div class="settings-row-2col">
+          <label>
+            <span>Rule set</span>
+            <select id="ruleSet" name="ruleSet">
+              <option value="latest">latest</option>
+              <option value="versioned">versioned</option>
+            </select>
+          </label>
 
-        <label>
-          <span>Depth</span>
-          <select id="maxDepth" name="maxDepth">
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-          </select>
-        </label>
+          <label>
+            <span>Depth</span>
+            <select id="maxDepth" name="maxDepth">
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="issue-levels-container">
+          <span>Include issue levels</span>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input id="level-violation" type="checkbox" checked disabled />
+              <span>Violation</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="level-needs-review" type="checkbox" />
+              <span>Needs review</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="level-recommendation" type="checkbox" />
+              <span>Recommendation</span>
+            </label>
+          </div>
+        </div>
       </form>
 
       <section class="controls" aria-label="Run controls">

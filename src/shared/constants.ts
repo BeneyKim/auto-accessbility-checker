@@ -8,7 +8,12 @@ export const DEFAULT_SETTINGS: CheckerSettings = {
   title: "ThinQ Web",
   accessibilityStandard: "IBM_Accessibility",
   ruleSet: "latest",
-  maxDepth: 5
+  maxDepth: 5,
+  levels: {
+    violation: true,
+    needsReview: false,
+    recommendation: false
+  }
 };
 
 export const DEPTH_OPTIONS = [3, 4, 5, 6, 7] as const;

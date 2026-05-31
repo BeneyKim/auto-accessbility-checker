@@ -24,14 +24,54 @@ describe("report helpers", () => {
     expect(summary.pass).toBe(120);
   });
 
-  it("creates safe file names and report formats", () => {
+  it("creates safe file names and report formats with default levels", () => {
     const result = makeRunResult();
     const base = makeFileBase("ThinQ Web: Air/Purifier", new Date("2026-05-05T01:02:03"));
 
     expect(base).toBe("ThinQ-Web-Air-Purifier-20260505-010203");
-    expect(JSON.parse(buildJsonReport(result)).results).toHaveLength(1);
-    expect(buildMarkdownReport(result)).toContain("| 제품 > 예약 | product | 1 | 1 | 0 | 0 |");
-    expect(buildHtmlReport(result)).toContain("<title>ThinQ Web - Accessibility Report</title>");
+    
+    // Default levels (undefined in settings, so defaults to all true)
+    const json = JSON.parse(buildJsonReport(result));
+    expect(json.results).toHaveLength(1);
+    expect(json.results[0].ibmReport.report.results).toHaveLength(3); // Should have 3 issues
+
+    const md = buildMarkdownReport(result);
+    expect(md).toContain("| 제품 > 예약 | product | 1 | 1 | 1 | 1 |");
+    expect(md).toContain("- Included levels: 🔴 Violation, 🟡 Needs review, 🔵 Recommendation");
+
+    const html = buildHtmlReport(result);
+    expect(html).toContain("<title>ThinQ Web - Accessibility Report</title>");
+    expect(html).toContain("<strong>Included Levels:</strong> 🔴 Violation, 🟡 Needs review, 🔵 Recommendation");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-violation);\">1</span>");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-needs-review);\">1</span>");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-recommendation);\">1</span>");
+  });
+
+  it("filters reports when only Violation level is selected", () => {
+    const result = makeRunResult();
+    result.metadata.settings.levels = {
+      violation: true,
+      needsReview: false,
+      recommendation: false
+    };
+
+    // JSON report should only have 1 issue (the violation)
+    const json = JSON.parse(buildJsonReport(result));
+    expect(json.results[0].ibmReport.report.results).toHaveLength(1);
+    expect(json.results[0].ibmReport.report.results[0].value[0]).toBe("VIOLATION");
+    expect(json.results[0].ibmReport.report.results[0].value[1]).toBe("FAIL");
+
+    // Markdown report should show N/A for filtered columns
+    const md = buildMarkdownReport(result);
+    expect(md).toContain("| 제품 > 예약 | product | 1 | 1 | N/A | N/A |");
+    expect(md).toContain("- Included levels: 🔴 Violation");
+
+    // HTML report should show N/A for filtered counts
+    const html = buildHtmlReport(result);
+    expect(html).toContain("<strong>Included Levels:</strong> 🔴 Violation");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-violation);\">1</span>");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-needs-review);\">N/A</span>");
+    expect(html).toContain("<span class=\"summary-val\" style=\"color: var(--color-recommendation);\">N/A</span>");
   });
 });
 
@@ -59,11 +99,35 @@ function makeRunResult(): RunResult {
         title: "예약",
         url: "https://my.lgthinq.com/",
         timestamp: "2026-05-05T01:00:30.000Z",
-        ibmReport: { report: { summary: { counts: { violation: 1 } } } },
+        ibmReport: {
+          report: {
+            summary: { counts: { violation: 1, potentialviolation: 1, recommendation: 1 } },
+            results: [
+              {
+                value: ["VIOLATION", "FAIL"],
+                ruleId: "some-rule-1",
+                message: "Violation message",
+                path: { dom: "div" }
+              },
+              {
+                value: ["VIOLATION", "POTENTIAL"],
+                ruleId: "some-rule-2",
+                message: "Potential message",
+                path: { dom: "span" }
+              },
+              {
+                value: ["RECOMMENDATION", "RECOMMENDATION"],
+                ruleId: "some-rule-3",
+                message: "Recommendation message",
+                path: { dom: "a" }
+              }
+            ]
+          }
+        },
         summary: {
           violation: 1,
-          potentialviolation: 0,
-          recommendation: 0,
+          potentialviolation: 1,
+          recommendation: 1,
           potentialrecommendation: 0,
           manual: 0,
           pass: 0,
