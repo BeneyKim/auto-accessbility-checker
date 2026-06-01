@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHtmlReport, buildJsonReport, buildMarkdownReport, extractSummary, makeFileBase } from "../src/shared/report";
+import { buildHtmlReport, buildJsonReport, buildMarkdownReport, extractSummary, makeFileBase, analyzeConsistency, normalizeLabelForConsistency } from "../src/shared/report";
 import type { RunResult } from "../src/shared/types";
 
 describe("report helpers", () => {
@@ -179,3 +179,82 @@ function makeRunResult(): RunResult {
     ]
   };
 }
+
+describe("Cognitive Navigation Consistency Check", () => {
+  it("normalizes state indicators and dates for comparison", () => {
+    expect(normalizeLabelForConsistency("켜짐, 오토모드")).toBe("오토모드");
+    expect(normalizeLabelForConsistency("식기세척기, 선택 목록")).toBe("식기세척기");
+    expect(normalizeLabelForConsistency("보관 시작일 2026. 5. 31.")).toBe("보관 시작일");
+    expect(normalizeLabelForConsistency("공간, 마이홈 - 주방")).toBe("공간");
+  });
+
+  it("detects no violations when same label leads to same destination", () => {
+    const logs = [
+      {
+        triggerName: "식품 추가",
+        sourceTitle: "식품 관리",
+        targetTitle: "식품 추가 메인",
+        targetPathname: "/food/add",
+        selector: "button#add"
+      },
+      {
+        triggerName: "식품 추가",
+        sourceTitle: "기타 카테고리",
+        targetTitle: "식품 추가 메인",
+        targetPathname: "/food/add",
+        selector: "button#add-other"
+      }
+    ];
+
+    const violations = analyzeConsistency(logs);
+    expect(violations).toHaveLength(0);
+  });
+
+  it("detects violations when same label leads to different destination titles", () => {
+    const logs = [
+      {
+        triggerName: "식품 추가",
+        sourceTitle: "식품 관리",
+        targetTitle: "식품 추가 기본",
+        targetPathname: "/food/add/basic",
+        selector: "button#add-basic"
+      },
+      {
+        triggerName: "식품 추가",
+        sourceTitle: "기타 카테고리",
+        targetTitle: "식품 추가 기타",
+        targetPathname: "/food/add/other",
+        selector: "button#add-other"
+      }
+    ];
+
+    const violations = analyzeConsistency(logs);
+    expect(violations).toHaveLength(1);
+    expect(violations[0].label).toBe("식품 추가");
+    expect(violations[0].instances).toHaveLength(2);
+    expect(violations[0].instances[0].targetTitle).toBe("식품 추가 기본");
+    expect(violations[0].instances[1].targetTitle).toBe("식품 추가 기타");
+  });
+
+  it("ignores generic navigation labels like 닫기/뒤로/확인", () => {
+    const logs = [
+      {
+        triggerName: "닫기",
+        sourceTitle: "식품 관리",
+        targetTitle: "홈",
+        targetPathname: "/home",
+        selector: "button#close1"
+      },
+      {
+        triggerName: "닫기",
+        sourceTitle: "예약 설정",
+        targetTitle: "설정",
+        targetPathname: "/settings",
+        selector: "button#close2"
+      }
+    ];
+
+    const violations = analyzeConsistency(logs);
+    expect(violations).toHaveLength(0);
+  });
+});

@@ -1,4 +1,4 @@
-import type { AccessibilitySummary, RunResult, ScreenResult } from "./types";
+import type { AccessibilitySummary, RunResult, ScreenResult, TransitionLog, ConsistencyViolation } from "./types";
 
 export type IssueCategory = "Violation" | "Needs review" | "Recommendation";
 
@@ -142,6 +142,8 @@ export function buildJsonReport(result: RunResult): string {
     }
   });
 
+  cloned.consistencyViolations = analyzeConsistency(result.transitionLogs);
+
   return JSON.stringify(cloned, null, 2);
 }
 
@@ -192,6 +194,34 @@ export function buildMarkdownReport(result: RunResult): string {
     ""
   ];
 
+  const consistencyViolations = analyzeConsistency(result.transitionLogs);
+  const consistencyLines: string[] = [
+    "## Cognitive Navigation Consistency (WCAG 3.2.4)",
+    ""
+  ];
+
+  if (consistencyViolations.length > 0) {
+    consistencyLines.push(
+      "### Identical Labels with Different Destinations",
+      "The following interactive elements share the same accessible name/label but navigate to different destination screens, which violates WCAG 3.2.4 (Consistent Identification).",
+      "",
+      "| Label | Source Screen | Destination Screen | Selector |",
+      "| --- | --- | --- | --- |"
+    );
+    for (const v of consistencyViolations) {
+      for (const inst of v.instances) {
+        consistencyLines.push(
+          `| **${escapeMarkdown(v.label)}** | ${escapeMarkdown(inst.sourceTitle)} | ${escapeMarkdown(inst.targetTitle)} | \`${inst.selector.replace(/\|/g, "\\|")}\` |`
+        );
+      }
+    }
+  } else {
+    consistencyLines.push("🎉 **No cognitive navigation consistency violations detected (all identical labels lead to consistent destinations).**");
+  }
+  consistencyLines.push("", "");
+
+  lines.push(...consistencyLines);
+
   for (const screen of result.results) {
     lines.push(...buildScreenMarkdown(screen, levels));
   }
@@ -201,6 +231,53 @@ export function buildMarkdownReport(result: RunResult): string {
 
 export function buildHtmlReport(result: RunResult): string {
   const levels = result.metadata.settings.levels || { violation: true, needsReview: true, recommendation: true };
+
+  const consistencyViolations = analyzeConsistency(result.transitionLogs);
+  let consistencyHtml = "";
+  if (consistencyViolations.length > 0) {
+    consistencyHtml = consistencyViolations.map((v) => {
+      const rows = v.instances.map((inst) => `
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">${escapeHtml(inst.sourceTitle)}</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">${escapeHtml(inst.targetTitle)}</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>${escapeHtml(inst.selector)}</code></td>
+        </tr>
+      `).join("");
+
+      return `
+        <div class="consistency-card" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 4px solid var(--color-violation); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="font-size: 16px; font-weight: 700; color: var(--color-violation); margin-bottom: 8px;">
+            ⚠️ Inconsistent Label: "${escapeHtml(v.label)}"
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            This label is used on multiple screens but leads to different target pages (violating WCAG 3.2.4):
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-weight: 600;">
+                  <th style="padding: 12px;">Source Screen</th>
+                  <th style="padding: 12px;">Destination Screen</th>
+                  <th style="padding: 12px;">Selector</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } else {
+    consistencyHtml = `
+      <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Cognitive Navigation Consistency Check Passed</div>
+        <div class="success-message">All elements sharing the same label were verified to lead to consistent destinations (WCAG 3.2.4 compliant).</div>
+      </div>
+    `;
+  }
 
   let totalViolations = 0;
   let totalNeedsReview = 0;
@@ -893,6 +970,12 @@ export function buildHtmlReport(result: RunResult): string {
       </div>
     </div>
 
+    <!-- Cognitive Navigation Consistency section -->
+    <div class="consistency-section" style="margin-bottom: 40px;">
+      <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px; background: linear-gradient(135deg, #f8fafc, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Cognitive Navigation Consistency Check (WCAG 3.2.4)</h2>
+      ${consistencyHtml}
+    </div>
+
     <div class="screens-container">
       ${sections}
     </div>
@@ -1031,4 +1114,113 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+export function normalizeLabelForConsistency(name: string): string {
+  let res = name.trim().toLowerCase();
+  
+  // Strip common state indicators
+  res = res.replace(/^(현재 다운로드 코스|선택됨|사용 중|사용|켜짐|꺼짐),\s*/i, "");
+  res = res.replace(/,\s*(다운로드됨|사용 중|사용|선택됨|켜짐|꺼짐|선택 목록)$/i, "");
+  
+  // Strip comma-separated dynamic values (e.g. "공간, 마이홈 - 주방" -> "공간")
+  if (res.includes(",")) {
+    const firstPart = res.split(",")[0].trim();
+    if (firstPart.length > 0) {
+      res = firstPart;
+    }
+  }
+  
+  // Strip date suffixes
+  const dateStripped = res
+    .replace(/\s*\b\d{4}[./-]\s*\d{1,2}[./-]\s*\d{1,2}\.?/g, "")
+    .replace(/\s*\b\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일(?:\s*[가-힣]{1,3}(?:요일)?)?/g, "")
+    .trim();
+
+  if (dateStripped.length > 0 && /[a-zA-Z0-9가-힣]/.test(dateStripped)) {
+    res = dateStripped;
+  }
+  
+  return res.replace(/\s+/g, " ").trim();
+}
+
+export function analyzeConsistency(transitionLogs: TransitionLog[] | undefined): ConsistencyViolation[] {
+  if (!transitionLogs || transitionLogs.length === 0) {
+    return [];
+  }
+
+  const IGNORED_LABELS = new Set([
+    "닫기", "뒤로", "확인", "취소", "x", "close", "back", "ok", "cancel", "이동", "홈", "home",
+    "이전", "다음", "완료", "저장", "선택", "삭제", "추가", "열기", "닫기", "메뉴", "설정",
+    "prev", "next", "done", "save", "select", "delete", "add", "open", "menu", "settings",
+    "yes", "no", "예", "아니오"
+  ]);
+
+  const groups = new Map<string, TransitionLog[]>();
+  for (const log of transitionLogs) {
+    const rawLabel = log.triggerName || "";
+    const norm = normalizeLabelForConsistency(rawLabel);
+    if (!norm || IGNORED_LABELS.has(norm)) {
+      continue;
+    }
+    // Also ignore short/empty names or numeric labels (like calendar days)
+    if (norm.length <= 1 && !/^[a-zA-Z0-9가-힣]$/.test(norm)) {
+      continue;
+    }
+    // If it's a date or number, ignore
+    if (/^\d+$/.test(norm) || /^\d{4}[./-]\d{1,2}[./-]\d{1,2}/.test(norm)) {
+      continue;
+    }
+
+    if (!groups.has(norm)) {
+      groups.set(norm, []);
+    }
+    groups.get(norm)!.push(log);
+  }
+
+  const violations: ConsistencyViolation[] = [];
+
+  for (const [normLabel, logs] of groups.entries()) {
+    // Find unique destinations by target title
+    const destMap = new Map<string, TransitionLog[]>();
+    for (const log of logs) {
+      const destKey = (log.targetTitle || "").trim();
+      if (!destKey) continue;
+      if (!destMap.has(destKey)) {
+        destMap.set(destKey, []);
+      }
+      destMap.get(destKey)!.push(log);
+    }
+
+    if (destMap.size > 1) {
+      // Consistency violation detected
+      const instances = logs.map(log => ({
+        sourceTitle: log.sourceTitle,
+        targetTitle: log.targetTitle,
+        targetPathname: log.targetPathname,
+        selector: log.selector
+      }));
+
+      // Find the most frequent raw label used
+      const labelCounts = new Map<string, number>();
+      for (const log of logs) {
+        labelCounts.set(log.triggerName, (labelCounts.get(log.triggerName) || 0) + 1);
+      }
+      let bestLabel = normLabel;
+      let maxCount = 0;
+      for (const [label, count] of labelCounts.entries()) {
+        if (count > maxCount) {
+          maxCount = count;
+          bestLabel = label;
+        }
+      }
+
+      violations.push({
+        label: bestLabel,
+        instances
+      });
+    }
+  }
+
+  return violations;
 }

@@ -85,11 +85,22 @@ export interface TransitionLog {
   selector: string;
 }
 
+export interface ConsistencyViolation {
+  label: string;
+  instances: {
+    sourceTitle: string;
+    targetTitle: string;
+    targetPathname: string;
+    selector: string;
+  }[];
+}
+
 export interface RunResult {
   metadata: RunMetadata;
   results: ScreenResult[];
   logs: LogEntry[];
   transitionLogs?: TransitionLog[];
+  consistencyViolations?: ConsistencyViolation[];
 }
 
 export interface StartRunMessage {

@@ -991,3 +991,28 @@ export function sampleLargeLists(candidates: ClickCandidate[]): ClickCandidate[]
   return candidates.filter(c => candidatesToKeep.has(c));
 }
 
+export function getElementSelector(el: HTMLElement): string {
+  const parts: string[] = [];
+  let current: HTMLElement | null = el;
+  while (current && current !== document.body) {
+    let part = current.tagName.toLowerCase();
+    if (current.id) {
+      part += `#${current.id}`;
+      parts.unshift(part);
+      break;
+    }
+    let sibling = current.previousElementSibling;
+    let nth = 1;
+    while (sibling) {
+      if (sibling.tagName === current.tagName) {
+        nth++;
+      }
+      sibling = sibling.previousElementSibling;
+    }
+    part += `:nth-of-type(${nth})`;
+    parts.unshift(part);
+    current = current.parentElement;
+  }
+  return parts.join(" > ");
+}
+

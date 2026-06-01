@@ -14,7 +14,7 @@ const OVERLAY_SELECTOR =
   '[role="dialog"], [aria-modal="true"], [data-modal="true"], [bottomsheet="1"], #portal_container, [class*="Bottom"], [class*="bottom"], [class*="Sheet"], [class*="sheet"], [class*="Popup"], [class*="popup"], [class*="Modal"], [class*="modal"], [class*="calendar" i], [class*="picker" i], [class*="date" i], [class*="time" i], [class*="select" i]';
 
 import exclusions from "../../public/exclusions.json";
-import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult } from "../shared/types";
+import type { Branch, CandidateSnapshot, CheckerSettings, LogEntry, RunResult, RuntimeMessage, ScreenResult, TransitionLog } from "../shared/types";
 import {
   branchLabel,
   collectClickCandidates,
@@ -29,7 +29,8 @@ import {
   findRequiredControls,
   isDatePickerTriggerName,
   isVisible,
-  screenSignature
+  screenSignature,
+  getElementSelector
 } from "./dom";
 import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "./traversal";
 
@@ -119,7 +120,8 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
       results,
       log,
       state: "ROOT_BRANCH",
-      aborted: false
+      aborted: false,
+      transitionLogs: []
     };
     traversalContext = traversal;
     const branches: Branch[] = ["product", "usefulFeatures", "settings"];
@@ -150,7 +152,8 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
         toolVersion: chrome.runtime.getManifest().version
       },
       results,
-      logs
+      logs,
+      transitionLogs: traversal.transitionLogs
     };
 
     await sendRuntimeMessageSafely({ type: "RUN_COMPLETE", result } satisfies RuntimeMessage);
@@ -181,6 +184,7 @@ interface TraversalContext {
   log: (level: LogEntry["level"], message: string, data?: unknown) => void;
   state: TraversalState;
   aborted: boolean;
+  transitionLogs: TransitionLog[];
 }
 
 type RestoreMethod = "overlay-close" | "escape" | "back-button" | "history-back" | "tab-reentry" | "self-healing";
@@ -402,7 +406,8 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
     const candidate = candidates.find((item) => {
       const key = candidateAttemptKey(frame, item.snapshot);
       const triggerName = item.snapshot.name || item.snapshot.role;
-      return !context.attemptedCandidates.has(key) && !frame.menuPath.includes(triggerName);
+      const isDirectLoop = frame.menuPath.length > 0 && frame.menuPath[frame.menuPath.length - 1] === triggerName;
+      return !context.attemptedCandidates.has(key) && !isDirectLoop;
     });
 
     if (!candidate) {
@@ -483,7 +488,15 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     reason: transition.reason,
     before: summarizeSnapshot(transition.before),
     after: summarizeSnapshot(transition.after)
-  });
+  });  if (transition.classification !== "no-change" && transition.classification !== "unknown") {
+    context.transitionLogs.push({
+      triggerName,
+      sourceTitle: before.title || "",
+      targetTitle: transition.after.title || "",
+      targetPathname: new URL(transition.after.url, location.href).pathname,
+      selector: getElementSelector(candidate.element)
+    });
+  }
 
   if (isSameDepthVariantName(triggerName) && (transition.classification === "state-change" || transition.classification === "in-product-child")) {
     await recordSameDepthVariantResult(context, frame, candidate.snapshot, transition);
