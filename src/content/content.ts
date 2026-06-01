@@ -503,6 +503,29 @@ async function clickCandidateAndHandleTransition(context: TraversalContext, fram
     return;
   }
 
+  if (transition.classification === "state-change" && transition.reason === "overlay-count-decreased") {
+    context.log("info", "Overlay count decreased; scanning new state as same-depth variant.", { triggerName });
+    await recordSameDepthVariantResult(context, frame, candidate.snapshot, transition);
+
+    // Update the stack frame in-place to keep signatures/titles consistent with the new main screen state.
+    const snapshot = getCurrentScreenSnapshot();
+    if (snapshot.shell && snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike) {
+      frame.rootSignature = snapshot.signature;
+      frame.rootTitle = snapshot.title;
+      frame.shellSelector = describeStableShell(snapshot.shell);
+      if (frame.semanticIdentity) {
+        frame.semanticIdentity.title = snapshot.title;
+        frame.semanticIdentity.signature = snapshot.signature;
+        frame.semanticIdentity.overlayCount = snapshot.overlayDescriptors.length;
+      }
+      const idxInStack = context.navigationStack.findIndex((f) => f.depth === frame.depth);
+      if (idxInStack !== -1) {
+        context.navigationStack[idxInStack] = { ...frame };
+      }
+    }
+    return;
+  }
+
   if (transition.classification === "no-change" || transition.classification === "state-change") {
     context.log("debug", "candidate skipped.", { triggerName, classification: transition.classification, reason: transition.reason });
     return;
