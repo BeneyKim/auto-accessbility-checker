@@ -303,7 +303,7 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
       continue;
     }
     const element = findActionableCandidate(rawElement, shell);
-    if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
+    if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell) || element.tagName.toLowerCase() === "label") {
       continue;
     }
     if (!isHorizontallyInShell(element, shell)) {
@@ -363,7 +363,7 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     : deduplicatedCandidates;
 
   // Filter out duplicate-named candidates in the same group (sibling/cousin list items)
-  const dedupedNameCandidates = filterDuplicateNamesInGroups(finalCandidates);
+  const dedupedNameCandidates = filterDuplicateNamesInGroups(finalCandidates, shell);
 
   // Sample large repeating lists to prevent timeouts and redundant clicks
   const sampledCandidates = sampleLargeLists(dedupedNameCandidates);
@@ -715,19 +715,37 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
 }
 
 function isSwitchLike(element: HTMLElement): boolean {
+  const role = getRole(element);
+  const tag = element.tagName.toLowerCase();
+  const type = element.getAttribute("type");
+  const className = String(element.className ?? "");
+  const name = getAccessibleName(element);
+
+  // 1. Direct interactive switches are always skipped
+  const isDirectSwitch = role === "switch" ||
+                         role === "checkbox" ||
+                         (tag === "input" && ["checkbox", "radio"].includes(type ?? "")) ||
+                         /switch|toggle/i.test(className) ||
+                         (element.hasAttribute("aria-pressed") && !hasNavigationHint(element));
+  if (isDirectSwitch) {
+    return true;
+  }
+
+  // 2. Elements with navigation hints are never considered as simple switch toggles (never skipped)
+  if (hasNavigationHint(element)) {
+    return false;
+  }
+
   const checkSelf = (el: HTMLElement): boolean => {
-    const role = getRole(el);
-    const tag = el.tagName.toLowerCase();
-    const type = el.getAttribute("type");
-    const className = String(el.className ?? "");
-    const name = getAccessibleName(el);
+    const r = getRole(el);
+    const t = el.tagName.toLowerCase();
+    const n = getAccessibleName(el);
     return (
-      role === "switch" ||
-      role === "checkbox" ||
-      (tag === "input" && ["checkbox", "radio"].includes(type ?? "")) ||
-      /switch|toggle/i.test(className) ||
-      (el.hasAttribute("aria-pressed") && !hasNavigationHint(el)) ||
-      ((role === "text" || tag === "div" || tag === "span" || tag === "p") && /^(켜짐|꺼짐|on|off)$/i.test(name))
+      (r === "text" || t === "div" || t === "span" || t === "p") && 
+      (/^(켜짐|꺼짐|on|off)$/i.test(n) ||
+       /,\s*(켜짐|꺼짐|on|off)$/i.test(n) ||
+       /,\s*$/i.test(n) ||
+       /(?:^|\s)(켜짐|꺼짐|on|off)$/i.test(n))
     );
   };
 
@@ -747,7 +765,21 @@ function isSwitchLike(element: HTMLElement): boolean {
 
 function hasNavigationHint(element: HTMLElement): boolean {
   const name = getAccessibleName(element);
-  return /상세|보기|예약|설정|관리|이동|next|open|detail|more/i.test(name);
+  const text = element.innerText ?? "";
+  
+  if (/상세|보기|예약|설정|관리|이동|next|open|detail|more/i.test(name)) {
+    return true;
+  }
+  if (/>|→|\|/.test(name) || />|→|\|/.test(text)) {
+    return true;
+  }
+  const hasVisualIndicator = element.querySelector(
+    ".divider, .separator, .line, .arrow, .chevron, [class*='arrow'], [class*='chevron']"
+  );
+  if (hasVisualIndicator) {
+    return true;
+  }
+  return false;
 }
 
 function isChartDataControl(element: HTMLElement, name: string): boolean {
@@ -986,13 +1018,13 @@ export function isSaveLikeName(name: string): boolean {
   return /저장|등록|확인|완료|적용|추가|생성|save|confirm|apply|submit|done|add|create|register/i.test(norm);
 }
 
-export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): ClickCandidate[] {
+export function filterDuplicateNamesInGroups(candidates: ClickCandidate[], shell?: HTMLElement): ClickCandidate[] {
   const groupMap = new Map<HTMLElement, Map<string, ClickCandidate[]>>();
 
   for (const c of candidates) {
     let curr = c.element.parentElement;
-    for (let level = 1; level <= 2; level++) {
-      if (!curr || curr === document.body) break;
+    for (let level = 1; level <= 4; level++) {
+      if (!curr || curr === document.body || (shell && curr === shell)) break;
       
       const typeKey = `${level}`;
       if (!groupMap.has(curr)) {
@@ -1011,8 +1043,8 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): Clic
   const candidateToGroup = new Map<ClickCandidate, ClickCandidate[]>();
   for (const c of candidates) {
     let curr = c.element.parentElement;
-    for (let level = 1; level <= 2; level++) {
-      if (!curr || curr === document.body) break;
+    for (let level = 1; level <= 4; level++) {
+      if (!curr || curr === document.body || (shell && curr === shell)) break;
       
       const typeKey = `${level}`;
       const group = groupMap.get(curr)?.get(typeKey) || [];
@@ -1028,13 +1060,40 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): Clic
   const candidatesToRemove = new Set<ClickCandidate>();
 
   for (const group of uniqueGroups) {
-    const seenNames = new Set<string>();
-    for (const c of group) {
-      const name = c.snapshot.name || c.snapshot.role;
-      if (seenNames.has(name)) {
-        candidatesToRemove.add(c);
-      } else {
-        seenNames.add(name);
+    const processed = new Set<ClickCandidate>();
+    for (let i = 0; i < group.length; i++) {
+      const c1 = group[i];
+      if (processed.has(c1)) continue;
+      const n1 = (c1.snapshot.name || c1.snapshot.role || "").trim().toLowerCase();
+      if (!n1) continue;
+
+      const cluster = [c1];
+      for (let j = i + 1; j < group.length; j++) {
+        const c2 = group[j];
+        if (processed.has(c2)) continue;
+        const n2 = (c2.snapshot.name || c2.snapshot.role || "").trim().toLowerCase();
+        if (!n2) continue;
+
+        if (n1.includes(n2) || n2.includes(n1)) {
+          cluster.push(c2);
+        }
+      }
+
+      if (cluster.length >= 2) {
+        let best = cluster.find(c => {
+          const tag = c.element.tagName.toLowerCase();
+          const role = c.snapshot.role;
+          return tag === "button" || tag === "a" || role === "button" || role === "link" || role === "tab";
+        });
+        if (!best) {
+          best = cluster[0];
+        }
+        for (const c of cluster) {
+          processed.add(c);
+          if (c !== best) {
+            candidatesToRemove.add(c);
+          }
+        }
       }
     }
   }

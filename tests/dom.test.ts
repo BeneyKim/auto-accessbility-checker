@@ -884,5 +884,64 @@ describe("ThinQ DOM helpers", () => {
       expect(skipped.map(s => s.name)).toContain("란제리/울, 삭제");
       expect(skipped.map(s => s.name)).toContain("이불, 추가");
     });
+
+    it("skips status cards ending with commas or states but keeps those with navigation hints", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div data-nscreenfocusable="true" aria-label="자동 문열림 건조,"></div>
+          <div data-nscreenfocusable="true" aria-label="듀얼존, 꺼짐"></div>
+          <div data-nscreenfocusable="true" aria-label="가습기 자동건조, 꺼짐">
+            <span class="chevron">></span>
+          </div>
+          <button>정상 코스</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toContain("가습기 자동건조, 꺼짐");
+      expect(candidates.map(c => c.snapshot.name)).toContain("정상 코스");
+      expect(candidates.map(c => c.snapshot.name)).not.toContain("듀얼존, 꺼짐");
+    });
+
+    it("does not skip elements containing navigation symbols like | or >", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div data-nscreenfocusable="true" aria-label="취침 예약 | 2시간 후 꺼짐"></div>
+          <div data-nscreenfocusable="true" aria-label="일반 꺼짐"></div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toContain("취침 예약 | 2시간 후 꺼짐");
+      expect(candidates.map(c => c.snapshot.name)).not.toContain("일반 꺼짐");
+    });
+
+    it("excludes label elements from candidates list to prevent native focus side effects", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <label>취침 예약</label>
+          <button>취침 예약</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.role)).toEqual(["button"]);
+      expect(candidates.length).toBe(1);
+    });
+
+    it("deduplicates candidates under same group when one name includes another", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div class="card">
+            <button>취침 예약 1시간 58분 후 꺼짐</button>
+            <button>취침 예약</button>
+          </div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["취침 예약 1시간 58분 후 꺼짐"]);
+      expect(candidates.length).toBe(1);
+    });
   });
 });

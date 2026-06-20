@@ -18,6 +18,13 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!stored[STORAGE_KEYS.settings]) {
     await chrome.storage.local.set({ [STORAGE_KEYS.settings]: DEFAULT_SETTINGS });
   }
+
+  // Enable opening side panel on action click
+  if (typeof chrome !== "undefined" && chrome.sidePanel) {
+    await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch((error: unknown) => {
+      console.error("Failed to set side panel behavior:", error);
+    });
+  }
 });
 
 chrome.runtime.onMessage.addListener((message: RuntimeMessage, sender, sendResponse) => {

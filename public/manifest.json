@@ -5,14 +5,16 @@
   "version": "0.99.11",
   "description": "Crawls ThinQ Web product screens and generates IBM Equal Access accessibility reports.",
   "action": {
-    "default_popup": "popup.html",
     "default_title": "ThinQ A11y Checker"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
   },
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "downloads", "scripting", "storage", "tabs", "unlimitedStorage"],
+  "permissions": ["activeTab", "downloads", "scripting", "storage", "tabs", "unlimitedStorage", "sidePanel"],
   "host_permissions": ["https://my.lgthinq.com/*"],
   "content_scripts": [
     {
