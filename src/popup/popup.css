@@ -219,3 +219,13 @@ button:disabled {
   color: #1d4ed8;
   text-decoration: underline;
 }
+
+/* Running State Transparency */
+body.running {
+  opacity: 0.12;
+  transition: opacity 0.25s ease-in-out;
+}
+
+body.running:hover {
+  opacity: 1.0;
+}

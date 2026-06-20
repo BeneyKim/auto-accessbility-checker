@@ -251,6 +251,49 @@ function isStrongInteractive(element: HTMLElement): boolean {
   );
 }
 
+export function isHorizontallyInShell(element: HTMLElement, shell: HTMLElement): boolean {
+  const elementRect = element.getBoundingClientRect();
+  const shellRect = shell.getBoundingClientRect();
+  if (shellRect.width === 0 && shellRect.height === 0) {
+    return true;
+  }
+  return elementRect.right > shellRect.left + 5 && elementRect.left < shellRect.right - 5;
+}
+
+export function filterDuplicateNamesScreenWide(candidates: ClickCandidate[]): ClickCandidate[] {
+  const nameMap = new Map<string, ClickCandidate[]>();
+  for (const c of candidates) {
+    const name = (c.snapshot.name || c.snapshot.role || "").trim().toLowerCase();
+    if (!name) continue;
+    if (!nameMap.has(name)) {
+      nameMap.set(name, []);
+    }
+    nameMap.get(name)!.push(c);
+  }
+
+  const toRemove = new Set<ClickCandidate>();
+  for (const [name, list] of nameMap.entries()) {
+    if (list.length >= 2) {
+      const strong = list.find(c => {
+        const tag = c.element.tagName.toLowerCase();
+        const role = c.snapshot.role;
+        return tag === "button" || tag === "a" || role === "button" || role === "link" || role === "tab";
+      });
+      if (strong) {
+        for (const c of list) {
+          const tag = c.element.tagName.toLowerCase();
+          const role = c.snapshot.role;
+          const isStrong = tag === "button" || tag === "a" || role === "button" || role === "link" || role === "tab";
+          if (!isStrong) {
+            toRemove.add(c);
+          }
+        }
+      }
+    }
+  }
+  return candidates.filter(c => !toRemove.has(c));
+}
+
 export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   const seen = new Set<HTMLElement>();
   const candidates: ClickCandidate[] = [];
@@ -261,6 +304,9 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     }
     const element = findActionableCandidate(rawElement, shell);
     if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
+      continue;
+    }
+    if (!isHorizontallyInShell(element, shell)) {
       continue;
     }
     seen.add(element);
@@ -322,8 +368,11 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   // Sample large repeating lists to prevent timeouts and redundant clicks
   const sampledCandidates = sampleLargeLists(dedupedNameCandidates);
 
+  // Screen-wide deduplication for elements with identical names (e.g. button and label inside the same card)
+  const screenWideDeduped = filterDuplicateNamesScreenWide(sampledCandidates);
+
   const occurrenceCounts = new Map<string, number>();
-  for (const c of sampledCandidates) {
+  for (const c of screenWideDeduped) {
     const normalizedName = (c.snapshot.name || c.snapshot.role).replace(/\s+/g, " ").trim().toLowerCase();
     const signature = `${normalizedName}:${c.snapshot.role}:${c.snapshot.tagName}`;
     const count = occurrenceCounts.get(signature) || 0;
@@ -331,7 +380,7 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     occurrenceCounts.set(signature, count + 1);
   }
 
-  return sampledCandidates;
+  return screenWideDeduped;
 }
 
 export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[] {
@@ -341,6 +390,9 @@ export function collectSkippedCandidates(shell: HTMLElement): CandidateSnapshot[
     .map((element) => findActionableCandidate(element, shell))
     .filter((element) => {
       if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell)) {
+        return false;
+      }
+      if (!isHorizontallyInShell(element, shell)) {
         return false;
       }
       seen.add(element);
@@ -402,7 +454,7 @@ export function normalizeUrl(url: string): string {
       if (knownPages.includes(seg.toLowerCase())) {
         return seg;
       }
-      if (seg.includes("_")) {
+      if (/^[A-Z]{3,4}_[A-Za-z0-9_]+$/.test(seg)) {
         return seg;
       }
       if (/^[A-Za-z0-9\-_=]+$/.test(seg)) {
@@ -609,6 +661,25 @@ function findSettingsButton(root: ParentNode): HTMLElement | undefined {
 }
 
 function getSkipReason(element: HTMLElement, name: string): string | undefined {
+  if (element.tagName.toLowerCase() === "a") {
+    const target = element.getAttribute("target");
+    if (target === "_blank") {
+      return "blocked-external-service";
+    }
+    const href = element.getAttribute("href");
+    if (href) {
+      try {
+        const url = new URL(href, location.href);
+        const currentHost = location.hostname || "my.lgthinq.com";
+        if (url.hostname !== currentHost && url.hostname !== "my.lgthinq.com" && !url.protocol.startsWith("javascript")) {
+          return "blocked-external-service";
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   if (isSwitchLike(element)) {
     return "switch-toggle";
   }
@@ -649,12 +720,14 @@ function isSwitchLike(element: HTMLElement): boolean {
     const tag = el.tagName.toLowerCase();
     const type = el.getAttribute("type");
     const className = String(el.className ?? "");
+    const name = getAccessibleName(el);
     return (
       role === "switch" ||
       role === "checkbox" ||
       (tag === "input" && ["checkbox", "radio"].includes(type ?? "")) ||
       /switch|toggle/i.test(className) ||
-      (el.hasAttribute("aria-pressed") && !hasNavigationHint(el))
+      (el.hasAttribute("aria-pressed") && !hasNavigationHint(el)) ||
+      ((role === "text" || tag === "div" || tag === "span" || tag === "p") && /^(켜짐|꺼짐|on|off)$/i.test(name))
     );
   };
 
@@ -874,7 +947,8 @@ function isDisabled(element: HTMLElement): boolean {
 }
 
 function getRole(element: HTMLElement): string {
-  return element.getAttribute("role") ?? element.tagName.toLowerCase();
+  const role = element.getAttribute("role") ?? element.tagName.toLowerCase();
+  return role === "a" ? "link" : role;
 }
 
 function stableElementId(element: HTMLElement): string {
@@ -920,7 +994,7 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): Clic
     for (let level = 1; level <= 2; level++) {
       if (!curr || curr === document.body) break;
       
-      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      const typeKey = `${level}`;
       if (!groupMap.has(curr)) {
         groupMap.set(curr, new Map());
       }
@@ -940,7 +1014,7 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): Clic
     for (let level = 1; level <= 2; level++) {
       if (!curr || curr === document.body) break;
       
-      const typeKey = `${c.snapshot.tagName}:${c.snapshot.role}:${level}`;
+      const typeKey = `${level}`;
       const group = groupMap.get(curr)?.get(typeKey) || [];
       if (group.length >= 2) {
         candidateToGroup.set(c, group);
@@ -970,7 +1044,13 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[]): Clic
 
 export function sampleLargeLists(candidates: ClickCandidate[]): ClickCandidate[] {
   if (typeof window !== "undefined" && !window.__thinqSeed__) {
-    window.__thinqSeed__ = Math.random();
+    try {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      window.__thinqSeed__ = arr[0] / 0xffffffff;
+    } catch {
+      window.__thinqSeed__ = (Math.random() + (Date.now() % 1000) / 1000) % 1;
+    }
   }
 
   const groupMap = new Map<HTMLElement, Map<string, ClickCandidate[]>>();

@@ -56,6 +56,13 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResp
       return true;
     }
     stopRequested = false;
+    try {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      window.__thinqSeed__ = ((arr[0] / 0xffffffff) + Math.random() + (Date.now() % 1000) / 1000) % 1;
+    } catch {
+      window.__thinqSeed__ = (Math.random() + (Date.now() % 1000) / 1000) % 1;
+    }
     activeRun = runTraversal(message.settings).finally(() => {
       activeRun = undefined;
     });
@@ -377,12 +384,25 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   await recordScreenResult(context, frame, snapshot);
 
   if (frame.depth > 0) {
-    const semanticId = `${snapshot.title || "Untitled"}:${normalizeUrl(location.href)}`;
-    if (context.visitedSemantically.has(semanticId)) {
-      context.log("info", "Semantic match found: skipping duplicate sub-candidate traversal for this frame.", { semanticId, frame });
-      return;
+    const normalizedUrl = normalizeUrl(location.href);
+    const normalizedUrlLower = normalizedUrl.toLowerCase();
+    const isListOrSearchPage = normalizedUrlLower.includes("subfoodlist") || normalizedUrlLower.includes("sublist") || normalizedUrlLower.includes("search");
+
+    if (!isListOrSearchPage) {
+      let semanticLayoutKey: string;
+      if (normalizedUrlLower.includes("editfoodinfo")) {
+        semanticLayoutKey = normalizedUrl;
+      } else {
+        const candidateRoles = snapshot.shell ? collectClickCandidates(snapshot.shell).map(c => `${c.snapshot.role}:${c.snapshot.tagName}`).sort().join("|") : "";
+        semanticLayoutKey = `${normalizedUrl}[${candidateRoles}]`;
+      }
+
+      if (context.visitedSemantically.has(semanticLayoutKey)) {
+        context.log("info", "Semantic match found: skipping duplicate sub-candidate traversal for this frame.", { semanticLayoutKey, frame });
+        return;
+      }
+      context.visitedSemantically.add(semanticLayoutKey);
     }
-    context.visitedSemantically.add(semanticId);
   }
 
   if (!shouldTraverseFrameCandidates(frame)) {
@@ -875,14 +895,14 @@ function classifyTransition(
   const candidateSetChanged = after.candidateNames.join("|") !== before.candidateNames.join("|");
   const triggerName = trigger.name || trigger.role;
 
-  // 1. Overlay count decrease
-  if (after.overlayDescriptors.length < before.overlayDescriptors.length) {
-    return { classification: "state-change", reason: "overlay-count-decreased", before, after };
-  }
-
-  // 2. URL Changed navigation (always prioritize over overlay opening)
+  // 1. URL Changed navigation (always prioritize over overlay opening or closing)
   if (urlChanged) {
     return { classification: "in-product-child", reason: "url-changed", before, after };
+  }
+
+  // 2. Overlay count decrease
+  if (after.overlayDescriptors.length < before.overlayDescriptors.length) {
+    return { classification: "state-change", reason: "overlay-count-decreased", before, after };
   }
 
   // 3. Overlay count increase (when URL is unchanged)
@@ -1118,7 +1138,13 @@ async function waitForFrameRestore(frame: NavigationFrame, timeoutMs: number): P
   const started = performance.now();
   let snapshot = getCurrentScreenSnapshot();
   while (performance.now() - started < timeoutMs) {
-    const isRelaxed = snapshot.boundaryPresent && !snapshot.isHomeLike && !snapshot.isOutOfScopeLike && snapshot.title === frame.rootTitle;
+    const targetOverlayCount = frame.semanticIdentity?.overlayCount ?? 0;
+    const currentOverlayCount = snapshot.overlayDescriptors.length;
+    const isRelaxed = snapshot.boundaryPresent && 
+                      !snapshot.isHomeLike && 
+                      !snapshot.isOutOfScopeLike && 
+                      snapshot.title === frame.rootTitle &&
+                      currentOverlayCount <= targetOverlayCount;
     const isLoading = isPageLoadingOrEmpty(snapshot);
     if (!isLoading && (isFrameRestored(frame, snapshot) || isRelaxed || snapshot.isHomeLike || snapshot.isOutOfScopeLike || !snapshot.boundaryPresent)) {
       return snapshot;
@@ -1251,7 +1277,7 @@ function findInternalRouteShell(): HTMLElement | undefined {
     return productShell;
   }
 
-  return Array.from(document.querySelectorAll<HTMLElement>("#root_container, #body_container, [id*='container'], [role='main'], main, body > div"))
+  const container = Array.from(document.querySelectorAll<HTMLElement>("#root_container, #body_container, [id*='container'], [role='main'], main, body > div"))
     .filter((element) => element !== document.body && isVisible(element) && areaOf(element) > 20000)
     .filter((element) => {
       const descriptor = `${element.id} ${String(element.className ?? "")} ${element.getAttribute("data-name") ?? ""}`;
@@ -1259,12 +1285,22 @@ function findInternalRouteShell(): HTMLElement | undefined {
       return !/background|bg|image/i.test(descriptor) || textLength > 20;
     })
     .sort((a, b) => areaOf(b) - areaOf(a))[0];
+
+  if (container) {
+    return container;
+  }
+
+  const root = document.getElementById("root");
+  if (root && isVisible(root)) {
+    return root;
+  }
+  return document.body;
 }
 
 function isInternalThinQProductRoute(): boolean {
   try {
     const url = new URL(location.href);
-    return url.hostname === THINQ_HOST && /\/[A-Za-z0-9]+-[A-Za-z0-9]+\//.test(url.pathname) && !looksLikeThinQHome();
+    return url.hostname === THINQ_HOST && /\/[A-Za-z0-9_-]+\/[A-Za-z0-9_=-]+\//.test(url.pathname) && !looksLikeThinQHome();
   } catch {
     return false;
   }
@@ -1371,6 +1407,9 @@ function makeDocumentSignature(title: string, overlays: string[], candidates: st
 }
 
 function looksLikeOutOfScope(): boolean {
+  if (isUrlInProductRoute(location.href)) {
+    return false;
+  }
   const text = document.body.innerText?.replace(/\s+/g, " ").trim() ?? "";
   return /ThinQ\s*Web|popup|external|browser|새\s*창|팝업|이동/i.test(text);
 }

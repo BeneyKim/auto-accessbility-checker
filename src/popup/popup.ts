@@ -159,6 +159,13 @@ async function sendRuntimeMessage(message: RuntimeMessage): Promise<unknown> {
 }
 
 function renderState(state: RunState, hasResult: boolean): void {
+  const isRunning = state.status === "running" || state.status === "stopping";
+  if (isRunning) {
+    document.body.classList.add("running");
+  } else {
+    document.body.classList.remove("running");
+  }
+
   if (statusText) {
     statusText.textContent = state.error ? `${state.status}: ${state.error}` : state.status;
   }

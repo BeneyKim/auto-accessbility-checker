@@ -186,6 +186,24 @@ export const FORBIDDEN_RULES: readonly ForbiddenRule[] = [
     description: "세기/모드/단계/레벨 이전/다음",
     textPattern: /\b(이전|다음)\b.*(세기|모드|단계|레벨)|(세기|모드|단계|레벨).*\b(이전|다음)\b/,
   },
+  {
+    id: "state-value-adjust",
+    category: "state-control",
+    description: "올림/내림/좌측/우측 값 및 상태 미세 조절 버튼",
+    textPattern: /올림$|내림$|좌측$|우측$/,
+  },
+  {
+    id: "ext-device-download",
+    category: "state-control",
+    description: "기기 전송/다운로드 액션 글로벌 제외",
+    textPattern: /[A-Za-z0-9가-힣]+에\s*(다운로드|전송)/,
+  },
+  {
+    id: "state-list-toggle",
+    category: "state-control",
+    description: "리스트 아이템 추가/삭제 토글 버튼 (예: 품목, 추가 또는 품목, 삭제)",
+    textPattern: /,\s*(추가|삭제|등록|해제|add|delete|remove|insert)$/i,
+  },
 ] as const;
 
 // ─── Lookup helpers ──────────────────────────────────────

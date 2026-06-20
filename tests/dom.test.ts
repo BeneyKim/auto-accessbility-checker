@@ -746,7 +746,143 @@ describe("ThinQ DOM helpers", () => {
       
       expect(n1).toBe("https://my.lgthinq.com/GRM-20/*/*/*/*/*/GRM_20_FOD01_Main/001/*");
       expect(n2).toBe("https://my.lgthinq.com/GRM-20/*/*/*/*/*/GRM_20_FOD01_Main/001/*");
-      expect(n1).toBe(n2);
+    });
+
+    it("normalizes base64 segments containing underscores to wildcards but preserves screen IDs", () => {
+      const base64Param = "eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIs";
+      const screenId = "GRM_20_FOD02_EditFoodInfo";
+      const url = `https://my.lgthinq.com/GRM-20/ZDQwNTIz/${base64Param}/${screenId}/001/GRM-20`;
+      const normalized = normalizeUrl(url);
+      expect(normalized).toBe("https://my.lgthinq.com/GRM-20/*/*/" + screenId + "/001/*");
+    });
+  });
+
+  describe("New forbidden rules and filters for v0.99.11", () => {
+    it("skips values/modes adjustments (올림/내림/좌측/우측)", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div role="button">희망 습도 올림</div>
+          <div role="button">희망 습도 내림</div>
+          <div role="button">풍량 좌측</div>
+          <div role="button">풍량 우측</div>
+          <button>정상 버튼</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const skipped = collectSkippedCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["정상 버튼"]);
+      expect(skipped.map(s => s.name)).toContain("희망 습도 올림");
+      expect(skipped.map(s => s.name)).toContain("풍량 우측");
+    });
+
+    it("skips device send/download actions globally", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <button>식기세척기에 다운로드</button>
+          <button>오븐에 다운로드</button>
+          <button>세탁기에 전송</button>
+          <button>일반 다운로드</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const skipped = collectSkippedCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["일반 다운로드"]);
+      expect(skipped.map(s => s.name)).toContain("식기세척기에 다운로드");
+      expect(skipped.map(s => s.name)).toContain("세탁기에 전송");
+    });
+
+    it("filters out external and target _blank links", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <a href="https://my.lgthinq.com/GDM-20/sub">내부 링크</a>
+          <a href="https://www.google.com" target="_self">구글 링크</a>
+          <a href="https://my.lgthinq.com/GDM-20/sub" target="_blank">새창 내부 링크</a>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const skipped = collectSkippedCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["내부 링크"]);
+      expect(skipped.map(s => s.reason)).toContain("blocked-external-service");
+    });
+
+    it("skips 켜짐/꺼짐 status texts and their container cards as switch-toggles", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div data-nscreenfocusable="true" class="row">
+            <span>자동 문열림 건조</span>
+            <span>켜짐</span>
+          </div>
+          <button>정상 작동 버튼</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["정상 작동 버튼"]);
+    });
+
+    it("deduplicates candidates with same name but different roles/tags under same parent", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div class="card">
+            <button>취침 예약</button>
+            <span>취침 예약</span>
+          </div>
+          <button>정상 작동 버튼</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["취침 예약", "정상 작동 버튼"]);
+    });
+
+    it("deduplicates screen-wide duplicate names favoring strong interactive elements", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div class="card1">
+            <button>공통버튼</button>
+          </div>
+          <div class="card2">
+            <span>공통버튼</span>
+          </div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["공통버튼"]);
+      expect(candidates[0].snapshot.tagName).toBe("button");
+    });
+
+    it("filters out elements that are horizontally outside the active shell bounds", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700" data-left="0">
+          <!-- Active tab elements inside the shell horizontal bounds -->
+          <button data-left="10" data-width="100">Active Tab Button</button>
+          <!-- Off-screen tab elements shifted horizontally -->
+          <button data-left="950" data-width="100">Off-Screen Tab Button</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["Active Tab Button"]);
+    });
+
+    it("skips list item add/delete toggle buttons", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <button>란제리/울, 삭제</button>
+          <button>이불, 추가</button>
+          <button>표준코스</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const skipped = collectSkippedCandidates(shell);
+      expect(candidates.map(c => c.snapshot.name)).toEqual(["표준코스"]);
+      expect(skipped.map(s => s.name)).toContain("란제리/울, 삭제");
+      expect(skipped.map(s => s.name)).toContain("이불, 추가");
     });
   });
 });
