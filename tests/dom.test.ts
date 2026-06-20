@@ -1001,5 +1001,25 @@ describe("ThinQ DOM helpers", () => {
       expect(ids).toContain("t2");
       expect(ids).not.toContain("t3");
     });
+
+    it("skips elements nested inside a Smart Diagnosis container to avoid external diagnostics", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div data-name="smart diagnosis">
+            <div>
+              <button id="btnSmart">세탁</button>
+            </div>
+          </div>
+          <button id="btnNormal">정상 작동</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const skipped = collectSkippedCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btnNormal");
+      expect(ids).not.toContain("btnSmart");
+      expect(skipped.map(s => s.reason)).toContain("blocked-external-service");
+    });
   });
 });

@@ -386,7 +386,7 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   if (frame.depth > 0) {
     const normalizedUrl = normalizeUrl(location.href);
     const normalizedUrlLower = normalizedUrl.toLowerCase();
-    const isListOrSearchPage = normalizedUrlLower.includes("subfoodlist") || normalizedUrlLower.includes("sublist") || normalizedUrlLower.includes("search");
+    const isListOrSearchPage = normalizedUrlLower.includes("list") || normalizedUrlLower.includes("search") || normalizedUrlLower.includes("history");
 
     if (!isListOrSearchPage) {
       let semanticLayoutKey: string;

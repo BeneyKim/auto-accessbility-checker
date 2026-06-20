@@ -696,6 +696,27 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
     return "switch-toggle";
   }
 
+  // Skip elements inside Smart Diagnosis context to prevent hardware mic activation
+  // or long diagnostic timeouts.
+  let parent = element.parentElement;
+  for (let level = 1; level <= 3; level++) {
+    if (!parent || parent === document.body) break;
+    const parentLabel = (parent.getAttribute("aria-label") ?? "").toLowerCase();
+    const parentDataName = (parent.getAttribute("data-name") ?? "").toLowerCase();
+    const hasSmartDiagContext = parentLabel.includes("스마트 진단") ||
+                                 parentLabel.includes("스마트진단") ||
+                                 parentLabel.includes("smart diagnosis") ||
+                                 parentLabel.includes("smartdiagnosis") ||
+                                 parentDataName.includes("스마트 진단") ||
+                                 parentDataName.includes("스마트진단") ||
+                                 parentDataName.includes("smart diagnosis") ||
+                                 parentDataName.includes("smartdiagnosis");
+    if (hasSmartDiagContext) {
+      return "blocked-external-service";
+    }
+    parent = parent.parentElement;
+  }
+
   // Registry-based check (covers all categories including new ones)
   const forbiddenMatch = matchForbiddenRule(name, element);
   if (forbiddenMatch) {
