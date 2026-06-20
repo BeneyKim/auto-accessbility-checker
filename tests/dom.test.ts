@@ -943,5 +943,63 @@ describe("ThinQ DOM helpers", () => {
       expect(candidates.map(c => c.snapshot.name)).toEqual(["취침 예약 1시간 58분 후 꺼짐"]);
       expect(candidates.length).toBe(1);
     });
+
+    it("skips elements under ancestors with aria-hidden='true' to ignore inactive tab views", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <!-- Active Tab Panel -->
+          <div id="panelActive">
+            <button id="btnActive">Active Button</button>
+          </div>
+          <!-- Inactive Tab Panel -->
+          <div id="panelInactive" aria-hidden="true">
+            <button id="btnInactive">Inactive Button</button>
+          </div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const names = candidates.map(c => c.snapshot.name);
+      expect(names).toContain("Active Button");
+      expect(names).not.toContain("Inactive Button");
+    });
+
+    it("skips static text roles and static measurements or state values when no navigation hint", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div role="text" id="t1">388 와트시</div>
+          <div data-nscreenfocusable="true" id="t2">3회</div>
+          <div data-nscreenfocusable="true" id="t3">40도</div>
+          <div data-nscreenfocusable="true" id="t4">강</div>
+          <div data-nscreenfocusable="true" id="t5">자동</div>
+          <button id="btn1">정상 작동</button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btn1");
+      expect(ids).not.toContain("t1");
+      expect(ids).not.toContain("t2");
+      expect(ids).not.toContain("t3");
+      expect(ids).not.toContain("t4");
+      expect(ids).not.toContain("t5");
+    });
+
+    it("does NOT skip static-looking elements if they contain visual navigation hints", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div data-nscreenfocusable="true" id="t1">온도 40도 ></div>
+          <div data-nscreenfocusable="true" id="t2">예약 2시간 | 꺼짐</div>
+          <div data-nscreenfocusable="true" id="t3">388 와트시</div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("t1");
+      expect(ids).toContain("t2");
+      expect(ids).not.toContain("t3");
+    });
   });
 });

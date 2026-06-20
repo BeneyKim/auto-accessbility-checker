@@ -600,6 +600,17 @@ export function getAccessibleName(element: HTMLElement): string {
   );
 }
 
+export function isAriaHidden(element: HTMLElement): boolean {
+  let current: HTMLElement | null = element;
+  while (current && current !== document.body) {
+    if (current.getAttribute("aria-hidden") === "true") {
+      return true;
+    }
+    current = current.parentElement;
+  }
+  return false;
+}
+
 export function isVisible(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect();
   const style = getComputedStyle(element);
@@ -608,7 +619,8 @@ export function isVisible(element: HTMLElement): boolean {
     rect.height > 0 &&
     style.visibility !== "hidden" &&
     style.display !== "none" &&
-    Number(style.opacity || 1) > 0
+    Number(style.opacity || 1) > 0 &&
+    !isAriaHidden(element)
   );
 }
 
@@ -697,6 +709,18 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
     return "static-composite-container";
   }
   const role = getRole(element);
+  if (role === "text" || role === "statictext") {
+    return "static-composite-container";
+  }
+
+  // Skip static measurement data labels and setting values (e.g. 388 와트시, 3회, 40도, 강, 자동)
+  // when there is no navigation hint (like >, |, separator class etc.)
+  const isStaticVal = /^(강|중|약|자동|표준|절약|스피드|섬세|울|란제리|소량|알뜰|이불|타월|셔츠|위생|살균)$/.test(name) ||
+                      /(?:^|\s)(?:[0-9.]+)?\s*(와트시|Wh|kWh|회|분|시간|도|℃)$/i.test(name);
+  if (isStaticVal && !hasNavigationHint(element)) {
+    return "static-composite-container";
+  }
+
   if (hasDatePickerDropdownSignal(element)) {
     if (isLargeCompositeDatePickerCandidate(element)) {
       return "static-composite-container";
