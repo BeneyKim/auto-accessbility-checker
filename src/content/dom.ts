@@ -764,7 +764,6 @@ function isSwitchLike(element: HTMLElement): boolean {
   const tag = element.tagName.toLowerCase();
   const type = element.getAttribute("type");
   const className = String(element.className ?? "");
-  const name = getAccessibleName(element);
 
   // 1. Direct interactive switches are always skipped
   const isDirectSwitch = role === "switch" ||
@@ -776,7 +775,12 @@ function isSwitchLike(element: HTMLElement): boolean {
     return true;
   }
 
-  // 2. Elements with navigation hints are never considered as simple switch toggles (never skipped)
+  // 2. Strong interactive elements (button, a, role="button/link/tab") are never simple switch-toggles
+  if (isStrongInteractive(element)) {
+    return false;
+  }
+
+  // 3. Elements with navigation hints are never considered as simple switch toggles (never skipped)
   if (hasNavigationHint(element)) {
     return false;
   }
@@ -788,8 +792,6 @@ function isSwitchLike(element: HTMLElement): boolean {
     return (
       (r === "text" || t === "div" || t === "span" || t === "p") && 
       (/^(켜짐|꺼짐|on|off)$/i.test(n) ||
-       /,\s*(켜짐|꺼짐|on|off)$/i.test(n) ||
-       /,\s*$/i.test(n) ||
        /(?:^|\s)(켜짐|꺼짐|on|off)$/i.test(n))
     );
   };
@@ -812,18 +814,41 @@ function hasNavigationHint(element: HTMLElement): boolean {
   const name = getAccessibleName(element);
   const text = element.innerText ?? "";
   
+  // 1. Text-based navigation keywords
   if (/상세|보기|예약|설정|관리|이동|next|open|detail|more/i.test(name)) {
     return true;
   }
+  // 2. Text-based navigation characters
   if (/>|→|\|/.test(name) || />|→|\|/.test(text)) {
     return true;
   }
+
+  // 3. Class or Tag based visual indicator check (SVG icons, divider classes, tag search)
   const hasVisualIndicator = element.querySelector(
-    ".divider, .separator, .line, .arrow, .chevron, [class*='arrow'], [class*='chevron']"
+    ".divider, .separator, .line, .arrow, .chevron, [class*='arrow'], [class*='chevron'], [class*='divider'], [class*='separator'], i, svg"
   );
   if (hasVisualIndicator) {
     return true;
   }
+
+  // 4. CSS-based border divider check (checking if the element or any children has a vertical border style)
+  if (typeof window !== "undefined" && window.getComputedStyle) {
+    const allEls = [element, ...Array.from(element.querySelectorAll<HTMLElement>("*"))];
+    for (const el of allEls) {
+      try {
+        const style = window.getComputedStyle(el);
+        if (
+          (style.borderLeftStyle && style.borderLeftStyle !== "none" && parseFloat(style.borderLeftWidth || "0") > 0) ||
+          (style.borderRightStyle && style.borderRightStyle !== "none" && parseFloat(style.borderRightWidth || "0") > 0)
+        ) {
+          return true;
+        }
+      } catch (e) {
+        // ignore errors in jsdom environment if getComputedStyle fails
+      }
+    }
+  }
+
   return false;
 }
 

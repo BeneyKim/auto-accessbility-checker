@@ -885,10 +885,9 @@ describe("ThinQ DOM helpers", () => {
       expect(skipped.map(s => s.name)).toContain("이불, 추가");
     });
 
-    it("skips status cards ending with commas or states but keeps those with navigation hints", () => {
+    it("skips status cards ending with states (like 꺼짐/켜짐) but keeps those with navigation hints", () => {
       document.body.innerHTML = `
         <div role="dialog" data-width="900" data-height="700">
-          <div data-nscreenfocusable="true" aria-label="자동 문열림 건조,"></div>
           <div data-nscreenfocusable="true" aria-label="듀얼존, 꺼짐"></div>
           <div data-nscreenfocusable="true" aria-label="가습기 자동건조, 꺼짐">
             <span class="chevron">></span>
@@ -1049,6 +1048,54 @@ describe("ThinQ DOM helpers", () => {
       expect(ids).toContain("btnOther");
       expect(ids).not.toContain("btnStrong2");
       expect(candidates.length).toBe(2);
+    });
+
+    it("does NOT skip strong interactive buttons even if their descendant span ends with a comma", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <button id="btnCourse" tabindex="0">
+            <span aria-label="기름기 많은 식기 (P6), ">기름기 많은 식기 (P6)</span>
+          </button>
+          <button id="btnSetting" tabindex="0">
+            <span aria-label="제품 정보, ">제품 정보</span>
+          </button>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btnCourse");
+      expect(ids).toContain("btnSetting");
+    });
+
+    it("does NOT skip elements containing visual navigation indicators like divider classes, icon tags, or CSS borders", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <!-- Divider Class -->
+          <div data-nscreenfocusable="true" id="elDivider" aria-label="일반 꺼짐">
+            <div class="separator"></div>
+          </div>
+          <!-- Icon Tag -->
+          <div data-nscreenfocusable="true" id="elIcon" aria-label="일반 꺼짐">
+            <i class="chevron-right"></i>
+          </div>
+          <!-- CSS Border 세로 구분선 -->
+          <div data-nscreenfocusable="true" id="elBorder" aria-label="일반 꺼짐"></div>
+          <button id="btnNormal">정상 작동</button>
+        </div>
+      `;
+      // Inject vertical border style for JS-DOM
+      const elBorder = document.getElementById("elBorder")!;
+      elBorder.style.borderLeftStyle = "solid";
+      elBorder.style.borderLeftWidth = "1px";
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("elDivider");
+      expect(ids).toContain("elIcon");
+      expect(ids).toContain("elBorder");
+      expect(ids).toContain("btnNormal");
     });
   });
 });
