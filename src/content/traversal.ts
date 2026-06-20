@@ -59,3 +59,7 @@ export function normalizeStateIndicators(name: string): string {
   return res.replace(/\s+/g, " ").trim();
 }
 
+export function isListOrSearchPageUrl(url: string): boolean {
+  const urlLower = url.toLowerCase();
+  return urlLower.includes("list") || urlLower.includes("search") || urlLower.includes("history");
+}

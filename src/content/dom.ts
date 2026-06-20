@@ -1068,7 +1068,7 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[], shell
 
   for (const c of candidates) {
     let curr = c.element.parentElement;
-    for (let level = 1; level <= 4; level++) {
+    for (let level = 1; level <= 6; level++) {
       if (!curr || curr === document.body || (shell && curr === shell)) break;
       
       const typeKey = `${level}`;
@@ -1088,7 +1088,7 @@ export function filterDuplicateNamesInGroups(candidates: ClickCandidate[], shell
   const candidateToGroup = new Map<ClickCandidate, ClickCandidate[]>();
   for (const c of candidates) {
     let curr = c.element.parentElement;
-    for (let level = 1; level <= 4; level++) {
+    for (let level = 1; level <= 6; level++) {
       if (!curr || curr === document.body || (shell && curr === shell)) break;
       
       const typeKey = `${level}`;

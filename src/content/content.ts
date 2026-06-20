@@ -34,7 +34,7 @@ import {
   hasActionSubRoute,
   normalizeUrl
 } from "./dom";
-import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "./traversal";
+import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators, isListOrSearchPageUrl } from "./traversal";
 
 let stopRequested = false;
 let activeRun: Promise<void> | undefined;
@@ -386,7 +386,7 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   if (frame.depth > 0) {
     const normalizedUrl = normalizeUrl(location.href);
     const normalizedUrlLower = normalizedUrl.toLowerCase();
-    const isListOrSearchPage = normalizedUrlLower.includes("list") || normalizedUrlLower.includes("search") || normalizedUrlLower.includes("history");
+    const isListOrSearchPage = isListOrSearchPageUrl(normalizedUrl);
 
     if (!isListOrSearchPage) {
       let semanticLayoutKey: string;

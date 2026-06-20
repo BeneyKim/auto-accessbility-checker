@@ -1021,5 +1021,34 @@ describe("ThinQ DOM helpers", () => {
       expect(ids).not.toContain("btnSmart");
       expect(skipped.map(s => s.reason)).toContain("blocked-external-service");
     });
+
+    it("deduplicates multiple strong elements with the exact same accessible name within the same deep group (up to 6 levels)", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div class="card-root">
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <button id="btnStrong1">감 냉장실 21일 지남</button>
+                    <button id="btnStrong2">감 냉장실 21일 지남</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-root2">
+            <button id="btnOther">감 냉장실 21일 지남</button>
+          </div>
+        </div>
+      `;
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+      expect(ids).toContain("btnStrong1");
+      expect(ids).toContain("btnOther");
+      expect(ids).not.toContain("btnStrong2");
+      expect(candidates.length).toBe(2);
+    });
   });
 });

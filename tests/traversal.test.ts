@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "../src/content/traversal";
+import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators, isListOrSearchPageUrl } from "../src/content/traversal";
 
 describe("ThinQ traversal frame policy", () => {
   it("treats bottom sheet overlays as terminal screens", () => {
@@ -57,5 +57,12 @@ describe("ThinQ traversal frame policy", () => {
     // Safe fallbacks for date-only buttons and date ranges
     expect(normalizeStateIndicators("2026년 5월 30일 토")).toBe("2026년 5월 30일 토");
     expect(normalizeStateIndicators("2026. 5. 24.-2026. 5. 30.")).toBe("2026. 5. 24.-2026. 5. 30.");
+  });
+
+  it("identifies list, search, and history URLs as list-like pages", () => {
+    expect(isListOrSearchPageUrl("http://localhost/thinq/GWM_Cycles_Used_List_Screen")).toBe(true);
+    expect(isListOrSearchPageUrl("http://localhost/thinq/GWM_Cycles_Used_Search_Screen")).toBe(true);
+    expect(isListOrSearchPageUrl("http://localhost/thinq/GWM_Cycles_Used_History_Screen")).toBe(true);
+    expect(isListOrSearchPageUrl("http://localhost/thinq/normal_screen")).toBe(false);
   });
 });
