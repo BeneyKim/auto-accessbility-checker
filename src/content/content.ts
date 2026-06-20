@@ -30,7 +30,9 @@ import {
   isDatePickerTriggerName,
   isVisible,
   screenSignature,
-  getElementSelector
+  getElementSelector,
+  hasActionSubRoute,
+  normalizeUrl
 } from "./dom";
 import { isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators } from "./traversal";
 
@@ -115,6 +117,7 @@ async function runTraversal(settings: CheckerSettings): Promise<void> {
     const traversal: TraversalContext = {
       settings,
       visited: new Set<string>(),
+      visitedSemantically: new Set<string>(),
       attemptedCandidates: new Set<string>(),
       navigationStack: [],
       results,
@@ -178,6 +181,7 @@ type TransitionClassification =
 interface TraversalContext {
   settings: CheckerSettings;
   visited: Set<string>;
+  visitedSemantically: Set<string>;
   attemptedCandidates: Set<string>;
   navigationStack: NavigationFrame[];
   results: ScreenResult[];
@@ -371,6 +375,16 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
   context.visited.add(visitKey);
 
   await recordScreenResult(context, frame, snapshot);
+
+  if (frame.depth > 0) {
+    const semanticId = `${snapshot.title || "Untitled"}:${normalizeUrl(location.href)}`;
+    if (context.visitedSemantically.has(semanticId)) {
+      context.log("info", "Semantic match found: skipping duplicate sub-candidate traversal for this frame.", { semanticId, frame });
+      return;
+    }
+    context.visitedSemantically.add(semanticId);
+  }
+
   if (!shouldTraverseFrameCandidates(frame)) {
     context.log("info", "overlay frame scanned; skipping inner candidate traversal.", {
       frame,
@@ -725,6 +739,9 @@ function isPageLoadingOrEmpty(snapshot: ScreenSnapshot): boolean {
   if (isPageLoading()) {
     return true;
   }
+  if (hasActionSubRoute(snapshot.url)) {
+    return true;
+  }
   if (snapshot.boundaryPresent && snapshot.candidateNames.length === 0) {
     if (snapshot.overlayDescriptors.length === 0) {
       return true;
@@ -805,7 +822,10 @@ async function waitAndClassifyTransition(
 
     if (isStableSuccess) {
       lastSafeTransition = latestClassification;
-      const targetStableMs = latestClassification.classification === "in-product-child" ? CHILD_TRANSITION_STABLE_MS : TRANSITION_STABLE_MS;
+      let targetStableMs = latestClassification.classification === "in-product-child" ? CHILD_TRANSITION_STABLE_MS : TRANSITION_STABLE_MS;
+      if (latestClassification.classification === "in-product-child" && latestClassification.after.url.includes("ENM01")) {
+        targetStableMs = 2200;
+      }
       if (stableFor >= targetStableMs) {
         return latestClassification;
       }

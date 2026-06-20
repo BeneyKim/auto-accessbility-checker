@@ -386,6 +386,58 @@ export function toCandidateSnapshot(element: HTMLElement): CandidateSnapshot {
   };
 }
 
+export function normalizeUrl(url: string): string {
+  try {
+    const parsed = new URL(url, location.href);
+    const segments = parsed.pathname.split("/");
+    const normalizedSegments = segments.map((seg, idx) => {
+      if (!seg || idx === 1 || /^\d+$/.test(seg)) {
+        return seg;
+      }
+      const knownPages = [
+        "search", "subfoodlist", "adduserfood", "disclaimer",
+        "energymonitoringuserguide", "productinfo", "sublist",
+        "smartcare", "history"
+      ];
+      if (knownPages.includes(seg.toLowerCase())) {
+        return seg;
+      }
+      if (seg.includes("_")) {
+        return seg;
+      }
+      if (/^[A-Za-z0-9\-_=]+$/.test(seg)) {
+        return "*";
+      }
+      return seg;
+    });
+    parsed.pathname = normalizedSegments.join("/");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+export function hasActionSubRoute(url: string): boolean {
+  try {
+    const parsed = new URL(url, location.origin);
+    const segments = parsed.pathname.split("/");
+    if (segments.length > 3) {
+      const seg3 = segments[3];
+      if (seg3 && seg3 !== "undefined" && seg3 !== "dW5kZWZpbmVk") {
+        try {
+          const decoded = atob(seg3).toUpperCase();
+          return ["ADD", "EDIT", "CREATE", "DELETE"].includes(decoded);
+        } catch {
+          return false;
+        }
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function screenSignature(shell: HTMLElement): string {
   const selectedTab = Array.from(shell.querySelectorAll<HTMLElement>('[aria-selected="true"], [aria-current="page"]'))
     .map(getAccessibleName)
@@ -412,7 +464,7 @@ export function screenSignature(shell: HTMLElement): string {
     .map((element) => `${element.tagName}:${element.getAttribute("role") ?? ""}:${element.getAttribute("data-name") ?? ""}:${element.getAttribute("aria-expanded") ?? ""}`)
     .slice(0, 80)
     .join("|");
-  return hash(`${location.href}\n${selectedTab}\n${headings}\n${overlays}\n${landmarkShape}`);
+  return hash(`${normalizeUrl(location.href)}\n${selectedTab}\n${headings}\n${overlays}\n${landmarkShape}`);
 }
 
 export function extractScreenTitle(shell: HTMLElement, fallback: string): string {

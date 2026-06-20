@@ -12,7 +12,9 @@ import {
   isCancelLikeName,
   isSaveLikeName,
   sampleLargeLists,
-  filterDuplicateNamesInGroups
+  filterDuplicateNamesInGroups,
+  hasActionSubRoute,
+  normalizeUrl
 } from "../src/content/dom";
 
 beforeEach(() => {
@@ -711,6 +713,40 @@ describe("ThinQ DOM helpers", () => {
         }
       }
       expect(differentResultFound).toBe(true);
+    });
+  });
+
+  describe("hasActionSubRoute", () => {
+    it("returns true for valid base64 actions like ADD or EDIT in segment 3", () => {
+      // QURE is base64 for ADD
+      const addUrl = "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/QURE/LTE=/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20";
+      expect(hasActionSubRoute(addUrl)).toBe(true);
+
+      // RURJVA== is base64 for EDIT
+      const editUrl = "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/RURJVA==/LTE=/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20";
+      expect(hasActionSubRoute(editUrl)).toBe(true);
+    });
+
+    it("returns false for undefined action segment or non-action segments", () => {
+      const normalUrl = "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20";
+      expect(hasActionSubRoute(normalUrl)).toBe(false);
+
+      const emptyUrl = "https://my.lgthinq.com/";
+      expect(hasActionSubRoute(emptyUrl)).toBe(false);
+    });
+  });
+
+  describe("normalizeUrl", () => {
+    it("normalizes dynamic base64 URL segments to wildcards", () => {
+      const url1 = "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/QURE/LTE=/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20";
+      const url2 = "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20";
+      
+      const n1 = normalizeUrl(url1);
+      const n2 = normalizeUrl(url2);
+      
+      expect(n1).toBe("https://my.lgthinq.com/GRM-20/*/*/*/*/*/GRM_20_FOD01_Main/001/*");
+      expect(n2).toBe("https://my.lgthinq.com/GRM-20/*/*/*/*/*/GRM_20_FOD01_Main/001/*");
+      expect(n1).toBe(n2);
     });
   });
 });
