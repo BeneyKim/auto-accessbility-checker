@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>식기세척기-전원ON - Accessibility Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(22, 29, 49, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-violation: #ef4444;
+      --color-needs-review: #f59e0b;
+      --color-recommendation: #3b82f6;
+      --color-success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar styling */
+    .sidebar {
+      width: 350px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .sidebar-filter {
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .filter-input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .menu-item {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background-color 0.2s, border-color 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-color);
+    }
+
+    .menu-item.active {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .menu-item-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .menu-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .menu-item-counts {
+      display: flex;
+      gap: 4px;
+    }
+
+    .mini-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .mini-badge.violation { background-color: rgba(239, 68, 68, 0.15); color: var(--color-violation); }
+    .mini-badge.needs-review { background-color: rgba(245, 158, 11, 0.15); color: var(--color-needs-review); }
+    .mini-badge.recommendation { background-color: rgba(59, 130, 246, 0.15); color: var(--color-recommendation); }
+    .mini-badge.success { background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+
+    .menu-item-path {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main content styling */
+    .main-content {
+      flex: 1;
+      height: 100%;
+      overflow-y: auto;
+      padding: 40px;
+      scroll-behavior: smooth;
+    }
+
+    /* Summary section */
+    .summary-container {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .summary-card {
+      flex: 1;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .summary-icon {
+      font-size: 28px;
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .summary-icon.violation { background-color: rgba(239, 68, 68, 0.1); color: var(--color-violation); }
+    .summary-icon.needs-review { background-color: rgba(245, 158, 11, 0.1); color: var(--color-needs-review); }
+    .summary-icon.recommendation { background-color: rgba(59, 130, 246, 0.1); color: var(--color-recommendation); }
+    .summary-icon.screens { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+
+    .summary-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-val {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .summary-lbl {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Screen result cards */
+    .screen-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .screen-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .screen-index {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .screen-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .screen-meta {
+      display: flex;
+      gap: 12px;
+    }
+
+    .meta-tag {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .screen-body {
+      display: flex;
+      gap: 32px;
+    }
+
+    .screen-screenshot-column {
+      width: 320px;
+      flex-shrink: 0;
+    }
+
+    .screenshot-container {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background-color: #000;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .screenshot-container:hover {
+      transform: scale(1.02);
+    }
+
+    .screenshot-container img {
+      width: 100%;
+      height: auto;
+      max-height: 480px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .screenshot-zoom-hint {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 11px;
+      text-align: center;
+      padding: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .no-screenshot {
+      height: 200px;
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .screen-issues-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    /* Issue cards */
+    .issue-card {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .issue-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .issue-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .issue-rule-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .issue-message {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .issue-selector {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .issue-selector code {
+      font-family: monospace;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .issue-snippet pre {
+      background-color: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .issue-snippet code {
+      font-family: monospace;
+      font-size: 11px;
+      color: #c084fc;
+    }
+
+    /* Success Card */
+    .success-card {
+      background-color: rgba(16, 185, 129, 0.03);
+      border: 1px dashed var(--color-success);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .success-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .success-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-success);
+      margin-bottom: 6px;
+    }
+
+    .success-message {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(11, 15, 25, 0.95);
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      color: var(--text-primary);
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--color-violation);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">ThinQ Web A11y</div>
+      <div class="sidebar-meta">
+        <strong>Standard:</strong> WCAG 2.2 (A, AA)<br />
+        <strong>Rule Set:</strong> latest<br />
+        <strong>Included Levels:</strong> 🔴 Violation<br />
+        <strong>Tool Version:</strong> v0.99.12
+      </div>
+    </div>
+    <div class="sidebar-filter">
+      <input type="text" class="filter-input" placeholder="Search screens..." oninput="filterScreens(this.value)" />
+    </div>
+    <div class="sidebar-menu">
+      
+        <div class="menu-item" onclick="scrollToScreen(0, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품">식기세척기</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품">제품</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(1, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능">식기세척기</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능">유용한 기능</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(2, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 다운로드 코스 관리">다운로드 코스 관리</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 다운로드 코스 관리">유용한 기능 &gt; 다운로드 코스 관리</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(3, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정">제품</span>
+            <div class="menu-item-counts">
+            <span class="mini-badge violation">3</span>
+            
+            
+          </div>
+          </div>
+          <span class="menu-item-path" title="설정">설정</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(4, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정 &gt; 제품 세부 설정 안내">제품 세부 설정 안내</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="설정 &gt; 제품 세부 설정 안내">설정 &gt; 제품 세부 설정 안내</span>
+        </div>
+      
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="summary-container">
+      <div class="summary-card">
+        <div class="summary-icon screens">🖥️</div>
+        <div class="summary-details">
+          <span class="summary-val">5</span>
+          <span class="summary-lbl">Scanned Screens</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon violation">🔴</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-violation);">3</span>
+          <span class="summary-lbl">Violations</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon needs-review">🟡</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-needs-review);">N/A</span>
+          <span class="summary-lbl">Needs Review</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon recommendation">🔵</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-recommendation);">N/A</span>
+          <span class="summary-lbl">Recommendations</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cognitive Navigation Consistency section -->
+    <div class="consistency-section" style="margin-bottom: 40px;">
+      <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px; background: linear-gradient(135deg, #f8fafc, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Cognitive Navigation Consistency Check (WCAG 3.2.4)</h2>
+      
+      <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Cognitive Navigation Consistency Check Passed</div>
+        <div class="success-message">All elements sharing the same label were verified to lead to consistent destinations (WCAG 3.2.4 compliant).</div>
+      </div>
+    
+    </div>
+
+    <div class="screens-container">
+      
+        <div class="screen-card" id="screen-0">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#1</span>
+              <h2 class="screen-title">제품</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-1">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#2</span>
+              <h2 class="screen-title">유용한 기능</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-2">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#3</span>
+              <h2 class="screen-title">유용한 기능 &gt; 다운로드 코스 관리</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-3">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#4</span>
+              <h2 class="screen-title">설정</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 3</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_id_unique</span>
+                </div>
+                <div class="issue-message">The &#039;id&#039; &quot;label_for_switch_auto_set01_signalLevel제품, 알림음_id&quot; specified for the ARIA property &#039;aria-labelledby&#039; value is not valid</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[3]/label[1]/input[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;input checked=&quot;&quot; class=&quot;sc-jtJlRs sc-cBsrDa ePMstY eugwZQ&quot; tabindex=&quot;0&quot; type=&quot;checkbox&quot; aria-labelledby=&quot;label_for_switch_auto_set01_signalLevel제품 알림음_id&quot; id=&quot;auto_set01_signalLevel제품 알림음_id&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_id_unique</span>
+                </div>
+                <div class="issue-message">The &#039;id&#039; &quot;label_for_switch_auto_set01_mcReminderSetting통살균, 알림등_id&quot; specified for the ARIA property &#039;aria-labelledby&#039; value is not valid</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[4]/label[1]/input[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;input checked=&quot;&quot; class=&quot;sc-jtJlRs sc-cBsrDa ePMstY eugwZQ&quot; tabindex=&quot;0&quot; type=&quot;checkbox&quot; aria-labelledby=&quot;label_for_switch_auto_set01_mcReminderSetting통살균 알림등_id&quot; id=&quot;auto_set01_mcReminderSetting통살균 알림등_id&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_id_unique</span>
+                </div>
+                <div class="issue-message">The &#039;id&#039; &quot;label_for_switch_auto_set01_timeIndicator전면, 시간, 표시_id&quot; specified for the ARIA property &#039;aria-labelledby&#039; value is not valid</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[5]/label[1]/input[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;input checked=&quot;&quot; class=&quot;sc-jtJlRs sc-cBsrDa ePMstY eugwZQ&quot; tabindex=&quot;0&quot; type=&quot;checkbox&quot; aria-labelledby=&quot;label_for_switch_auto_set01_timeIndicator전면 시간 표시_id&quot; id=&quot;auto_set01_timeIndicator전면 시간 표시_id&quot;&gt;</code></pre></div>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-4">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#5</span>
+              <h2 class="screen-title">설정 &gt; 제품 세부 설정 안내</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+
+  <div id="screenshot-modal" class="modal" onclick="closeModal()">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modal-img">
+  </div>
+
+  <script>
+    function scrollToScreen(index, element) {
+      const card = document.getElementById('screen-' + index);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function filterScreens(text) {
+      const query = text.toLowerCase().trim();
+      document.querySelectorAll('.menu-item').forEach((item, index) => {
+        const title = item.querySelector('.menu-item-title').textContent.toLowerCase();
+        const path = item.querySelector('.menu-item-path').textContent.toLowerCase();
+        const card = document.getElementById('screen-' + index);
+        
+        if (title.includes(query) || path.includes(query)) {
+          item.style.display = 'flex';
+          if (card) card.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+          if (card) card.style.display = 'none';
+        }
+      });
+    }
+
+    function openModal(src) {
+      const modal = document.getElementById("screenshot-modal");
+      const modalImg = document.getElementById("modal-img");
+      modal.style.display = "flex";
+      modalImg.src = src;
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("screenshot-modal");
+      modal.style.display = "none";
+    }
+
+    // Set first menu item active by default
+    const firstMenu = document.querySelector('.menu-item');
+    if (firstMenu) firstMenu.classList.add('active');
+  </script>
+</body>
+</html>

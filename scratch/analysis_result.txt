@@ -1,0 +1,313 @@
+=== 냉장고 (Refrigerator) Log Analysis ===
+Loaded 688 log entries.
+Total clicks in Refrigerator run: 61
+
+--- Clicks list (Issue A / B checking) ---
+1. [button] "냉장실설정 온도, 섭씨 3도" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+2. [button] "스마트케어+, 사용" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+3. [button] "AI 신선 케어, 사용 습관을 분석해 냉장고 속 온도가 높아질 것 같으면 자동으로 온도를 낮춰요." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/ZmFsc2U=/dW5kZWZpbmVk/ZmFsc2U=/Mw==/dW5kZWZpbmVk/GRM_20_SMC01_Main/001/GRM-20
+4. [button] "2026년 6월 14일 부터 2026년 6월 20일 까지" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_SMC04_SmartFreshStorage/001/GRM-20
+5. [button] "에너지 절약 모드, 기존 '인공지능 절전 케어'와 동일한 기능으로 사용 습관을 분석해 자동으로 에너지를 절약해요." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/ZmFsc2U=/dW5kZWZpbmVk/ZmFsc2U=/Mw==/dW5kZWZpbmVk/GRM_20_SMC01_Main/001/GRM-20
+6. [button] "맞춤 운전 비율" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_ECO01_Main/001/GRM-20
+7. [button] "2026년" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/NQ==/dW5kZWZpbmVk/GRM_20_ECO03_SavingRatio_V2/001/GRM-20
+8. [button] "식품 관리" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+9. [button] "식품 추가" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+10. [button] "검색" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20
+11. [button] "자주 보관하는 식품" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20
+12. [button] "가지" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+13. [button] "수량 1" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjFkMWVhZDI2LTJiNzgtNGYwNS1hNzhjLTNmZmMyM2I1MjA0OSUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI3NX5obWFjJTNEMTM5NTFmMWNkMTAxMDM5YWVjY2JmOGE5NTk3NjJjMWMxMDkwNGQ2YjczN2QwNDRjNzlkMzNlZGJlOThhYWMwNiIsImZvb2RTZXR1cFR5cGUiOiJEZWZhdWx0IiwiZm9vZE5hbWUiOiIlRUElQjAlODAlRUMlQTclODAiLCJtb2RpZnlBdXRob3JpdHkiOiJOIiwia2VlcEVuZERhdGUiOiIyMDI2LTA3LTA0In0=/dW5kZWZpbmVk/R1JNXzIwX0ZPRDA0X0FkZEZvb2Qvc3ViRm9vZExpc3Q=/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/dW5kZWZpbmVk/dW5kZWZpbmVk/Ng==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+14. [button] "보관 위치 냉장실" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjFkMWVhZDI2LTJiNzgtNGYwNS1hNzhjLTNmZmMyM2I1MjA0OSUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI3NX5obWFjJTNEMTM5NTFmMWNkMTAxMDM5YWVjY2JmOGE5NTk3NjJjMWMxMDkwNGQ2YjczN2QwNDRjNzlkMzNlZGJlOThhYWMwNiIsImZvb2RTZXR1cFR5cGUiOiJEZWZhdWx0IiwiZm9vZE5hbWUiOiIlRUElQjAlODAlRUMlQTclODAiLCJtb2RpZnlBdXRob3JpdHkiOiJOIiwia2VlcEVuZERhdGUiOiIyMDI2LTA3LTA0In0=/dW5kZWZpbmVk/R1JNXzIwX0ZPRDA0X0FkZEZvb2Qvc3ViRm9vZExpc3Q=/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/dW5kZWZpbmVk/dW5kZWZpbmVk/Ng==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+15. [button] "보관 시작일 2026. 6. 20." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjFkMWVhZDI2LTJiNzgtNGYwNS1hNzhjLTNmZmMyM2I1MjA0OSUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI3NX5obWFjJTNEMTM5NTFmMWNkMTAxMDM5YWVjY2JmOGE5NTk3NjJjMWMxMDkwNGQ2YjczN2QwNDRjNzlkMzNlZGJlOThhYWMwNiIsImZvb2RTZXR1cFR5cGUiOiJEZWZhdWx0IiwiZm9vZE5hbWUiOiIlRUElQjAlODAlRUMlQTclODAiLCJtb2RpZnlBdXRob3JpdHkiOiJOIiwia2VlcEVuZERhdGUiOiIyMDI2LTA3LTA0In0=/dW5kZWZpbmVk/R1JNXzIwX0ZPRDA0X0FkZEZvb2Qvc3ViRm9vZExpc3Q=/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/dW5kZWZpbmVk/dW5kZWZpbmVk/Ng==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+16. [button] "보관 기한일 2026. 7. 4." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjFkMWVhZDI2LTJiNzgtNGYwNS1hNzhjLTNmZmMyM2I1MjA0OSUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI3NX5obWFjJTNEMTM5NTFmMWNkMTAxMDM5YWVjY2JmOGE5NTk3NjJjMWMxMDkwNGQ2YjczN2QwNDRjNzlkMzNlZGJlOThhYWMwNiIsImZvb2RTZXR1cFR5cGUiOiJEZWZhdWx0IiwiZm9vZE5hbWUiOiIlRUElQjAlODAlRUMlQTclODAiLCJtb2RpZnlBdXRob3JpdHkiOiJOIiwia2VlcEVuZERhdGUiOiIyMDI2LTA3LTA0In0=/dW5kZWZpbmVk/R1JNXzIwX0ZPRDA0X0FkZEZvb2Qvc3ViRm9vZExpc3Q=/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/dW5kZWZpbmVk/dW5kZWZpbmVk/Ng==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+17. [button] "취소" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZElkIjoiS1JfRk9PRF8wMDAwMSIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjFkMWVhZDI2LTJiNzgtNGYwNS1hNzhjLTNmZmMyM2I1MjA0OSUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI3NX5obWFjJTNEMTM5NTFmMWNkMTAxMDM5YWVjY2JmOGE5NTk3NjJjMWMxMDkwNGQ2YjczN2QwNDRjNzlkMzNlZGJlOThhYWMwNiIsImZvb2RTZXR1cFR5cGUiOiJEZWZhdWx0IiwiZm9vZE5hbWUiOiIlRUElQjAlODAlRUMlQTclODAiLCJtb2RpZnlBdXRob3JpdHkiOiJOIiwia2VlcEVuZERhdGUiOiIyMDI2LTA3LTA0In0=/dW5kZWZpbmVk/R1JNXzIwX0ZPRDA0X0FkZEZvb2Qvc3ViRm9vZExpc3Q=/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/dW5kZWZpbmVk/dW5kZWZpbmVk/Ng==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+18. [button] "감" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/RmF2b3JpdGU=/JUVDJTlFJTkwJUVDJUEzJUJDJTIwJUVCJUIzJUI0JUVBJUI0JTgwJUVEJTk1JTk4JUVCJThBJTk0JTIwJUVDJThCJTlEJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+19. [button] "야채" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20
+20. [button] "생강" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfMQ==/JUVDJTk1JUJDJUVDJUIxJTg0/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+21. [button] "호박" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfMQ==/JUVDJTk1JUJDJUVDJUIxJTg0/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+22. [button] "유제품" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20
+23. [button] "식품 추가" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfNQ==/JUVDJTlDJUEwJUVDJUEwJTlDJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+24. [button] "검색" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfNQ==/JUVDJTlDJUEwJUVDJUEwJTlDJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+25. [button] "두유" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfNQ==/JUVDJTlDJUEwJUVDJUEwJTlDJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+26. [button] "모짜렐라치즈" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfNQ==/JUVDJTlDJUEwJUVDJUEwJTlDJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+27. [button] "치즈" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/S1JfNQ==/JUVDJTlDJUEwJUVDJUEwJTlDJUVEJTkyJTg4/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20
+28. [button] "기타" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20
+29. [button] "검색" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+30. [button] "삭제" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+31. [div] "21일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/delete/GRM-20
+32. [div] "12일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/delete/GRM-20
+33. [button] "취소" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/NA==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/delete/GRM-20
+34. [button] "감 냉장실 21일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+35. [button] "수량 1" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZFNlcU5vIjoiNDk5OTgwIiwiZm9vZElkIjoiS1JfRk9PRF8wMDA3OCIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjkwYzA4OTkwLWE2OTMtNDE5OS1iMTZiLWU0ZWJkNTA2Yzc3MyUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI2OX5obWFjJTNENjM1MTk1NmYyOTFhOWZhODkxMTY3MjVkY2M0MDY0ZThhMjQwZjQwM2M5Y2YwZGFmZTNiOGNmZGZiZGZlNzk1NSIsImZvb2ROYW1lIjoiJUVBJUIwJTkwIiwia2VlcFBsYWNlIjoiUiIsInJlbWFpblBlcmlvZCI6IjIx7J28IOyngOuCqCIsInJlbWFpblBlcmlvZENvbG9yIjoicmdiYSgxOTQsIDAsIDM0LCAxKSIsImZvb2RDb3VudCI6IjEiLCJyZW1haW5QZXJpb2REYXkiOiItMjEiLCJjdXN0b21Gb29kSW1hZ2UiOiJodHRwczovL29iamVjdGNvbnRlbnQubGd0aGlucS5jb20vNzU4ZDRmM2ItMjA4ZC00ZDEzLWE2ODgtNDMzMjg1YWViN2I1P2hkbnRzPWV4cD0xODE0MDcxNTMxfmhtYWM9NWU1OWRlOTIyMjE1MDE3NGQwNTQ4NGRhZjdmYTFhMTJlMTRmMmY2MjUxM2M1NTgwZTlkZDI2M2FmY2JhMGQ4ZSIsImN1c3RvbUljb25JZCI6IklDT05fMTAiLCJjaG9DaGFyIjoi44SxIn0=/S1JfRk9PRF8wMDA3OA==/R1JNXzIwX0ZPRDAxX01haW4=/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+36. [button] "보관 위치 냉장실" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZFNlcU5vIjoiNDk5OTgwIiwiZm9vZElkIjoiS1JfRk9PRF8wMDA3OCIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjkwYzA4OTkwLWE2OTMtNDE5OS1iMTZiLWU0ZWJkNTA2Yzc3MyUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI2OX5obWFjJTNENjM1MTk1NmYyOTFhOWZhODkxMTY3MjVkY2M0MDY0ZThhMjQwZjQwM2M5Y2YwZGFmZTNiOGNmZGZiZGZlNzk1NSIsImZvb2ROYW1lIjoiJUVBJUIwJTkwIiwia2VlcFBsYWNlIjoiUiIsInJlbWFpblBlcmlvZCI6IjIx7J28IOyngOuCqCIsInJlbWFpblBlcmlvZENvbG9yIjoicmdiYSgxOTQsIDAsIDM0LCAxKSIsImZvb2RDb3VudCI6IjEiLCJyZW1haW5QZXJpb2REYXkiOiItMjEiLCJjdXN0b21Gb29kSW1hZ2UiOiJodHRwczovL29iamVjdGNvbnRlbnQubGd0aGlucS5jb20vNzU4ZDRmM2ItMjA4ZC00ZDEzLWE2ODgtNDMzMjg1YWViN2I1P2hkbnRzPWV4cD0xODE0MDcxNTMxfmhtYWM9NWU1OWRlOTIyMjE1MDE3NGQwNTQ4NGRhZjdmYTFhMTJlMTRmMmY2MjUxM2M1NTgwZTlkZDI2M2FmY2JhMGQ4ZSIsImN1c3RvbUljb25JZCI6IklDT05fMTAiLCJjaG9DaGFyIjoi44SxIn0=/S1JfRk9PRF8wMDA3OA==/R1JNXzIwX0ZPRDAxX01haW4=/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+37. [button] "보관 시작일 2026. 5. 24." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZFNlcU5vIjoiNDk5OTgwIiwiZm9vZElkIjoiS1JfRk9PRF8wMDA3OCIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjkwYzA4OTkwLWE2OTMtNDE5OS1iMTZiLWU0ZWJkNTA2Yzc3MyUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI2OX5obWFjJTNENjM1MTk1NmYyOTFhOWZhODkxMTY3MjVkY2M0MDY0ZThhMjQwZjQwM2M5Y2YwZGFmZTNiOGNmZGZiZGZlNzk1NSIsImZvb2ROYW1lIjoiJUVBJUIwJTkwIiwia2VlcFBsYWNlIjoiUiIsInJlbWFpblBlcmlvZCI6IjIx7J28IOyngOuCqCIsInJlbWFpblBlcmlvZENvbG9yIjoicmdiYSgxOTQsIDAsIDM0LCAxKSIsImZvb2RDb3VudCI6IjEiLCJyZW1haW5QZXJpb2REYXkiOiItMjEiLCJjdXN0b21Gb29kSW1hZ2UiOiJodHRwczovL29iamVjdGNvbnRlbnQubGd0aGlucS5jb20vNzU4ZDRmM2ItMjA4ZC00ZDEzLWE2ODgtNDMzMjg1YWViN2I1P2hkbnRzPWV4cD0xODE0MDcxNTMxfmhtYWM9NWU1OWRlOTIyMjE1MDE3NGQwNTQ4NGRhZjdmYTFhMTJlMTRmMmY2MjUxM2M1NTgwZTlkZDI2M2FmY2JhMGQ4ZSIsImN1c3RvbUljb25JZCI6IklDT05fMTAiLCJjaG9DaGFyIjoi44SxIn0=/S1JfRk9PRF8wMDA3OA==/R1JNXzIwX0ZPRDAxX01haW4=/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+38. [button] "보관 기한일 2026. 5. 30." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZFNlcU5vIjoiNDk5OTgwIiwiZm9vZElkIjoiS1JfRk9PRF8wMDA3OCIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjkwYzA4OTkwLWE2OTMtNDE5OS1iMTZiLWU0ZWJkNTA2Yzc3MyUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI2OX5obWFjJTNENjM1MTk1NmYyOTFhOWZhODkxMTY3MjVkY2M0MDY0ZThhMjQwZjQwM2M5Y2YwZGFmZTNiOGNmZGZiZGZlNzk1NSIsImZvb2ROYW1lIjoiJUVBJUIwJTkwIiwia2VlcFBsYWNlIjoiUiIsInJlbWFpblBlcmlvZCI6IjIx7J28IOyngOuCqCIsInJlbWFpblBlcmlvZENvbG9yIjoicmdiYSgxOTQsIDAsIDM0LCAxKSIsImZvb2RDb3VudCI6IjEiLCJyZW1haW5QZXJpb2REYXkiOiItMjEiLCJjdXN0b21Gb29kSW1hZ2UiOiJodHRwczovL29iamVjdGNvbnRlbnQubGd0aGlucS5jb20vNzU4ZDRmM2ItMjA4ZC00ZDEzLWE2ODgtNDMzMjg1YWViN2I1P2hkbnRzPWV4cD0xODE0MDcxNTMxfmhtYWM9NWU1OWRlOTIyMjE1MDE3NGQwNTQ4NGRhZjdmYTFhMTJlMTRmMmY2MjUxM2M1NTgwZTlkZDI2M2FmY2JhMGQ4ZSIsImN1c3RvbUljb25JZCI6IklDT05fMTAiLCJjaG9DaGFyIjoi44SxIn0=/S1JfRk9PRF8wMDA3OA==/R1JNXzIwX0ZPRDAxX01haW4=/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+39. [button] "식품 삭제" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/eyJpc0NoZWNrIjpmYWxzZSwiZm9vZFNlcU5vIjoiNDk5OTgwIiwiZm9vZElkIjoiS1JfRk9PRF8wMDA3OCIsImZvb2RJbWFnZSI6Imh0dHBzJTNBJTJGJTJGb2JqZWN0Y29udGVudC5sZ3RoaW5xLmNvbSUyRjkwYzA4OTkwLWE2OTMtNDE5OS1iMTZiLWU0ZWJkNTA2Yzc3MyUzRmhkbnRzJTNEZXhwJTNEMTgxMjE3NTI2OX5obWFjJTNENjM1MTk1NmYyOTFhOWZhODkxMTY3MjVkY2M0MDY0ZThhMjQwZjQwM2M5Y2YwZGFmZTNiOGNmZGZiZGZlNzk1NSIsImZvb2ROYW1lIjoiJUVBJUIwJTkwIiwia2VlcFBsYWNlIjoiUiIsInJlbWFpblBlcmlvZCI6IjIx7J28IOyngOuCqCIsInJlbWFpblBlcmlvZENvbG9yIjoicmdiYSgxOTQsIDAsIDM0LCAxKSIsImZvb2RDb3VudCI6IjEiLCJyZW1haW5QZXJpb2REYXkiOiItMjEiLCJjdXN0b21Gb29kSW1hZ2UiOiJodHRwczovL29iamVjdGNvbnRlbnQubGd0aGlucS5jb20vNzU4ZDRmM2ItMjA4ZC00ZDEzLWE2ODgtNDMzMjg1YWViN2I1P2hkbnRzPWV4cD0xODE0MDcxNTMxfmhtYWM9NWU1OWRlOTIyMjE1MDE3NGQwNTQ4NGRhZjdmYTFhMTJlMTRmMmY2MjUxM2M1NTgwZTlkZDI2M2FmY2JhMGQ4ZSIsImN1c3RvbUljb25JZCI6IklDT05fMTAiLCJjaG9DaGFyIjoi44SxIn0=/S1JfRk9PRF8wMDA3OA==/R1JNXzIwX0ZPRDAxX01haW4=/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/NA==/dW5kZWZpbmVk/GRM_20_FOD02_EditFoodInfo/001/GRM-20
+40. [button] "감 냉장실 21일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+41. [button] "가지 냉장실 12일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+42. [button] "가지 냉장실 12일 지남" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+43. [tab] "냉장실" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+44. [tab] "냉동실" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+45. [tab] "모두 보기" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20
+46. [button] "에너지 모니터링" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+47. [button] "추가 정보" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+48. [button] "2026년 6월 20일 토" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+49. [button] "전력 사용량 안내" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+50. [tab] "1일" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+51. [tab] "1주" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+52. [button] "2026. 6. 14.-2026. 6. 20." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+53. [tab] "1개월" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+54. [button] "2026. 6." on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+55. [tab] "1년" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+56. [button] "2026" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20
+57. [button] "추가하기" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+58. [button] "다음" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20
+59. [button] "제품 이름, 냉장고" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_SET01_Main/001/GRM-20
+60. [button] "공간, 마이홈 - 주방" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_SET01_Main/001/GRM-20
+61. [button] "제품 정보" on URL: https://my.lgthinq.com/GRM-20/ZDQwNTIzMTEtOTVjMy0xYjI0LWFmNjctNGNiY2U5ODdkZTI5/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_SET01_Main/001/GRM-20
+
+--- Let's check dynamic selection of foods (Issue A) ---
+Step 8: Clicked "식품 관리"
+Step 9: Clicked "식품 추가"
+Step 11: Clicked "자주 보관하는 식품"
+Step 12: Clicked "가지"
+Step 23: Clicked "식품 추가"
+Step 26: Clicked "모짜렐라치즈"
+Step 27: Clicked "치즈"
+Step 39: Clicked "식품 삭제"
+Step 41: Clicked "가지 냉장실 12일 지남"
+Step 42: Clicked "가지 냉장실 12일 지남"
+
+--- Unique screen titles and URLs visited ---
+Scanning screen: 냉장고
+Scanning screen: 냉장실
+Scanning screen: 스마트케어+
+Scanning screen: AI 신선 케어
+Scanning screen: 2026년 6월 14일 부터 2026년 6월 20일 까지
+Scanning screen: 에너지 절약 모드
+Scanning screen: 맞춤 운전 비율
+Scanning screen: 2026년
+Scanning screen: 식품 관리
+Scanning screen: 식품 추가
+Scanning screen: 제품
+Scanning screen: 자주 보관하는 식품
+Scanning screen: 가지
+Scanning screen: 수량
+Scanning screen: 보관 위치
+Scanning screen: 보관 시작일
+Scanning screen: 보관 기한일
+Scanning screen: 감
+Scanning screen: 생강
+Scanning screen: 호박
+Scanning screen: 유제품
+Scanning screen: 새 식품 추가
+Scanning screen: 두유
+Scanning screen: 모짜렐라치즈
+Scanning screen: 치즈
+Scanning screen: 기타
+Scanning screen: 식품 편집
+Scanning screen: 에너지 모니터링
+Scanning screen: 사용자 가이드
+Scanning screen: 2026년 6월 20일 토
+Scanning screen: 전력 사용량 안내
+Scanning screen: 2026. 6. 14.-2026. 6. 20.
+Scanning screen: 2026. 6.
+Scanning screen: 2026
+Scanning screen: 제품 정보
+
+=== 워시타워 (WashTower) Log Analysis ===
+Loaded 19 log entries.
+[info] Scanning screen: 워시타워
+[info] candidate collected.
+[info] candidate click started.
+   Candidate: {"id":"15on0u","name":"즐겨찾기 코스 관리","role":"button","tagName":"button","occurrenceIndex":0}
+[warn] candidate primary click produced no change; retrying keyboard activation.
+   Candidate: {"id":"15on0u","name":"즐겨찾기 코스 관리","role":"button","tagName":"button","occurrenceIndex":0}
+[error] Frame became unsafe before collecting next candidate.
+
+=== 식기세척기 (Dishwasher) Log Analysis ===
+Loaded 215 log entries.
+
+--- Clicks and Out-of-scope/Settings checks ---
+[info] Scanning screen: 식기세척기
+[info] candidate click started.
+   Candidate: "전원 꺼짐"
+[info] candidate click started.
+   Candidate: "코스 다운로드 하기"
+[info] Scanning screen: 다운로드 코스 관리
+[info] candidate click started.
+   Candidate: "현재 다운로드 코스, 고기류 구이 (P5)"
+[info] Scanning screen: 고기류 구이
+[info] candidate click started.
+   Candidate: "안내"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "단단하게 눌어붙은 식기 (P7)"
+[info] Scanning screen: 단단하게 눌어붙은 식기
+[info] candidate click started.
+   Candidate: "유리 제품 (P3)"
+[info] Scanning screen: 유리 제품
+[info] Scanning screen: 식기세척기
+[info] candidate click started.
+   Candidate: "다운로드 코스 관리"
+[info] Scanning screen: 다운로드 코스 관리
+[info] candidate click started.
+   Candidate: "식기세척기 음식물 거름 필터 (2019년 이후 모델)"
+[info] candidate click started.
+   Candidate: "식기세척기 하단 바구니 (태블릿 세제함+프라이팬 거치대) (2019~2023년)"
+[info] candidate click started.
+   Candidate: "식기세척기 최상단 바구니 (일반 그레이) (2019~2023년)"
+[info] candidate click started.
+   Candidate: "통살균 코치"
+[info] Scanning screen: 통살균 코치
+[info] candidate click started.
+   Candidate: "다음"
+[info] candidate click started.
+   Candidate: "함께 구매하면 좋은 상품, ThinQ 단독 혜택으로 제공되는 세제를 만나보세요."
+[info] Entering branch: 설정
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "제품 세부 설정 안내"
+[info] Scanning screen: 제품 세부 설정 안내
+[info] candidate click started.
+   Candidate: "확인"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "제품 이름, 식기세척기"
+[info] Redirected back to parent frame "제품" (depth 0) via candidate "제품 이름, 식기세척기". Unwinding stack.
+[info] Unwinding stopped at target frame "제품" (depth 0). Continuing traversal here.
+[info] candidate click started.
+   Candidate: "확인"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "제품 이름, 식기세척기"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "공간, 마이홈 - 주방"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "제품 정보"
+[info] Scanning screen: 제품 정보
+[warn] Back button not found or failed; trying history.back() fallback.
+[info] Attempting self-healing re-navigation to frame with menu path: 설정
+[warn] Cannot re-navigate: branch controls not found. Attempting branch root URL navigation fallback.
+
+--- Consumables/highlight logs ---
+[info] Semantic match found: skipping duplicate sub-candidate traversal for this frame.
+[info] Semantic match found: skipping duplicate sub-candidate traversal for this frame.
+[info] Semantic match found: skipping duplicate sub-candidate traversal for this frame.
+[info] Semantic match found: skipping duplicate sub-candidate traversal for this frame.
+
+=== 공기청정기 (Air Purifier) Log Analysis ===
+Loaded 420 log entries.
+
+--- Sleep mode schedule (취침 예약) clicks & navigation ---
+[info] Scanning screen: 공기청정기
+[info] candidate click started.
+   Candidate: "청정 세기 자동"
+[info] Scanning screen: 청정 세기
+[info] candidate click started.
+   Candidate: "순환팬 세기 자동"
+[info] Scanning screen: 순환팬 세기
+[info] candidate click started.
+   Candidate: "종합청정도 보통"
+[info] Scanning screen: 공기청정도
+[info] candidate click started.
+   Candidate: "실내 초미세먼지(PM2.5) 이력"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "2026년 6월 20일 토요일"
+[info] Scanning screen: 2026년 6월 20일 토
+[info] candidate click started.
+   Candidate: "1일"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "1주"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "2026년 6월 14일부터 2026년 6월 20일까지"
+[info] Scanning screen: 2026. 6. 14.-2026. 6. 20.
+[info] candidate click started.
+   Candidate: "1개월"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "2026년 6월"
+[info] Scanning screen: 2026. 6.
+[info] candidate click started.
+   Candidate: "1년"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "2026년"
+[info] Scanning screen: 2026
+[info] candidate click started.
+   Candidate: "공기질 측정 기준"
+[info] Scanning screen: 공기질 측정 기준
+[info] candidate click started.
+   Candidate: "취침 예약"
+[info] Scanning screen: 취침 예약
+[info] candidate click started.
+   Candidate: "취침 예약"
+[info] candidate click started.
+   Candidate: "예약"
+[info] Scanning screen: 예약
+[info] candidate click started.
+   Candidate: "켜기"
+[info] Scanning screen: 켜기
+[info] candidate click started.
+   Candidate: "끄기"
+[info] Scanning screen: 끄기
+[info] candidate click started.
+   Candidate: "삭제"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "취소"
+[info] Redirected back to parent frame "예약" (depth 1) via candidate "취소". Unwinding stack.
+[info] Unwinding stopped at target frame "예약" (depth 1). Continuing traversal here.
+[info] candidate click started.
+   Candidate: "켜는 시간: 오전 1시 06분 , 끄는 시간: 오전 2시 06분 , 매일"
+[info] Scanning screen: 반복 예약
+[info] candidate click started.
+   Candidate: "켜는 시간, 오전 1시 06분"
+[info] candidate click started.
+   Candidate: "끄는 시간, 오전 2시 06분"
+[info] candidate click started.
+   Candidate: "반복 예약 삭제"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "켜는 시간: 오전 1시 22분 , 끄는 시간: 오전 2시 22분 , 매일"
+[info] Scanning screen: 반복 예약
+[info] candidate click started.
+   Candidate: "반복 예약 추가"
+[info] Scanning screen: 반복 예약
+[info] candidate click started.
+   Candidate: "클린부스터 운전 모드 선택 목록"
+[info] Scanning screen: 운전 모드
+[info] Scanning screen: 공기청정기
+[info] candidate click started.
+   Candidate: "추천 운전"
+[info] Scanning screen: 추천 운전
+[info] candidate click started.
+   Candidate: "실내 초미세먼지(PM2.5) 이력"
+[info] Scanning screen: 실내 초미세먼지(PM2.5) 이력
+[info] candidate click started.
+   Candidate: "오늘"
+[info] candidate click started.
+   Candidate: "필터 관리"
+[info] Scanning screen: 필터 관리
+[info] candidate click started.
+   Candidate: "필터 정보"
+[info] Scanning screen: 필터 정보
+[info] candidate click started.
+   Candidate: "다음"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "제품 이름, 공기청정기"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "공간, 마이홈 - 거실"
+[info] Scanning screen: 제품
+[info] candidate click started.
+   Candidate: "공기질 센서, 운전 중에만"
+[info] Scanning screen: 공기질 센서
+[info] candidate click started.
+   Candidate: "제품 정보"
+[info] Scanning screen: 제품 정보

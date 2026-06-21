@@ -2,16 +2,22 @@
 
 ThinQ Web IBM Accessibility Checker는 ThinQ Web 제품 상세 화면을 자동 탐색하고 IBM Equal Access 접근성 검사를 수행하는 Chrome/Edge Manifest V3 확장앱입니다.
 
-이 프로젝트는 CODEX에 의해 개발되었습니다.
+이 프로젝트는 Gemini 3.5 Flash (High)에 의해 개발되었습니다.
 
 ## Features
 
 - `https://my.lgthinq.com/`의 제품 상세 화면에서 실행
 - 제품 탭, 유용한 기능 탭, 설정 화면을 기준으로 depth 제한 DFS 탐색
 - ThinQ PLAY, 닫기, 홈 이동, 단순 ON/OFF switch 조작 방지
+- 활성/비활성 탭 자동 감지 및 비활성 영역 자동 수집 제외
+- DOM 기반 동적 목록/검색 화면 판별 (`isDynamicListOrSearchPage`) 및 활성 탭 명칭 결합 세맨틱 캐시
+- Shadow DOM 지원 및 `shadowContains` 헬퍼를 활용한 조상 6레벨 이내 카드 레이아웃 중복 클릭 방지
+- 스마트진단 오진입 방지를 위한 8단계 조상 깊이 차단 및 sds/sds_diagnosis 필터
+- `<all_urls>` 권한 기반 MV3 환경에서의 안정적인 스크린샷 캡쳐 및 레포트 ZIP 다운로드
 - 각 화면별 IBM Equal Access 검사, 스크린샷, depth/menu path 기록
 - JSON, Markdown, HTML 결과서 다운로드
 - 설정 저장: title, accessibility standard, rule set, depth
+
 
 ## Development
 

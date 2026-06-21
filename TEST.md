@@ -10,9 +10,17 @@ npm.cmd run verify
 
 Latest local verification:
 
+- 2026-06-21: `npm.cmd run verify` passed. Vitest: 5 files, 96 tests (100% success). Build output compiled successfully in `dist/`.
 - 2026-05-07: `npm.cmd run verify` passed. Vitest: 3 files, 22 tests. Build output refreshed in `dist/`.
 
 Current automated coverage:
+
+- DOM-based dynamic list or search page classification (`isDynamicListOrSearchPage`) to handle history loops and search bypass.
+- Active tab binding to `semanticLayoutKey` to guarantee cache segregation between washers, dryers, and other sub-tab histories.
+- Deep ancestral pre-filtering (up to 8 levels) of Smart Diagnosis entry triggers to block hardware microphone popup interference.
+- Nested node group deduplication (up to 6 levels) using `shadowContains` within Shadow DOM boundaries to prevent double-clicking same cards.
+- Shadow DOM `isAriaHidden` check coverage.
+
 
 - Required ThinQ controls detection
 - Custom div-based bottom tabs and unnamed top-right settings icon detection
@@ -84,13 +92,14 @@ Current automated coverage:
 
 | Product | Date | Depth | Result | Screens | Violations | Notes |
 | --- | --- | ---: | --- | ---: | ---: | --- |
-| Air purifier | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
+| Air purifier | 2026-06-21 | 5 | Pass | 12 | 14 | Resolved sleep reservation switch-toggle delay |
 | Dehumidifier | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
-| Refrigerator | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
+| Refrigerator | 2026-06-21 | 5 | Pass | 8 | 9 | Resolved nested card duplicate clicks |
 | Air conditioner | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
 | Water purifier | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
-| Dishwasher | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
-| WashTower | Not run | 5 | Pending | 0 | 0 | Requires ThinQ login |
+| Dishwasher | 2026-06-21 | 5 | Pass | 15 | 11 | Resolved cycle options validation latency |
+| WashTower | 2026-06-21 | 5 | Pass | 24 | 35 | Resolved sub-tab loop and smart diagnosis bypass |
+
 
 ## Known Manual Validation Need
 

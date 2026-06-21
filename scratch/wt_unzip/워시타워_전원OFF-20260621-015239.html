@@ -1,0 +1,3202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>워시타워_전원OFF - Accessibility Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(22, 29, 49, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --color-violation: #ef4444;
+      --color-needs-review: #f59e0b;
+      --color-recommendation: #3b82f6;
+      --color-success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar styling */
+    .sidebar {
+      width: 350px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .sidebar-filter {
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .filter-input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .menu-item {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background-color 0.2s, border-color 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-color);
+    }
+
+    .menu-item.active {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .menu-item-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .menu-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .menu-item-counts {
+      display: flex;
+      gap: 4px;
+    }
+
+    .mini-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .mini-badge.violation { background-color: rgba(239, 68, 68, 0.15); color: var(--color-violation); }
+    .mini-badge.needs-review { background-color: rgba(245, 158, 11, 0.15); color: var(--color-needs-review); }
+    .mini-badge.recommendation { background-color: rgba(59, 130, 246, 0.15); color: var(--color-recommendation); }
+    .mini-badge.success { background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+
+    .menu-item-path {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main content styling */
+    .main-content {
+      flex: 1;
+      height: 100%;
+      overflow-y: auto;
+      padding: 40px;
+      scroll-behavior: smooth;
+    }
+
+    /* Summary section */
+    .summary-container {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .summary-card {
+      flex: 1;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .summary-icon {
+      font-size: 28px;
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .summary-icon.violation { background-color: rgba(239, 68, 68, 0.1); color: var(--color-violation); }
+    .summary-icon.needs-review { background-color: rgba(245, 158, 11, 0.1); color: var(--color-needs-review); }
+    .summary-icon.recommendation { background-color: rgba(59, 130, 246, 0.1); color: var(--color-recommendation); }
+    .summary-icon.screens { background-color: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+
+    .summary-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-val {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .summary-lbl {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Screen result cards */
+    .screen-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .screen-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .screen-index {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .screen-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .screen-meta {
+      display: flex;
+      gap: 12px;
+    }
+
+    .meta-tag {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .screen-body {
+      display: flex;
+      gap: 32px;
+    }
+
+    .screen-screenshot-column {
+      width: 320px;
+      flex-shrink: 0;
+    }
+
+    .screenshot-container {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background-color: #000;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .screenshot-container:hover {
+      transform: scale(1.02);
+    }
+
+    .screenshot-container img {
+      width: 100%;
+      height: auto;
+      max-height: 480px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .screenshot-zoom-hint {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 11px;
+      text-align: center;
+      padding: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .no-screenshot {
+      height: 200px;
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .screen-issues-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    /* Issue cards */
+    .issue-card {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .issue-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .issue-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .issue-rule-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .issue-message {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .issue-selector {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .issue-selector code {
+      font-family: monospace;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .issue-snippet pre {
+      background-color: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .issue-snippet code {
+      font-family: monospace;
+      font-size: 11px;
+      color: #c084fc;
+    }
+
+    /* Success Card */
+    .success-card {
+      background-color: rgba(16, 185, 129, 0.03);
+      border: 1px dashed var(--color-success);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .success-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .success-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-success);
+      margin-bottom: 6px;
+    }
+
+    .success-message {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(11, 15, 25, 0.95);
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      color: var(--text-primary);
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--color-violation);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">ThinQ Web A11y</div>
+      <div class="sidebar-meta">
+        <strong>Standard:</strong> WCAG 2.2 (A, AA)<br />
+        <strong>Rule Set:</strong> latest<br />
+        <strong>Included Levels:</strong> 🔴 Violation<br />
+        <strong>Tool Version:</strong> v0.99.12
+      </div>
+    </div>
+    <div class="sidebar-filter">
+      <input type="text" class="filter-input" placeholder="Search screens..." oninput="filterScreens(this.value)" />
+    </div>
+    <div class="sidebar-menu">
+      
+        <div class="menu-item" onclick="scrollToScreen(0, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품">워시타워</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품">제품</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(1, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 즐겨찾기 코스 관리">즐겨찾기</span>
+            <div class="menu-item-counts">
+            <span class="mini-badge violation">52</span>
+            
+            
+          </div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 즐겨찾기 코스 관리">제품 &gt; 즐겨찾기 코스 관리</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(2, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 최근 사용 코스">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 최근 사용 코스">제품 &gt; 최근 사용 코스</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(3, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준">오전 9:54</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(4, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준 &gt; 전력 사용량 안내">전력 사용량 안내</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준 &gt; 전력 사용량 안내">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준 &gt; 전력 사용량 안내</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(5, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 14. 오전 10:47 표준">오전 10:47</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 최근 사용 코스 &gt; 2026. 6. 14. 오전 10:47 표준">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 14. 오전 10:47 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(6, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 최근 사용 코스 &gt; 2026. 5. 24. 오후 10:17 표준">오후 10:17</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 최근 사용 코스 &gt; 2026. 5. 24. 오후 10:17 표준">제품 &gt; 최근 사용 코스 &gt; 2026. 5. 24. 오후 10:17 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(7, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 표준 2026. 6. 20. 오전 9:54">오전 9:54</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 표준 2026. 6. 20. 오전 9:54">제품 &gt; 표준 2026. 6. 20. 오전 9:54</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(8, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 표준 2026. 6. 17. 오후 9:25">오후 9:25</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 표준 2026. 6. 17. 오후 9:25">제품 &gt; 표준 2026. 6. 17. 오후 9:25</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(9, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 표준 2026. 6. 20. 오전 11:46">오전 11:46</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 표준 2026. 6. 20. 오전 11:46">제품 &gt; 표준 2026. 6. 20. 오전 11:46</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(10, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 표준 2026. 6. 20. 오전 11:46 &gt; 전력 사용량 안내">전력 사용량 안내</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 표준 2026. 6. 20. 오전 11:46 &gt; 전력 사용량 안내">제품 &gt; 표준 2026. 6. 20. 오전 11:46 &gt; 전력 사용량 안내</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(11, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="제품 &gt; 표준 2026. 6. 17. 오후 11:09">오후 11:09</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="제품 &gt; 표준 2026. 6. 17. 오후 11:09">제품 &gt; 표준 2026. 6. 17. 오후 11:09</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(12, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능">워시타워</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능">유용한 기능</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(13, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 즐겨찾기 코스 관리">즐겨찾기</span>
+            <div class="menu-item-counts">
+            <span class="mini-badge violation">52</span>
+            
+            
+          </div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 즐겨찾기 코스 관리">유용한 기능 &gt; 즐겨찾기 코스 관리</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(14, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링">에너지 모니터링</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링">유용한 기능 &gt; 에너지 모니터링</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(15, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링 &gt; 전력 사용량 안내">전력 사용량 안내</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링 &gt; 전력 사용량 안내">유용한 기능 &gt; 에너지 모니터링 &gt; 전력 사용량 안내</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(16, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1일">에너지 모니터링</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1일">유용한 기능 &gt; 에너지 모니터링 &gt; 1일</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(17, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1년">에너지 모니터링</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1년">유용한 기능 &gt; 에너지 모니터링 &gt; 1년</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(18, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1주">에너지 모니터링</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1주">유용한 기능 &gt; 에너지 모니터링 &gt; 1주</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(19, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1개월">에너지 모니터링</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 에너지 모니터링 &gt; 1개월">유용한 기능 &gt; 에너지 모니터링 &gt; 1개월</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(20, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력">유용한 기능 &gt; 사용 이력</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(21, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 9:54 표준">오전 9:54</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 9:54 표준">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 9:54 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(22, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 14. 오전 10:47 표준">오전 10:47</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 14. 오전 10:47 표준">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 14. 오전 10:47 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(23, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 24. 오후 10:17 표준">오후 10:17</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 24. 오후 10:17 표준">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 24. 오후 10:17 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(24, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 11:46 표준">오전 11:46</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 11:46 표준">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 11:46 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(25, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 28. 오후 10:14 시간건조">오후 10:14</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 28. 오후 10:14 시간건조">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 28. 오후 10:14 시간건조</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(26, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 22. 오후 3:51 표준">오후 3:51</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 22. 오후 3:51 표준">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 22. 오후 3:51 표준</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(27, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁">세탁 통살균 코치</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁">유용한 기능 &gt; 세탁</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(28, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁">유용한 기능 &gt; 세탁</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(29, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁 &gt; 옵션 더보기">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁 &gt; 옵션 더보기">유용한 기능 &gt; 세탁 &gt; 옵션 더보기</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(30, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁 &gt; 시작하기">소리로 진단</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁 &gt; 시작하기">유용한 기능 &gt; 세탁 &gt; 시작하기</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(31, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음">유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(32, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음 &gt; 안내">사용자 가이드</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음 &gt; 안내">유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음 &gt; 안내</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(33, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 건조">건조 통살균 코치</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 건조">유용한 기능 &gt; 건조</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(34, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="유용한 기능 &gt; 건조">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="유용한 기능 &gt; 건조">유용한 기능 &gt; 건조</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(35, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정">제품</span>
+            <div class="menu-item-counts">
+            <span class="mini-badge violation">5</span>
+            
+            
+          </div>
+          </div>
+          <span class="menu-item-path" title="설정">설정</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(36, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정 &gt; 제품 이름 워시타워">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="설정 &gt; 제품 이름 워시타워">설정 &gt; 제품 이름 워시타워</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(37, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정 &gt; 공간 마이홈 - 다용도실">제품</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="설정 &gt; 공간 마이홈 - 다용도실">설정 &gt; 공간 마이홈 - 다용도실</span>
+        </div>
+      
+        <div class="menu-item" onclick="scrollToScreen(38, this)">
+          <div class="menu-item-title-row">
+            <span class="menu-item-title" title="설정 &gt; 제품 정보">제품 정보</span>
+            <div class="menu-item-counts"><span class="mini-badge success">✓</span></div>
+          </div>
+          <span class="menu-item-path" title="설정 &gt; 제품 정보">설정 &gt; 제품 정보</span>
+        </div>
+      
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="summary-container">
+      <div class="summary-card">
+        <div class="summary-icon screens">🖥️</div>
+        <div class="summary-details">
+          <span class="summary-val">39</span>
+          <span class="summary-lbl">Scanned Screens</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon violation">🔴</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-violation);">109</span>
+          <span class="summary-lbl">Violations</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon needs-review">🟡</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-needs-review);">N/A</span>
+          <span class="summary-lbl">Needs Review</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon recommendation">🔵</div>
+        <div class="summary-details">
+          <span class="summary-val" style="color: var(--color-recommendation);">N/A</span>
+          <span class="summary-lbl">Recommendations</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cognitive Navigation Consistency section -->
+    <div class="consistency-section" style="margin-bottom: 40px;">
+      <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px; background: linear-gradient(135deg, #f8fafc, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Cognitive Navigation Consistency Check (WCAG 3.2.4)</h2>
+      
+        <div class="consistency-card" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 4px solid var(--color-violation); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="font-size: 16px; font-weight: 700; color: var(--color-violation); margin-bottom: 8px;">
+            ⚠️ Inconsistent Label: "건조"
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            This label is used on multiple screens but leads to different target pages (violating WCAG 3.2.4):
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-weight: 600;">
+                  <th style="padding: 12px;">Source Screen</th>
+                  <th style="padding: 12px;">Destination Screen</th>
+                  <th style="padding: 12px;">Selector</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">즐겨찾기</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">즐겨찾기</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>ul#tabbar_id__1781973994172_3622856026-301473928 &gt; li:nth-of-type(2)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>ul#tabbar_id__1781974072933_759137572-2126219535 &gt; li:nth-of-type(2)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">제품</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">제품</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>ul#tabbar_id__1781974195580_113913574-1075318034 &gt; li:nth-of-type(2)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">건조 통살균 코치</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>div#body_container &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(3) &gt; div:nth-of-type(3) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; ul:nth-of-type(1) &gt; li:nth-of-type(1) &gt; div:nth-of-type(1) &gt; button:nth-of-type(1)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">제품</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>div#body_container &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(3) &gt; div:nth-of-type(6) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; ul:nth-of-type(1) &gt; li:nth-of-type(1) &gt; div:nth-of-type(1) &gt; button:nth-of-type(1)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">제품 정보</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">제품 정보</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>ul#tabbar_id__1781974313927_2952868124-2015822542 &gt; li:nth-of-type(2)</code></td>
+        </tr>
+      
+              </tbody>
+            </table>
+          </div>
+        </div>
+      
+        <div class="consistency-card" style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-left: 4px solid var(--color-violation); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div style="font-size: 16px; font-weight: 700; color: var(--color-violation); margin-bottom: 8px;">
+            ⚠️ Inconsistent Label: "세탁"
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            This label is used on multiple screens but leads to different target pages (violating WCAG 3.2.4):
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-weight: 600;">
+                  <th style="padding: 12px;">Source Screen</th>
+                  <th style="padding: 12px;">Destination Screen</th>
+                  <th style="padding: 12px;">Selector</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">세탁 통살균 코치</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>div#body_container &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(3) &gt; div:nth-of-type(3) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; ul:nth-of-type(1) &gt; li:nth-of-type(1) &gt; div:nth-of-type(1) &gt; button:nth-of-type(1)</code></td>
+        </tr>
+      
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px; font-weight: 500;">워시타워</td>
+          <td style="padding: 12px; color: #60a5fa; font-weight: 500;">제품</td>
+          <td style="padding: 12px; font-family: monospace; font-size: 11px; color: var(--text-secondary); word-break: break-all;"><code>div#body_container &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(2) &gt; div:nth-of-type(1) &gt; div:nth-of-type(3) &gt; div:nth-of-type(6) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; div:nth-of-type(1) &gt; ul:nth-of-type(1) &gt; li:nth-of-type(1) &gt; div:nth-of-type(1) &gt; button:nth-of-type(1)</code></td>
+        </tr>
+      
+              </tbody>
+            </table>
+          </div>
+        </div>
+      
+    </div>
+
+    <div class="screens-container">
+      
+        <div class="screen-card" id="screen-0">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#1</span>
+              <h2 class="screen-title">제품</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-1">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#2</span>
+              <h2 class="screen-title">제품 &gt; 즐겨찾기 코스 관리</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 52</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_DUVET&quot; tabindex=&quot;0&quot; aria-label=&quot;이불, 삭제&quot; id=&quot;id_DUVET_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_SPEEDWASH&quot; tabindex=&quot;0&quot; aria-label=&quot;스피드워시, 삭제&quot; id=&quot;id_SPEEDWASH_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_SPEEDBOIL&quot; tabindex=&quot;0&quot; aria-label=&quot;알뜰삶음, 삭제&quot; id=&quot;id_SPEEDBOIL_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_TUB_CLEAN&quot; tabindex=&quot;0&quot; aria-label=&quot;통살균, 삭제&quot; id=&quot;id_TUB_CLEAN_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[6]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_LINGERIE_WOOL&quot; tabindex=&quot;0&quot; aria-label=&quot;란제리/울, 추가&quot; id=&quot;id_LINGERIE_WOOL_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[6]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COTTON&quot; tabindex=&quot;0&quot; aria-label=&quot;표준, 추가&quot; id=&quot;id_COTTON_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SCHOOL_UNIFORM&quot; tabindex=&quot;0&quot; aria-label=&quot;교복, 추가&quot; id=&quot;id_SCHOOL_UNIFORM_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPORTS_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;기능성 의류, 추가&quot; id=&quot;id_SPORTS_WEAR_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SWEAT_STAIN&quot; tabindex=&quot;0&quot; aria-label=&quot;땀얼룩 제거, 추가&quot; id=&quot;id_SWEAT_STAIN_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SHIRT_1H_WASHER&quot; tabindex=&quot;0&quot; aria-label=&quot;셔츠 한 벌, 추가&quot; id=&quot;id_SHIRT_1H_WASHER_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SMALL_LOAD&quot; tabindex=&quot;0&quot; aria-label=&quot;소량 세탁, 추가&quot; id=&quot;id_SMALL_LOAD_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SKIN_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;스킨 케어, 추가&quot; id=&quot;id_SKIN_CARE_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BABY_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;아기옷, 추가&quot; id=&quot;id_BABY_WEAR_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SMART_RINSE&quot; tabindex=&quot;0&quot; aria-label=&quot;안심 헹굼, 추가&quot; id=&quot;id_SMART_RINSE_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_CLOTH_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;옷감 보호, 추가&quot; id=&quot;id_CLOTH_CARE_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[10]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SHIRT&quot; tabindex=&quot;0&quot; aria-label=&quot;와이셔츠, 추가&quot; id=&quot;id_SHIRT_9&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[11]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RAINY_DAY&quot; tabindex=&quot;0&quot; aria-label=&quot;장마철 세탁, 추가&quot; id=&quot;id_RAINY_DAY_10&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[12]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SILENT_WASH&quot; tabindex=&quot;0&quot; aria-label=&quot;조용조용, 추가&quot; id=&quot;id_SILENT_WASH_11&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[13]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_HEAVYDUTY&quot; tabindex=&quot;0&quot; aria-label=&quot;찌든때, 추가&quot; id=&quot;id_HEAVYDUTY_12&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[14]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COLD_WASH&quot; tabindex=&quot;0&quot; aria-label=&quot;찬물 세탁, 추가&quot; id=&quot;id_COLD_WASH_13&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[15]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COLORCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;컬러 케어, 추가&quot; id=&quot;id_COLORCARE_14&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[16]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_KIDS_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;키즈옷, 추가&quot; id=&quot;id_KIDS_WEAR_15&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[17]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TOWELS&quot; tabindex=&quot;0&quot; aria-label=&quot;타월, 추가&quot; id=&quot;id_TOWELS_16&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[18]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPIN_ONLY&quot; tabindex=&quot;0&quot; aria-label=&quot;탈수 단독, 추가&quot; id=&quot;id_SPIN_ONLY_17&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[19]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SINGLE_GARMENTS&quot; tabindex=&quot;0&quot; aria-label=&quot;한벌 세탁, 추가&quot; id=&quot;id_SINGLE_GARMENTS_18&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[20]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RINSE_SPIN&quot; tabindex=&quot;0&quot; aria-label=&quot;헹굼 + 탈수, 추가&quot; id=&quot;id_RINSE_SPIN_19&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_QUICKDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;소량급속, 추가&quot; id=&quot;id_QUICKDRY_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_REFRESH&quot; tabindex=&quot;0&quot; aria-label=&quot;스팀리프레쉬, 추가&quot; id=&quot;id_REFRESH_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_ALLERGYCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;스팀살균, 추가&quot; id=&quot;id_ALLERGYCARE_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WOOL&quot; tabindex=&quot;0&quot; aria-label=&quot;울 / 섬세, 추가&quot; id=&quot;id_WOOL_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BULKYITEM&quot; tabindex=&quot;0&quot; aria-label=&quot;이불, 추가&quot; id=&quot;id_BULKYITEM_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BEDDING_BRUSH&quot; tabindex=&quot;0&quot; aria-label=&quot;침구털기, 추가&quot; id=&quot;id_BEDDING_BRUSH_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_CONDENSER_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;콘덴서케어, 추가&quot; id=&quot;id_CONDENSER_CARE_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TUB_CLEAN&quot; tabindex=&quot;0&quot; aria-label=&quot;통살균, 추가&quot; id=&quot;id_TUB_CLEAN_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COTTONNORMAL&quot; tabindex=&quot;0&quot; aria-label=&quot;표준, 추가&quot; id=&quot;id_COTTONNORMAL_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_POWER&quot; tabindex=&quot;0&quot; aria-label=&quot;강력 건조, 추가&quot; id=&quot;id_POWER_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_MINIMIZEWRINKLES&quot; tabindex=&quot;0&quot; aria-label=&quot;구김 완화 건조, 추가&quot; id=&quot;id_MINIMIZEWRINKLES_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPORTWEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;기능성의류, 추가&quot; id=&quot;id_SPORTWEAR_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_FULLSIZELOAD&quot; tabindex=&quot;0&quot; aria-label=&quot;다량 건조, 추가&quot; id=&quot;id_FULLSIZELOAD_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RACKDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;선반건조, 추가&quot; id=&quot;id_RACKDRY_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_EASYCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;셔츠, 추가&quot; id=&quot;id_EASYCARE_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COOLAIR&quot; tabindex=&quot;0&quot; aria-label=&quot;송풍, 추가&quot; id=&quot;id_COOLAIR_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BABYWEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;아기옷, 추가&quot; id=&quot;id_BABYWEAR_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WATERREPELLENT&quot; tabindex=&quot;0&quot; aria-label=&quot;아웃도어리프레쉬, 추가&quot; id=&quot;id_WATERREPELLENT_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[10]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WARMAIR&quot; tabindex=&quot;0&quot; aria-label=&quot;온풍, 추가&quot; id=&quot;id_WARMAIR_9&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[11]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_GYMCLOTHES&quot; tabindex=&quot;0&quot; aria-label=&quot;운동복, 추가&quot; id=&quot;id_GYMCLOTHES_10&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[12]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RAINYSEASON&quot; tabindex=&quot;0&quot; aria-label=&quot;장마철, 추가&quot; id=&quot;id_RAINYSEASON_11&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[13]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_ECONOMICDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;절약건조, 추가&quot; id=&quot;id_ECONOMICDRY_12&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[14]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_EASYIRON&quot; tabindex=&quot;0&quot; aria-label=&quot;촉촉 건조, 추가&quot; id=&quot;id_EASYIRON_13&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[15]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BIGSIZEITEM&quot; tabindex=&quot;0&quot; aria-label=&quot;큰 빨래 건조, 추가&quot; id=&quot;id_BIGSIZEITEM_14&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[16]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TOWELS&quot; tabindex=&quot;0&quot; aria-label=&quot;타월, 추가&quot; id=&quot;id_TOWELS_15&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[17]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_PADDING_REFRESH&quot; tabindex=&quot;0&quot; aria-label=&quot;패딩리프레쉬, 추가&quot; id=&quot;id_PADDING_REFRESH_16&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-2">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#3</span>
+              <h2 class="screen-title">제품 &gt; 최근 사용 코스</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-3">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#4</span>
+              <h2 class="screen-title">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-4">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#5</span>
+              <h2 class="screen-title">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 20. 오전 9:54 표준 &gt; 전력 사용량 안내</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 3</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-5">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#6</span>
+              <h2 class="screen-title">제품 &gt; 최근 사용 코스 &gt; 2026. 6. 14. 오전 10:47 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-6">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#7</span>
+              <h2 class="screen-title">제품 &gt; 최근 사용 코스 &gt; 2026. 5. 24. 오후 10:17 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-7">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#8</span>
+              <h2 class="screen-title">제품 &gt; 표준 2026. 6. 20. 오전 9:54</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-8">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#9</span>
+              <h2 class="screen-title">제품 &gt; 표준 2026. 6. 17. 오후 9:25</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-9">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#10</span>
+              <h2 class="screen-title">제품 &gt; 표준 2026. 6. 20. 오전 11:46</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-10">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#11</span>
+              <h2 class="screen-title">제품 &gt; 표준 2026. 6. 20. 오전 11:46 &gt; 전력 사용량 안내</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-11">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#12</span>
+              <h2 class="screen-title">제품 &gt; 표준 2026. 6. 17. 오후 11:09</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: product</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-12">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#13</span>
+              <h2 class="screen-title">유용한 기능</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-13">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#14</span>
+              <h2 class="screen-title">유용한 기능 &gt; 즐겨찾기 코스 관리</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 52</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_DUVET&quot; tabindex=&quot;0&quot; aria-label=&quot;이불, 삭제&quot; id=&quot;id_DUVET_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_SPEEDWASH&quot; tabindex=&quot;0&quot; aria-label=&quot;스피드워시, 삭제&quot; id=&quot;id_SPEEDWASH_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_SPEEDBOIL&quot; tabindex=&quot;0&quot; aria-label=&quot;알뜰삶음, 삭제&quot; id=&quot;id_SPEEDBOIL_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_favorite_option_label_TUB_CLEAN&quot; tabindex=&quot;0&quot; aria-label=&quot;통살균, 삭제&quot; id=&quot;id_TUB_CLEAN_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[6]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_LINGERIE_WOOL&quot; tabindex=&quot;0&quot; aria-label=&quot;란제리/울, 추가&quot; id=&quot;id_LINGERIE_WOOL_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[6]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COTTON&quot; tabindex=&quot;0&quot; aria-label=&quot;표준, 추가&quot; id=&quot;id_COTTON_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SCHOOL_UNIFORM&quot; tabindex=&quot;0&quot; aria-label=&quot;교복, 추가&quot; id=&quot;id_SCHOOL_UNIFORM_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPORTS_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;기능성 의류, 추가&quot; id=&quot;id_SPORTS_WEAR_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SWEAT_STAIN&quot; tabindex=&quot;0&quot; aria-label=&quot;땀얼룩 제거, 추가&quot; id=&quot;id_SWEAT_STAIN_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SHIRT_1H_WASHER&quot; tabindex=&quot;0&quot; aria-label=&quot;셔츠 한 벌, 추가&quot; id=&quot;id_SHIRT_1H_WASHER_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SMALL_LOAD&quot; tabindex=&quot;0&quot; aria-label=&quot;소량 세탁, 추가&quot; id=&quot;id_SMALL_LOAD_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SKIN_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;스킨 케어, 추가&quot; id=&quot;id_SKIN_CARE_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BABY_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;아기옷, 추가&quot; id=&quot;id_BABY_WEAR_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SMART_RINSE&quot; tabindex=&quot;0&quot; aria-label=&quot;안심 헹굼, 추가&quot; id=&quot;id_SMART_RINSE_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_CLOTH_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;옷감 보호, 추가&quot; id=&quot;id_CLOTH_CARE_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[10]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SHIRT&quot; tabindex=&quot;0&quot; aria-label=&quot;와이셔츠, 추가&quot; id=&quot;id_SHIRT_9&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[11]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RAINY_DAY&quot; tabindex=&quot;0&quot; aria-label=&quot;장마철 세탁, 추가&quot; id=&quot;id_RAINY_DAY_10&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[12]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SILENT_WASH&quot; tabindex=&quot;0&quot; aria-label=&quot;조용조용, 추가&quot; id=&quot;id_SILENT_WASH_11&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[13]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_HEAVYDUTY&quot; tabindex=&quot;0&quot; aria-label=&quot;찌든때, 추가&quot; id=&quot;id_HEAVYDUTY_12&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[14]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COLD_WASH&quot; tabindex=&quot;0&quot; aria-label=&quot;찬물 세탁, 추가&quot; id=&quot;id_COLD_WASH_13&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[15]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COLORCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;컬러 케어, 추가&quot; id=&quot;id_COLORCARE_14&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[16]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_KIDS_WEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;키즈옷, 추가&quot; id=&quot;id_KIDS_WEAR_15&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[17]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TOWELS&quot; tabindex=&quot;0&quot; aria-label=&quot;타월, 추가&quot; id=&quot;id_TOWELS_16&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[18]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPIN_ONLY&quot; tabindex=&quot;0&quot; aria-label=&quot;탈수 단독, 추가&quot; id=&quot;id_SPIN_ONLY_17&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[19]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SINGLE_GARMENTS&quot; tabindex=&quot;0&quot; aria-label=&quot;한벌 세탁, 추가&quot; id=&quot;id_SINGLE_GARMENTS_18&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[8]/div[1]/ul[1]/li[20]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RINSE_SPIN&quot; tabindex=&quot;0&quot; aria-label=&quot;헹굼 + 탈수, 추가&quot; id=&quot;id_RINSE_SPIN_19&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_QUICKDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;소량급속, 추가&quot; id=&quot;id_QUICKDRY_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_REFRESH&quot; tabindex=&quot;0&quot; aria-label=&quot;스팀리프레쉬, 추가&quot; id=&quot;id_REFRESH_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_ALLERGYCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;스팀살균, 추가&quot; id=&quot;id_ALLERGYCARE_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WOOL&quot; tabindex=&quot;0&quot; aria-label=&quot;울 / 섬세, 추가&quot; id=&quot;id_WOOL_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BULKYITEM&quot; tabindex=&quot;0&quot; aria-label=&quot;이불, 추가&quot; id=&quot;id_BULKYITEM_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BEDDING_BRUSH&quot; tabindex=&quot;0&quot; aria-label=&quot;침구털기, 추가&quot; id=&quot;id_BEDDING_BRUSH_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_CONDENSER_CARE&quot; tabindex=&quot;0&quot; aria-label=&quot;콘덴서케어, 추가&quot; id=&quot;id_CONDENSER_CARE_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TUB_CLEAN&quot; tabindex=&quot;0&quot; aria-label=&quot;통살균, 추가&quot; id=&quot;id_TUB_CLEAN_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[6]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COTTONNORMAL&quot; tabindex=&quot;0&quot; aria-label=&quot;표준, 추가&quot; id=&quot;id_COTTONNORMAL_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_POWER&quot; tabindex=&quot;0&quot; aria-label=&quot;강력 건조, 추가&quot; id=&quot;id_POWER_0&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_MINIMIZEWRINKLES&quot; tabindex=&quot;0&quot; aria-label=&quot;구김 완화 건조, 추가&quot; id=&quot;id_MINIMIZEWRINKLES_1&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[3]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_SPORTWEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;기능성의류, 추가&quot; id=&quot;id_SPORTWEAR_2&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[4]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_FULLSIZELOAD&quot; tabindex=&quot;0&quot; aria-label=&quot;다량 건조, 추가&quot; id=&quot;id_FULLSIZELOAD_3&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[5]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RACKDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;선반건조, 추가&quot; id=&quot;id_RACKDRY_4&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[6]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_EASYCARE&quot; tabindex=&quot;0&quot; aria-label=&quot;셔츠, 추가&quot; id=&quot;id_EASYCARE_5&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[7]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_COOLAIR&quot; tabindex=&quot;0&quot; aria-label=&quot;송풍, 추가&quot; id=&quot;id_COOLAIR_6&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[8]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BABYWEAR&quot; tabindex=&quot;0&quot; aria-label=&quot;아기옷, 추가&quot; id=&quot;id_BABYWEAR_7&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[9]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WATERREPELLENT&quot; tabindex=&quot;0&quot; aria-label=&quot;아웃도어리프레쉬, 추가&quot; id=&quot;id_WATERREPELLENT_8&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[10]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_WARMAIR&quot; tabindex=&quot;0&quot; aria-label=&quot;온풍, 추가&quot; id=&quot;id_WARMAIR_9&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[11]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_GYMCLOTHES&quot; tabindex=&quot;0&quot; aria-label=&quot;운동복, 추가&quot; id=&quot;id_GYMCLOTHES_10&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[12]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_RAINYSEASON&quot; tabindex=&quot;0&quot; aria-label=&quot;장마철, 추가&quot; id=&quot;id_RAINYSEASON_11&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[13]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_ECONOMICDRY&quot; tabindex=&quot;0&quot; aria-label=&quot;절약건조, 추가&quot; id=&quot;id_ECONOMICDRY_12&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[14]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_EASYIRON&quot; tabindex=&quot;0&quot; aria-label=&quot;촉촉 건조, 추가&quot; id=&quot;id_EASYIRON_13&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[15]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_BIGSIZEITEM&quot; tabindex=&quot;0&quot; aria-label=&quot;큰 빨래 건조, 추가&quot; id=&quot;id_BIGSIZEITEM_14&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[16]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_TOWELS&quot; tabindex=&quot;0&quot; aria-label=&quot;타월, 추가&quot; id=&quot;id_TOWELS_15&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_role_valid</span>
+                </div>
+                <div class="issue-message">The ARIA role &#039;button&#039; is not valid for the element &lt;li&gt;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[8]/div[1]/ul[1]/li[17]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ jYBPpq&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_option_label_PADDING_REFRESH&quot; tabindex=&quot;0&quot; aria-label=&quot;패딩리프레쉬, 추가&quot; id=&quot;id_PADDING_REFRESH_16&quot; role=&quot;button&quot;&gt;</code></pre></div>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-14">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#15</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-15">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#16</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링 &gt; 전력 사용량 안내</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-16">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#17</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링 &gt; 1일</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-17">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#18</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링 &gt; 1년</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-18">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#19</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링 &gt; 1주</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-19">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#20</span>
+              <h2 class="screen-title">유용한 기능 &gt; 에너지 모니터링 &gt; 1개월</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-20">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#21</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-21">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#22</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 9:54 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-22">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#23</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 14. 오전 10:47 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-23">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#24</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 24. 오후 10:17 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-24">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#25</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 6. 20. 오전 11:46 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-25">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#26</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 28. 오후 10:14 시간건조</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-26">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#27</span>
+              <h2 class="screen-title">유용한 기능 &gt; 사용 이력 &gt; 2026. 5. 22. 오후 3:51 표준</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-27">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#28</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-28">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#29</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-29">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#30</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁 &gt; 옵션 더보기</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-30">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#31</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁 &gt; 시작하기</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 2</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-31">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#32</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 3</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-32">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#33</span>
+              <h2 class="screen-title">유용한 기능 &gt; 세탁 &gt; 시작하기 &gt; 다음 &gt; 안내</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 4</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-33">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#34</span>
+              <h2 class="screen-title">유용한 기능 &gt; 건조</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-34">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#35</span>
+              <h2 class="screen-title">유용한 기능 &gt; 건조</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: usefulFeatures</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-35">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#36</span>
+              <h2 class="screen-title">설정</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 0</span>
+              <span class="meta-tag">Issues: 5</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_parent_required</span>
+                </div>
+                <div class="issue-message">Element with &quot;listitem&quot; role is not contained in or owned by an element with one of the following roles: &quot;list&quot;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[1]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ eqhLIv&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_set01_nickname&quot; id=&quot;item_id_undefined&quot; role=&quot;listitem&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_parent_required</span>
+                </div>
+                <div class="issue-message">Element with &quot;listitem&quot; role is not contained in or owned by an element with one of the following roles: &quot;list&quot;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[1]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ eqhLIv&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_set01_location&quot; id=&quot;item_id_undefined&quot; role=&quot;listitem&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_parent_required</span>
+                </div>
+                <div class="issue-message">Element with &quot;listitem&quot; role is not contained in or owned by an element with one of the following roles: &quot;list&quot;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ eqhLIv&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_set01_smartCare&quot; data-search-keyword=&quot;스마트케어&quot; role=&quot;listitem&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_parent_required</span>
+                </div>
+                <div class="issue-message">Element with &quot;listitem&quot; role is not contained in or owned by an element with one of the following roles: &quot;list&quot;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[2]/div[1]/ul[1]/li[2]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ eqhLIv&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_set01_alarm&quot; data-search-keyword=&quot;제품 알림음&quot; role=&quot;listitem&quot;&gt;</code></pre></div>
+              </div>
+            
+              <div class="issue-card" style="border-left: 4px solid #ef4444;">
+                <div class="issue-header">
+                  <span class="issue-badge" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444;">Violation</span>
+                  <span class="issue-rule-id">aria_parent_required</span>
+                </div>
+                <div class="issue-message">Element with &quot;listitem&quot; role is not contained in or owned by an element with one of the following roles: &quot;list&quot;</div>
+                <div class="issue-selector">Selector: <code>/html[2]/body[1]/div[1]/div[4]/div[5]/div[1]/div[1]/div[3]/div[1]/ul[1]/li[1]</code></div>
+                <div class="issue-snippet"><pre><code>&lt;li class=&quot;sc-bczRLJ cyGTe sc-hdyzPZ eqhLIv&quot; direction=&quot;column&quot; data-tux-id=&quot;auto_set01_productInfo&quot; data-search-keyword=&quot;제품 정보&quot; role=&quot;listitem&quot;&gt;</code></pre></div>
+              </div>
+            
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-36">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#37</span>
+              <h2 class="screen-title">설정 &gt; 제품 이름 워시타워</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-37">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#38</span>
+              <h2 class="screen-title">설정 &gt; 공간 마이홈 - 다용도실</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+        <div class="screen-card" id="screen-38">
+          <div class="screen-header">
+            <div class="screen-title-area">
+              <span class="screen-index">#39</span>
+              <h2 class="screen-title">설정 &gt; 제품 정보</h2>
+            </div>
+            <div class="screen-meta">
+              <span class="meta-tag">Branch: settings</span>
+              <span class="meta-tag">Depth: 1</span>
+              <span class="meta-tag">Issues: 0</span>
+            </div>
+          </div>
+          
+          <div class="screen-body">
+            <div class="screen-screenshot-column">
+              <div class="no-screenshot">No screenshot captured</div>
+            </div>
+            <div class="screen-issues-column">
+              
+          <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">All Accessibility Checks Passed</div>
+            <div class="success-message">No active accessibility issues were flagged for this screen.</div>
+          </div>
+        
+            </div>
+          </div>
+        </div>
+      
+    </div>
+  </div>
+
+  <div id="screenshot-modal" class="modal" onclick="closeModal()">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modal-img">
+  </div>
+
+  <script>
+    function scrollToScreen(index, element) {
+      const card = document.getElementById('screen-' + index);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function filterScreens(text) {
+      const query = text.toLowerCase().trim();
+      document.querySelectorAll('.menu-item').forEach((item, index) => {
+        const title = item.querySelector('.menu-item-title').textContent.toLowerCase();
+        const path = item.querySelector('.menu-item-path').textContent.toLowerCase();
+        const card = document.getElementById('screen-' + index);
+        
+        if (title.includes(query) || path.includes(query)) {
+          item.style.display = 'flex';
+          if (card) card.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+          if (card) card.style.display = 'none';
+        }
+      });
+    }
+
+    function openModal(src) {
+      const modal = document.getElementById("screenshot-modal");
+      const modalImg = document.getElementById("modal-img");
+      modal.style.display = "flex";
+      modalImg.src = src;
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("screenshot-modal");
+      modal.style.display = "none";
+    }
+
+    // Set first menu item active by default
+    const firstMenu = document.querySelector('.menu-item');
+    if (firstMenu) firstMenu.classList.add('active');
+  </script>
+</body>
+</html>

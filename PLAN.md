@@ -26,23 +26,29 @@
 - [x] IBM Equal Access page runner injection
 - [x] JSON, Markdown, HTML report generation
 - [x] Unit tests for candidate filtering and report generation
+- [x] DOM-based List/Search classification (isDynamicListOrSearchPage) to resolve history page loop and search page bypass
+- [x] Active tab name binding to semanticLayoutKey to partition history tab caches
+- [x] Pre-filtering of Smart Diagnosis entry points by expanding ancestor search depth to 8 levels
+- [x] Shadow DOM traversal support for shadowContains and isAriaHidden
+- [x] Nesting deduplication with text tag filtering up to 6 levels of ancestor group
+- [x] Restored stable screenshot capturing via <all_urls> permission
 - [ ] Real ThinQ Web login/session validation
-- [ ] Product test pass: air purifier
+- [x] Product test pass: air purifier
 - [ ] Product test pass: dehumidifier
-- [ ] Product test pass: refrigerator
+- [x] Product test pass: refrigerator
 - [ ] Product test pass: air conditioner
 - [ ] Product test pass: water purifier
-- [ ] Product test pass: dishwasher
-- [ ] Product test pass: WashTower
+- [x] Product test pass: dishwasher
+- [x] Product test pass: WashTower
 - [ ] Corporate network Polarion follow-up implementation
+
 
 ## Implementation TODO
 
-- Verify real ThinQ DOM selectors after login.
-- Continue air purifier validation with debug logs after terminal bottom-sheet and internal route handling.
-- Tune blocked navigation heuristics if a product page exposes unnamed icon buttons.
 - Add waiver settings UI after baseline MVP validation.
 - Add Polarion REST publisher in a corporate-network Codex session.
+- Monitor DOM structure of other appliances (styler, water purifier, etc.) during traversal.
+
 
 ## Git Workflow
 

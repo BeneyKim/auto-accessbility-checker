@@ -1,0 +1,1573 @@
+[2026-06-01T20:09:12.365Z] [info] transition classified.
+{
+  "triggerName": "식품 추가",
+  "classification": "in-product-child",
+  "reason": "url-changed",
+  "before": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20",
+    "title": "기타",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 1,
+    "signature": "oxmyf6",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  },
+  "after": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/Ng==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/addUserFood/GRM-20",
+    "title": "새 식품 추가",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 1,
+    "signature": "g3twaf",
+    "shell": {
+      "tagName": "div",
+      "className": "sc-kTGBUR eJojdY sc-hbjaKc jtlBTB",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:12.366Z] [info] depth pushed.
+{
+  "triggerName": "식품 추가",
+  "fromDepth": 3,
+  "toDepth": 4,
+  "menuPath": [
+    "유용한 기능",
+    "식품 관리",
+    "식품 추가",
+    "기타",
+    "식품 추가"
+  ],
+  "classification": "in-product-child"
+}
+[2026-06-01T20:09:12.525Z] [info] Scanning screen: 새 식품 추가
+{
+  "depth": 4
+}
+[2026-06-01T20:09:12.762Z] [debug] Screenshot captured.
+"undefined"
+[2026-06-01T20:09:12.788Z] [info] Screen scanned.
+{
+  "title": "새 식품 추가",
+  "depth": 4,
+  "branch": "usefulFeatures"
+}
+[2026-06-01T20:09:13.153Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 4,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가",
+      "기타",
+      "식품 추가"
+    ],
+    "rootSignature": "g3twaf",
+    "rootTitle": "새 식품 추가",
+    "shellSelector": "div#.sc-kTGBUR.eJojdY.sc-hbjaKc",
+    "candidateSnapshot": {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "새 식품 추가",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/Ng==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/addUserFood/GRM-20",
+      "overlayCount": 0,
+      "signature": "g3twaf"
+    }
+  },
+  "count": 1,
+  "candidates": [
+    {
+      "id": "ip5hkh",
+      "name": "취소",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/Ng==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/addUserFood/GRM-20",
+    "title": "새 식품 추가",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 1,
+    "signature": "g3twaf",
+    "shell": {
+      "tagName": "div",
+      "className": "sc-kTGBUR eJojdY sc-hbjaKc jtlBTB",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:13.153Z] [info] restore started.
+{
+  "targetFrame": {
+    "branch": "usefulFeatures",
+    "depth": 3,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가",
+      "기타"
+    ],
+    "rootSignature": "oxmyf6",
+    "rootTitle": "기타",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "nbz8rx",
+      "name": "기타",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "기타",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20",
+      "overlayCount": 0,
+      "signature": "oxmyf6"
+    }
+  },
+  "childFrame": {
+    "branch": "usefulFeatures",
+    "depth": 4,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가",
+      "기타",
+      "식품 추가"
+    ],
+    "rootSignature": "g3twaf",
+    "rootTitle": "새 식품 추가",
+    "shellSelector": "div#.sc-kTGBUR.eJojdY.sc-hbjaKc",
+    "candidateSnapshot": {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "새 식품 추가",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/Ng==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/addUserFood/GRM-20",
+      "overlayCount": 0,
+      "signature": "g3twaf"
+    }
+  }
+}
+[2026-06-01T20:09:13.159Z] [info] Executing restore via: back-button
+{
+  "targetTitle": "기타",
+  "currentTitle": "새 식품 추가"
+}
+[2026-06-01T20:09:13.163Z] [warn] Back button not found or failed; trying history.back() fallback.
+"undefined"
+[2026-06-01T20:09:13.323Z] [info] depth popped.
+{
+  "triggerName": "식품 추가",
+  "fromDepth": 4,
+  "toDepth": 3,
+  "restored": true,
+  "method": "history-back"
+}
+[2026-06-01T20:09:13.698Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 3,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가",
+      "기타"
+    ],
+    "rootSignature": "oxmyf6",
+    "rootTitle": "기타",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "nbz8rx",
+      "name": "기타",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "기타",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20",
+      "overlayCount": 0,
+      "signature": "oxmyf6"
+    }
+  },
+  "count": 1,
+  "candidates": [
+    {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20",
+    "title": "기타",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 1,
+    "signature": "oxmyf6",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:13.699Z] [info] restore started.
+{
+  "targetFrame": {
+    "branch": "usefulFeatures",
+    "depth": 2,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가"
+    ],
+    "rootSignature": "zme2ix",
+    "rootTitle": "식품 추가",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 추가",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "zme2ix"
+    }
+  },
+  "childFrame": {
+    "branch": "usefulFeatures",
+    "depth": 3,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가",
+      "기타"
+    ],
+    "rootSignature": "oxmyf6",
+    "rootTitle": "기타",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "nbz8rx",
+      "name": "기타",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "기타",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/S1JfRVRD/JUVBJUI4JUIwJUVEJTgzJTgw/NQ==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/subFoodList/GRM-20",
+      "overlayCount": 0,
+      "signature": "oxmyf6"
+    }
+  }
+}
+[2026-06-01T20:09:13.704Z] [info] Executing restore via: back-button
+{
+  "targetTitle": "식품 추가",
+  "currentTitle": "기타"
+}
+[2026-06-01T20:09:13.707Z] [info] Clicking back button: 뒤로
+"undefined"
+[2026-06-01T20:09:14.207Z] [info] Restore accepted via title match (method: back-button).
+{
+  "targetTitle": "식품 추가",
+  "oldSignature": "zme2ix",
+  "newSignature": "l4uce5"
+}
+[2026-06-01T20:09:14.207Z] [info] depth popped.
+{
+  "triggerName": "기타",
+  "fromDepth": 3,
+  "toDepth": 2,
+  "restored": true,
+  "method": "back-button"
+}
+[2026-06-01T20:09:14.840Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 2,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가"
+    ],
+    "rootSignature": "zme2ix",
+    "rootTitle": "식품 추가",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 추가",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "zme2ix"
+    }
+  },
+  "count": 5,
+  "candidates": [
+    {
+      "id": "1l6fn9y",
+      "name": "검색",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "tkicbj",
+      "name": "자주 보관하는 식품",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "hnh9z8",
+      "name": "야채",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "vzpjhz",
+      "name": "과일",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "nbz8rx",
+      "name": "기타",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20",
+    "title": "식품 추가",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 5,
+    "signature": "zme2ix",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:14.840Z] [info] restore started.
+{
+  "targetFrame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "childFrame": {
+    "branch": "usefulFeatures",
+    "depth": 2,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리",
+      "식품 추가"
+    ],
+    "rootSignature": "zme2ix",
+    "rootTitle": "식품 추가",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 추가",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/NA==/dW5kZWZpbmVk/GRM_20_FOD04_AddFood/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "zme2ix"
+    }
+  }
+}
+[2026-06-01T20:09:14.869Z] [info] Executing restore via: back-button
+{
+  "targetTitle": "식품 관리",
+  "currentTitle": "식품 추가"
+}
+[2026-06-01T20:09:14.902Z] [info] Clicking back button: 뒤로
+"undefined"
+[2026-06-01T20:09:15.415Z] [info] depth popped.
+{
+  "triggerName": "식품 추가",
+  "fromDepth": 2,
+  "toDepth": 1,
+  "restored": true,
+  "method": "back-button"
+}
+[2026-06-01T20:09:15.799Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "count": 4,
+  "candidates": [
+    {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "v5e2j1",
+      "name": "냉장실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1j6qst0",
+      "name": "냉동실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "8xhl3r",
+      "name": "모두 보기",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "45dnmj",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:15.809Z] [info] candidate click started.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "candidate": {
+    "id": "v5e2j1",
+    "name": "냉장실",
+    "role": "tab",
+    "tagName": "li",
+    "occurrenceIndex": 0
+  },
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "45dnmj",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:17.058Z] [info] transition classified.
+{
+  "triggerName": "냉장실",
+  "classification": "state-change",
+  "reason": "tab-selected",
+  "before": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "45dnmj",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  },
+  "after": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "1ytazyg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:17.059Z] [debug] candidate skipped.
+{
+  "triggerName": "냉장실",
+  "classification": "state-change",
+  "reason": "tab-selected"
+}
+[2026-06-01T20:09:17.439Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "count": 4,
+  "candidates": [
+    {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "v5e2j1",
+      "name": "냉장실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1j6qst0",
+      "name": "냉동실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "8xhl3r",
+      "name": "모두 보기",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "1ytazyg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:17.448Z] [info] candidate click started.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "candidate": {
+    "id": "1j6qst0",
+    "name": "냉동실",
+    "role": "tab",
+    "tagName": "li",
+    "occurrenceIndex": 0
+  },
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "1ytazyg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:18.707Z] [info] transition classified.
+{
+  "triggerName": "냉동실",
+  "classification": "state-change",
+  "reason": "tab-selected",
+  "before": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "1ytazyg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  },
+  "after": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "194am44",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:18.707Z] [debug] candidate skipped.
+{
+  "triggerName": "냉동실",
+  "classification": "state-change",
+  "reason": "tab-selected"
+}
+[2026-06-01T20:09:19.475Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "count": 4,
+  "candidates": [
+    {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "v5e2j1",
+      "name": "냉장실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1j6qst0",
+      "name": "냉동실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "8xhl3r",
+      "name": "모두 보기",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "jho7s7",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:19.485Z] [info] candidate click started.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "candidate": {
+    "id": "8xhl3r",
+    "name": "모두 보기",
+    "role": "tab",
+    "tagName": "li",
+    "occurrenceIndex": 0
+  },
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "jho7s7",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:20.748Z] [info] transition classified.
+{
+  "triggerName": "모두 보기",
+  "classification": "state-change",
+  "reason": "tab-selected",
+  "before": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "jho7s7",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  },
+  "after": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "106hlfg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:20.748Z] [debug] candidate skipped.
+{
+  "triggerName": "모두 보기",
+  "classification": "state-change",
+  "reason": "tab-selected"
+}
+[2026-06-01T20:09:21.132Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  },
+  "count": 4,
+  "candidates": [
+    {
+      "id": "m7lndn",
+      "name": "식품 추가",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "v5e2j1",
+      "name": "냉장실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1j6qst0",
+      "name": "냉동실",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "8xhl3r",
+      "name": "모두 보기",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+    "title": "식품 관리",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 4,
+    "signature": "106hlfg",
+    "shell": {
+      "tagName": "div",
+      "id": "root",
+      "className": "",
+      "width": 1699,
+      "height": 935,
+      "top": 0,
+      "left": 0
+    }
+  }
+}
+[2026-06-01T20:09:21.132Z] [info] restore started.
+{
+  "targetFrame": {
+    "branch": "usefulFeatures",
+    "depth": 0,
+    "menuPath": [
+      "유용한 기능"
+    ],
+    "rootSignature": "nrsj8t",
+    "rootTitle": "냉동고",
+    "shellSelector": "div#body_container.sc-bczRLJ.rOcBW.sc-jVCNtP",
+    "semanticIdentity": {
+      "title": "냉동고",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "nrsj8t"
+    }
+  },
+  "childFrame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "식품 관리"
+    ],
+    "rootSignature": "45dnmj",
+    "rootTitle": "식품 관리",
+    "shellSelector": "div#root.",
+    "candidateSnapshot": {
+      "id": "1lybmtf",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "식품 관리",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/Mw==/dW5kZWZpbmVk/GRM_20_FOD01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "45dnmj"
+    }
+  }
+}
+[2026-06-01T20:09:21.144Z] [info] Executing restore via: back-button
+{
+  "targetTitle": "냉동고",
+  "currentTitle": "식품 관리"
+}
+[2026-06-01T20:09:21.154Z] [info] Clicking back button: 뒤로
+"undefined"
+[2026-06-01T20:09:21.861Z] [info] Restore accepted via title match (method: back-button).
+{
+  "targetTitle": "냉동고",
+  "oldSignature": "nrsj8t",
+  "newSignature": "25uiis"
+}
+[2026-06-01T20:09:21.862Z] [info] depth popped.
+{
+  "triggerName": "식품 관리",
+  "fromDepth": 1,
+  "toDepth": 0,
+  "restored": true,
+  "method": "back-button"
+}
+[2026-06-01T20:09:22.378Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 0,
+    "menuPath": [
+      "유용한 기능"
+    ],
+    "rootSignature": "nrsj8t",
+    "rootTitle": "냉동고",
+    "shellSelector": "div#body_container.sc-bczRLJ.rOcBW.sc-jVCNtP",
+    "semanticIdentity": {
+      "title": "냉동고",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "nrsj8t"
+    }
+  },
+  "count": 3,
+  "candidates": [
+    {
+      "id": "f3k3pd",
+      "name": "식품 관리",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "l4y8xo",
+      "name": "에너지 모니터링",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1yf7ata",
+      "name": "추가하기",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+    "title": "냉동고",
+    "selectedBranch": "usefulFeatures",
+    "hasRequiredControls": true,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 3,
+    "signature": "3tcfw9",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 976,
+      "height": 717,
+      "top": 98,
+      "left": 360
+    }
+  }
+}
+[2026-06-01T20:09:22.393Z] [info] candidate click started.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 0,
+    "menuPath": [
+      "유용한 기능"
+    ],
+    "rootSignature": "nrsj8t",
+    "rootTitle": "냉동고",
+    "shellSelector": "div#body_container.sc-bczRLJ.rOcBW.sc-jVCNtP",
+    "semanticIdentity": {
+      "title": "냉동고",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "nrsj8t"
+    }
+  },
+  "candidate": {
+    "id": "l4y8xo",
+    "name": "에너지 모니터링",
+    "role": "button",
+    "tagName": "button",
+    "occurrenceIndex": 0
+  },
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+    "title": "냉동고",
+    "selectedBranch": "usefulFeatures",
+    "hasRequiredControls": true,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 3,
+    "signature": "3tcfw9",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 976,
+      "height": 717,
+      "top": 98,
+      "left": 360
+    }
+  }
+}
+[2026-06-01T20:09:28.982Z] [info] transition classified.
+{
+  "triggerName": "에너지 모니터링",
+  "classification": "in-product-child",
+  "reason": "url-changed",
+  "before": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/dW5kZWZpbmVk/dW5kZWZpbmVk/dW5kZWZpbmVk/Mg==/dW5kZWZpbmVk/GRM_20_CEN01_Main/001/GRM-20",
+    "title": "냉동고",
+    "selectedBranch": "usefulFeatures",
+    "hasRequiredControls": true,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 3,
+    "signature": "3tcfw9",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "left": 0
+    }
+  },
+  "after": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20",
+    "title": "에너지 모니터링",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 7,
+    "signature": "1f9u2nl",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 976,
+      "height": 781,
+      "top": 98,
+      "left": 360
+    }
+  }
+}
+[2026-06-01T20:09:28.983Z] [info] depth pushed.
+{
+  "triggerName": "에너지 모니터링",
+  "fromDepth": 0,
+  "toDepth": 1,
+  "menuPath": [
+    "유용한 기능",
+    "에너지 모니터링"
+  ],
+  "classification": "in-product-child"
+}
+[2026-06-01T20:09:29.173Z] [info] Scanning screen: 에너지 모니터링
+{
+  "depth": 1
+}
+[2026-06-01T20:09:29.528Z] [debug] Screenshot captured.
+"undefined"
+[2026-06-01T20:09:29.567Z] [info] Screen scanned.
+{
+  "title": "에너지 모니터링",
+  "depth": 1,
+  "branch": "usefulFeatures"
+}
+[2026-06-01T20:09:30.024Z] [info] candidate collected.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "에너지 모니터링"
+    ],
+    "rootSignature": "1f9u2nl",
+    "rootTitle": "에너지 모니터링",
+    "shellSelector": "div#body_container.sc-bczRLJ.rOcBW.sc-jVCNtP",
+    "candidateSnapshot": {
+      "id": "l4y8xo",
+      "name": "에너지 모니터링",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "에너지 모니터링",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "1f9u2nl"
+    }
+  },
+  "count": 7,
+  "candidates": [
+    {
+      "id": "4nl1xm",
+      "name": "추가 정보",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "19dpcfb",
+      "name": "2026년 6월 2일 화",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "yi8p3a",
+      "name": "전력 사용량 안내",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "r6mo55",
+      "name": "1일",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "xbhij5",
+      "name": "1주",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "1vzthe",
+      "name": "1개월",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    },
+    {
+      "id": "cx389e",
+      "name": "1년",
+      "role": "tab",
+      "tagName": "li",
+      "occurrenceIndex": 0
+    }
+  ],
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20",
+    "title": "에너지 모니터링",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 7,
+    "signature": "1f9u2nl",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 976,
+      "height": 781,
+      "top": 98,
+      "left": 360
+    }
+  }
+}
+[2026-06-01T20:09:30.050Z] [info] candidate click started.
+{
+  "frame": {
+    "branch": "usefulFeatures",
+    "depth": 1,
+    "menuPath": [
+      "유용한 기능",
+      "에너지 모니터링"
+    ],
+    "rootSignature": "1f9u2nl",
+    "rootTitle": "에너지 모니터링",
+    "shellSelector": "div#body_container.sc-bczRLJ.rOcBW.sc-jVCNtP",
+    "candidateSnapshot": {
+      "id": "l4y8xo",
+      "name": "에너지 모니터링",
+      "role": "button",
+      "tagName": "button",
+      "occurrenceIndex": 0
+    },
+    "transitionClassification": "in-product-child",
+    "terminalOverlay": false,
+    "restoreMethod": "back-button",
+    "semanticIdentity": {
+      "title": "에너지 모니터링",
+      "urlPathname": "/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20",
+      "overlayCount": 0,
+      "signature": "1f9u2nl"
+    }
+  },
+  "candidate": {
+    "id": "4nl1xm",
+    "name": "추가 정보",
+    "role": "button",
+    "tagName": "button",
+    "occurrenceIndex": 0
+  },
+  "snapshot": {
+    "url": "https://my.lgthinq.com/GRM-20/MzcxZWQxNGMtZDU0My0xYzcxLWJmODUtNGNiY2U5ODlmNjYx/Mw==/dW5kZWZpbmVk/GRM_20_ENM01_Main/001/GRM-20",
+    "title": "에너지 모니터링",
+    "hasRequiredControls": false,
+    "boundaryPresent": true,
+    "isHomeLike": false,
+    "isOutOfScopeLike": false,
+    "overlayCount": 0,
+    "candidateCount": 7,
+    "signature": "1f9u2nl",
+    "shell": {
+      "tagName": "div",
+      "id": "body_container",
+      "className": "sc-bczRLJ rOcBW sc-jVCNtP kzIsWa",
+      "width": 976,
+      "height": 781,
+      "top": 98,
+      "left": 360
+    }
+  }
+}

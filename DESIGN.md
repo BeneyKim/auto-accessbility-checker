@@ -43,6 +43,12 @@ IBM Equal Access is bundled into the extension as `vendor/ace.js`. The content s
 - If the extension is reloaded while ThinQ Web is already open, the background worker injects `content.js` and retries `START_RUN` when Chrome reports that the receiving end does not exist.
 - Content-script runtime messages are best-effort for logs, screenshots, and completion notifications so a transient missing receiver does not crash traversal.
 - Overlay restore only clicks explicit close/cancel/dismiss controls; it no longer clicks the first arbitrary overlay button because picker popups may expose selectable year/month values as buttons.
+- `isDynamicListOrSearchPage` is evaluated based on DOM content context (presence of search input, list tags, or multiple items count) rather than simple URL substring matching, allowing static history lists (e.g. WashTower usage logs) to correctly use semantic cache rules while dynamic search lists are bypassed.
+- Active tab binding to `semanticLayoutKey` guarantees cache isolation between identical-structured screens under different tabs (e.g. WashTower Washer vs Dryer cycles histories) by appending a `(tab:selectedTab)` suffix.
+- Element nesting deduplication supports Shadow DOM boundaries via `shadowContains`. Child text elements (matching `isC1TextTag` for span, p, em, strong, b, i) with overlapping names are deduplicated under a parent click target up to 6 levels deep.
+- `getSkipReason` filters out interactive elements nested inside a Smart Diagnosis container up to 8 levels deep, including Shadow DOM hosts, preventing unintentional app-mic activation or diagnostic timeouts.
+- Extension permissions bundle `<all_urls>` to secure screenshot capturing authority against tab reloading/navigation under MV3 rules.
+
 
 ## Data Model
 

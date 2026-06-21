@@ -1,0 +1,93 @@
+{
+  "trigger": {
+    "name": "다운로드 코스 관리",
+    "role": "button"
+  },
+  "screenSignature": "spk317",
+  "skipped": [
+    {
+      "id": "1lmkznr",
+      "name": "ThinQ Web 홈 대시보드로 이동",
+      "role": "heading",
+      "tagName": "h1",
+      "reason": "blocked-navigation"
+    },
+    {
+      "id": "48h3ch",
+      "name": "팝업 창 닫기",
+      "role": "button",
+      "tagName": "button",
+      "reason": "blocked-navigation"
+    },
+    {
+      "id": "6eccol",
+      "name": "뒤로",
+      "role": "button",
+      "tagName": "button",
+      "reason": "blocked-back-navigation"
+    },
+    {
+      "id": "1ei418m",
+      "name": "현재 다운로드 코스, 고기류 구이 (P5)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "13yi042",
+      "name": "고기류 구이 (P5), 다운로드됨",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "1yodn7a",
+      "name": "기름기 많은 식기 (P6)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "139pdoa",
+      "name": "냄비 (P2)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "63be1n",
+      "name": "냄비와 프라이팬 (P1)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "12of7xj",
+      "name": "단단하게 눌어붙은 식기 (P7)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "1wvomm3",
+      "name": "생선 요리 (P8)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "hpsn4p",
+      "name": "야간 조용 (P4)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "19bwhxi",
+      "name": "유리 제품 (P3)",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    }
+  ]
+}

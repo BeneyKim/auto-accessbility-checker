@@ -1,0 +1,82 @@
+{
+  "screenSignature": "1xp069u",
+  "skipped": [
+    {
+      "id": "1lmkznr",
+      "name": "ThinQ Web 홈 대시보드로 이동",
+      "role": "heading",
+      "tagName": "h1",
+      "reason": "blocked-navigation"
+    },
+    {
+      "id": "48h3ch",
+      "name": "팝업 창 닫기",
+      "role": "button",
+      "tagName": "button",
+      "reason": "blocked-navigation"
+    },
+    {
+      "id": "6eccol",
+      "name": "뒤로",
+      "role": "button",
+      "tagName": "button",
+      "reason": "blocked-back-navigation"
+    },
+    {
+      "id": "1q08lf2",
+      "name": "제품 이름, 식기세척기",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "3no095",
+      "name": "공간, 마이홈 - 주방",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "1ls91lf",
+      "name": "린스 투입량, 2",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "h1aw8m",
+      "name": "제품 물 경도 레벨, 2",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "4krkg2",
+      "name": "제품 알림음",
+      "role": "label",
+      "tagName": "label",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "yrbqzx",
+      "name": "통살균 알림등",
+      "role": "label",
+      "tagName": "label",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "lwse10",
+      "name": "전면 시간 표시",
+      "role": "label",
+      "tagName": "label",
+      "reason": "switch-toggle"
+    },
+    {
+      "id": "1dj96ob",
+      "name": "제품 정보",
+      "role": "button",
+      "tagName": "button",
+      "reason": "switch-toggle"
+    }
+  ]
+}
