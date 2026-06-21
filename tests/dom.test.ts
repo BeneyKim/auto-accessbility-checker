@@ -1161,4 +1161,82 @@ describe("ThinQ DOM helpers", () => {
       expect(ids).not.toContain("btnUseful1");
     });
   });
+
+  describe("Smart Diagnosis Deep Context Filtering (Issue 3)", () => {
+    it("skips candidates that are deeply nested (up to 8 levels) inside a Smart Diagnosis container", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div aria-label="스마트 진단" class="card-root">
+            <div class="level-1">
+              <div class="level-2">
+                <div class="level-3">
+                  <div class="level-4">
+                    <div class="level-5">
+                      <div class="level-6">
+                        <button id="btnSmart" role="button">세탁</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button id="btnNormal">일반 버튼</button>
+        </div>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+
+      // 스마트진단 카드 하위에 깊게 중첩된 버튼은 수집 후보에서 제외되어야 함
+      expect(ids).not.toContain("btnSmart");
+      // 일반 버튼은 정상 수집되어야 함
+      expect(ids).toContain("btnNormal");
+    });
+
+    it("skips candidates when parent container matches class or id patterns (sds/smart_diagnosis)", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div id="smart_diagnosis_container">
+            <div>
+              <button id="btnSmartId" role="button">건조</button>
+            </div>
+          </div>
+          <div class="sds-card-wrapper">
+            <div>
+              <button id="btnSmartClass" role="button">세탁</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+
+      expect(ids).not.toContain("btnSmartId");
+      expect(ids).not.toContain("btnSmartClass");
+    });
+  });
+
+  describe("Nested Element Name Overlap Deduplication (Issue 5)", () => {
+    it("deduplicates nesting when parents have name overlap, keeping the parent container", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <div id="parentCard" tabindex="0" aria-label="감" data-tux-id="card-item">
+            <span id="childText" aria-label="감">감</span>
+          </div>
+        </div>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+
+      // 부모인 parentCard만 수집되고, 텍스트가 겹치는 자식 childText는 지워져야 함
+      expect(ids).toContain("parentCard");
+      expect(ids).not.toContain("childText");
+    });
+  });
 });

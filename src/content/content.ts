@@ -394,7 +394,13 @@ async function traverseFrame(context: TraversalContext, frame: NavigationFrame):
         semanticLayoutKey = normalizedUrl;
       } else {
         const candidateRoles = snapshot.shell ? collectClickCandidates(snapshot.shell).map(c => `${c.snapshot.role}:${c.snapshot.tagName}`).sort().join("|") : "";
-        semanticLayoutKey = `${normalizedUrl}[${candidateRoles}]`;
+        const selectedTab = snapshot.shell
+          ? Array.from(snapshot.shell.querySelectorAll<HTMLElement>('[aria-selected="true"], [aria-current="page"]'))
+              .map(getAccessibleName)
+              .filter(Boolean)
+              .join("|")
+          : "";
+        semanticLayoutKey = `${normalizedUrl}[${candidateRoles}](tab:${selectedTab})`;
       }
 
       if (context.visitedSemantically.has(semanticLayoutKey)) {

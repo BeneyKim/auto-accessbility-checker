@@ -15,7 +15,7 @@
     "type": "module"
   },
   "permissions": ["activeTab", "downloads", "scripting", "storage", "tabs", "unlimitedStorage", "sidePanel"],
-  "host_permissions": ["https://my.lgthinq.com/*"],
+  "host_permissions": ["https://my.lgthinq.com/*", "<all_urls>"],
   "content_scripts": [
     {
       "matches": ["https://my.lgthinq.com/*"],

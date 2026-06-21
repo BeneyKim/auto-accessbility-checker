@@ -294,6 +294,22 @@ export function filterDuplicateNamesScreenWide(candidates: ClickCandidate[]): Cl
   return candidates.filter(c => !toRemove.has(c));
 }
 
+function shadowContains(parent: HTMLElement, child: HTMLElement): boolean {
+  let current: Node | null = child;
+  while (current && current !== document.body) {
+    if (current === parent) {
+      return true;
+    }
+    const nextParent: ParentNode | null = current.parentNode;
+    if (nextParent && (nextParent as any).host) {
+      current = (nextParent as any).host;
+    } else {
+      current = nextParent;
+    }
+  }
+  return false;
+}
+
 export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   const seen = new Set<HTMLElement>();
   const candidates: ClickCandidate[] = [];
@@ -370,16 +386,31 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
     const isFilteredOut = candidates.some((c2) => {
       if (c2 === c1) return false;
 
-      const c2ContainsC1 = c2.element.contains(c1.element);
+      const name1 = (c1.snapshot.name || "").trim().toLowerCase();
+      const name2 = (c2.snapshot.name || "").trim().toLowerCase();
+      const hasNameOverlap = name1.length > 0 && name2.length > 0 && (name1.includes(name2) || name2.includes(name1));
+
+      const isC1Strong = isStrongInteractive(c1.element);
+      const isC2Strong = isStrongInteractive(c2.element);
+
+      const c1Tag = c1.element.tagName.toLowerCase();
+      const isC1TextTag = c1Tag === "span" || c1Tag === "p" || c1Tag === "em" || c1Tag === "strong" || c1Tag === "b" || c1Tag === "i";
+      const isChildTextTagAndNameOverlap = hasNameOverlap && isC1TextTag;
+
+      const c2ContainsC1 = shadowContains(c2.element, c1.element);
       if (c2ContainsC1) {
         // c2 is parent, c1 is child
-        return isStrongInteractive(c2.element);
+        return isC2Strong || (!isC2Strong && !isC1Strong && isChildTextTagAndNameOverlap);
       }
 
-      const c1ContainsC2 = c1.element.contains(c2.element);
+      const c1ContainsC2 = shadowContains(c1.element, c2.element);
       if (c1ContainsC2) {
         // c1 is parent, c2 is child
-        return !isStrongInteractive(c1.element);
+        const c2Tag = c2.element.tagName.toLowerCase();
+        const isC2TextTag = c2Tag === "span" || c2Tag === "p" || c2Tag === "em" || c2Tag === "strong" || c2Tag === "b" || c2Tag === "i";
+        const isChildC2TextTagAndNameOverlap = hasNameOverlap && isC2TextTag;
+
+        return !isC1Strong && (isC2Strong || !isChildC2TextTagAndNameOverlap);
       }
 
       return false;
@@ -742,10 +773,13 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
   // Skip elements inside Smart Diagnosis context to prevent hardware mic activation
   // or long diagnostic timeouts.
   let parent = element.parentElement;
-  for (let level = 1; level <= 3; level++) {
+  for (let level = 1; level <= 8; level++) {
     if (!parent || parent === document.body) break;
     const parentLabel = (parent.getAttribute("aria-label") ?? "").toLowerCase();
     const parentDataName = (parent.getAttribute("data-name") ?? "").toLowerCase();
+    const parentId = (parent.id ?? "").toLowerCase();
+    const parentClass = (parent.className ?? "").toLowerCase();
+
     const hasSmartDiagContext = parentLabel.includes("스마트 진단") ||
                                  parentLabel.includes("스마트진단") ||
                                  parentLabel.includes("smart diagnosis") ||
@@ -753,11 +787,25 @@ function getSkipReason(element: HTMLElement, name: string): string | undefined {
                                  parentDataName.includes("스마트 진단") ||
                                  parentDataName.includes("스마트진단") ||
                                  parentDataName.includes("smart diagnosis") ||
-                                 parentDataName.includes("smartdiagnosis");
+                                 parentDataName.includes("smartdiagnosis") ||
+                                 parentId.includes("smartdiagnosis") ||
+                                 parentId.includes("smart_diagnosis") ||
+                                 parentId.includes("sds") ||
+                                 parentClass.includes("smartdiagnosis") ||
+                                 parentClass.includes("smart_diagnosis") ||
+                                 parentClass.includes("sds");
     if (hasSmartDiagContext) {
       return "blocked-external-service";
     }
-    parent = parent.parentElement;
+    // Shadow DOM host traversal support
+    const nextParent: ParentNode | null = parent.parentElement || parent.parentNode;
+    if (nextParent && (nextParent as any).host) {
+      parent = (nextParent as any).host;
+    } else if (nextParent && nextParent instanceof HTMLElement) {
+      parent = nextParent;
+    } else {
+      parent = null;
+    }
   }
 
   // Registry-based check (covers all categories including new ones)
