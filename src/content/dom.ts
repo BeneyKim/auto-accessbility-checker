@@ -298,10 +298,42 @@ export function collectClickCandidates(shell: HTMLElement): ClickCandidate[] {
   const seen = new Set<HTMLElement>();
   const candidates: ClickCandidate[] = [];
 
+  // 비활성 탭 패널 수집 (aria-selected="false"인 탭이 가리키는 패널 제외 처리)
+  const inactivePanels = new Set<HTMLElement>();
+  const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[role="tabpanel"]'));
+
+  tabs.forEach((tab, index) => {
+    if (tab.getAttribute("aria-selected") === "false") {
+      const controlsId = tab.getAttribute("aria-controls");
+      if (controlsId) {
+        const panel = document.getElementById(controlsId);
+        if (panel) {
+          inactivePanels.add(panel);
+        }
+      } else if (index < panels.length) {
+        inactivePanels.add(panels[index]);
+      }
+    }
+  });
+
   for (const rawElement of shell.querySelectorAll<HTMLElement>(INTERACTIVE_SELECTORS.join(","))) {
     if (!isVisible(rawElement)) {
       continue;
     }
+
+    // 비활성 탭 패널 하위 요소 제외 필터링
+    let isWithinInactive = false;
+    for (const panel of inactivePanels) {
+      if (panel.contains(rawElement)) {
+        isWithinInactive = true;
+        break;
+      }
+    }
+    if (isWithinInactive) {
+      continue;
+    }
+
     const element = findActionableCandidate(rawElement, shell);
     if (seen.has(element) || !isVisible(element) || isDisabled(element) || isOversizedContainer(element, shell) || element.tagName.toLowerCase() === "label") {
       continue;
@@ -603,10 +635,21 @@ export function getAccessibleName(element: HTMLElement): string {
 export function isAriaHidden(element: HTMLElement): boolean {
   let current: HTMLElement | null = element;
   while (current && current !== document.body) {
-    if (current.getAttribute("aria-hidden") === "true") {
-      return true;
+    const ariaHiddenAttr = current.getAttribute("aria-hidden");
+    if (ariaHiddenAttr !== null) {
+      const normalizedValue = ariaHiddenAttr.trim().toLowerCase();
+      if (normalizedValue !== "false") {
+        return true;
+      }
     }
-    current = current.parentElement;
+    const parent: ParentNode | null = current.parentElement || current.parentNode;
+    if (parent && (parent as any).host) {
+      current = (parent as any).host;
+    } else if (parent && parent instanceof HTMLElement) {
+      current = parent;
+    } else {
+      current = null;
+    }
   }
   return false;
 }

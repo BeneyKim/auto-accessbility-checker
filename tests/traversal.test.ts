@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators, isListOrSearchPageUrl } from "../src/content/traversal";
+import { isDeepProductRouteFrame, isSameDepthVariantName, shouldTraverseFrameCandidates, ParentRedirection, normalizeStateIndicators, isListOrSearchPageUrl, isDynamicListOrSearchPage } from "../src/content/traversal";
 
 describe("ThinQ traversal frame policy", () => {
   it("treats bottom sheet overlays as terminal screens", () => {
@@ -64,5 +64,52 @@ describe("ThinQ traversal frame policy", () => {
     expect(isListOrSearchPageUrl("http://localhost/thinq/GWM_Cycles_Used_Search_Screen")).toBe(true);
     expect(isListOrSearchPageUrl("http://localhost/thinq/GWM_Cycles_Used_History_Screen")).toBe(true);
     expect(isListOrSearchPageUrl("http://localhost/thinq/normal_screen")).toBe(false);
+  });
+
+  describe("isDynamicListOrSearchPage", () => {
+    it("returns false if url does not contain list/search/history keywords", () => {
+      const shell = document.createElement("div");
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/normal_screen")).toBe(false);
+    });
+
+    it("returns false for static cycle history exceptions even if URL contains keywords", () => {
+      const shell = document.createElement("div");
+      // GWM_Cycles_Used_List_Screen 이나 GPM_POG01_Main 같은 정적 이력/탭은 예외적으로 false를 리턴하여 캐시를 타게 만듭니다.
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/GWM_Cycles_Used_List_Screen")).toBe(false);
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/GWM_Cycles_Used_History_Screen")).toBe(false);
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/GPM_POG01_Main_History")).toBe(false);
+    });
+
+    it("returns true when URL contains search keyword and DOM contains a search input", () => {
+      const shell = document.createElement("div");
+      shell.innerHTML = `
+        <form role="search">
+          <input type="text" placeholder="식품명을 입력하세요" />
+        </form>
+      `;
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/food_search")).toBe(true);
+    });
+
+    it("returns true when URL contains list keyword and DOM contains repeating item classes", () => {
+      const shell = document.createElement("div");
+      shell.innerHTML = `
+        <div>
+          <div class="food-card">사과</div>
+          <div class="food-card">배</div>
+          <div class="food-card">감</div>
+        </div>
+      `;
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/food_list")).toBe(true);
+    });
+
+    it("returns false when URL contains list keyword but DOM has no search input and no repeating list structure", () => {
+      const shell = document.createElement("div");
+      shell.innerHTML = `
+        <div>
+          <button>단일 설정 완료</button>
+        </div>
+      `;
+      expect(isDynamicListOrSearchPage(shell, "http://localhost/thinq/some_list")).toBe(false);
+    });
   });
 });

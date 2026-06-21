@@ -14,7 +14,8 @@ import {
   sampleLargeLists,
   filterDuplicateNamesInGroups,
   hasActionSubRoute,
-  normalizeUrl
+  normalizeUrl,
+  isAriaHidden
 } from "../src/content/dom";
 
 beforeEach(() => {
@@ -1096,6 +1097,68 @@ describe("ThinQ DOM helpers", () => {
       expect(ids).toContain("elIcon");
       expect(ids).toContain("elBorder");
       expect(ids).toContain("btnNormal");
+    });
+  });
+
+  describe("isAriaHidden & Shadow DOM & Inactive tab filtering", () => {
+    it("handles isAriaHidden with normalization and Shadow DOM traversals", () => {
+      // 1. Value normalization tests
+      const divNormal = document.createElement("div");
+      divNormal.setAttribute("aria-hidden", "true");
+      expect(isAriaHidden(divNormal)).toBe(true);
+
+      const divWhitespace = document.createElement("div");
+      divWhitespace.setAttribute("aria-hidden", "   true  ");
+      expect(isAriaHidden(divWhitespace)).toBe(true);
+
+      const divMixedCase = document.createElement("div");
+      divMixedCase.setAttribute("aria-hidden", "True");
+      expect(isAriaHidden(divMixedCase)).toBe(true);
+
+      const divEmptyVal = document.createElement("div");
+      divEmptyVal.setAttribute("aria-hidden", "");
+      expect(isAriaHidden(divEmptyVal)).toBe(true);
+
+      const divFalse = document.createElement("div");
+      divFalse.setAttribute("aria-hidden", "false");
+      expect(isAriaHidden(divFalse)).toBe(false);
+
+      // 2. Shadow DOM traversal test
+      const host = document.createElement("div");
+      host.setAttribute("aria-hidden", "true");
+      const shadowRoot = host.attachShadow({ mode: "open" });
+      const innerChild = document.createElement("button");
+      shadowRoot.appendChild(innerChild);
+
+      expect(isAriaHidden(innerChild)).toBe(true);
+    });
+
+    it("filters out candidates inside inactive tab panels", () => {
+      document.body.innerHTML = `
+        <div role="dialog" data-width="900" data-height="700">
+          <ul role="tablist">
+            <button id="tabProduct" role="tab" aria-selected="true" aria-controls="panelProduct">제품</button>
+            <button id="tabUseful" role="tab" aria-selected="false" aria-controls="panelUseful">유용한 기능</button>
+          </ul>
+          
+          <div id="panelProduct" role="tabpanel">
+            <button id="btnProduct1">제품 탭 버튼 1</button>
+          </div>
+          
+          <div id="panelUseful" role="tabpanel">
+            <button id="btnUseful1">유용한 기능 탭 버튼 1</button>
+          </div>
+        </div>
+      `;
+
+      const shell = document.querySelector<HTMLElement>("[role='dialog']")!;
+      const candidates = collectClickCandidates(shell);
+      const ids = candidates.map(c => c.element.id);
+
+      // 활성 탭(제품) 내부의 버튼은 후보에 수집되어야 함
+      expect(ids).toContain("btnProduct1");
+      // 비활성 탭(유용한 기능) 내부의 버튼은 배제(exclude)되어야 함
+      expect(ids).not.toContain("btnUseful1");
     });
   });
 });
